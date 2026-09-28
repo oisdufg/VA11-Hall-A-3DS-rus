@@ -1,8 +1,8 @@
-# VA-11 HALL-A 3DS
+<img width="416" height="512" alt="menu-article" src="https://github.com/user-attachments/assets/dbcd3f24-b87d-48e8-9a13-630ee6cdd7dc" /># VA-11 HALL-A 3DS
 
 VA-11 HALL-A 3DS is a fan-made port/implementation of VA-11 HALL-A: Cyberpunk Bartender Action for the Nintendo 3DS.
 
-build with neumiraie
+VA-11 HALL-A 3DS Port developed by neumiraie.
 
 ## Original Assets Are Not Included
 
@@ -121,3 +121,9 @@ VA-11 HALL-A was created by Sukeban Games, with music by Garoad. This project is
 Original game artwork, dialogue and music remain the property of their respective owners. Third-party components retain their own licenses; see [THIRD_PARTY.md](THIRD_PARTY.md) and the `licenses` directory.
 
 The attribution and educational purpose of this project do not grant redistribution rights to original game content or the fan translation. This repository does not assign a new license to that material.
+
+<img width="416" height="512" alt="day1-day2-actor8" src="https://github.com/user-attachments/assets/3dfd6a3c-b926-4f50-a7e8-6482efbc6ee5" />
+<img width="416" height="512" alt="day1-day2-pairFalse" src="https://github.com/user-attachments/assets/be78bc82-98f6-4b33-8e81-2763b926a284" />
+<img width="416" height="512" alt="menu-article" src="https://github.com/user-attachments/assets/3db80b99-a393-4a42-826d-7107c44c3bc2" />
+
+

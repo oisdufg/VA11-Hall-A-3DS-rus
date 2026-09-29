@@ -12,21 +12,25 @@ game=args.game
 day=(D/'gml_Script_day1control.gml').read_text();mix=(D/'gml_Script_mix1control.gml').read_text();drinks=(D/'gml_Script_drink_a.gml').read_text()
 day2=(D/'gml_Script_day2control.gml').read_text();mix2=(D/'gml_Script_mix2control.gml').read_text()
 day2=re.sub(r'choose\([^)]*\)', '0', day2).replace('distractioncheck()', '1')
-tokens=sorted(set(re.findall(r'"([^"\n]*)"',day+mix+day2+mix2+drinks)))
-tok=json.loads((G/'legacy-tokens.json').read_text())
+day3=(D/'gml_Script_day3control.gml').read_text();mix3=(D/'gml_Script_mix3control.gml').read_text()
+day3=re.sub(r'choose\([^)]*\)', '0', day3).replace('distractioncheck()', '1')
+day4=(D/'gml_Script_day4control.gml').read_text();mix4=(D/'gml_Script_mix4control.gml').read_text()
+day4=re.sub(r'choose\([^)]*\)', '0', day4).replace('distractioncheck()', '1')
+tokens=sorted(set(re.findall(r'"([^"\n]*)"',day+mix+day2+mix2+day3+mix3+day4+mix4+drinks)))
+tok=json.loads((G/'v6-metadata.json').read_text(encoding='utf8'))['tokens']
 for v in tokens:
  if v not in tok:tok[v]=max(tok.values())+1
 (G/'tokens.h').write_text('#pragma once\n'+''.join(f'#define TOK_{k} {v}\n' for k,v in tok.items() if re.fullmatch('[a-z]+',k)))
 def token(v):return str(tok[v])
-fields=sorted(set(re.findall(r'global\.(\w+)',day+mix+day2+mix2))-{'ch1','ch2','tuto'}-{f'odstr{i}' for i in range(200)})
+fields=sorted(set(re.findall(r'global\.(\w+)',day+mix+day2+mix2+day3+mix3+day4+mix4))-{'ch1','ch2','ch3','ch4','tuto'}-{f'odstr{i}' for i in range(200)})
 fields+=['shouldpay','rightdrink','big_able','tipping','cash','tips','mistakes','juke','mix','drinkscore_a']
 fields+=['cur_day','heldRecipe','heldK','heldIce','rightdrink1','rightdrink2','big_able1','big_able2']
-legacy=json.loads((G/'legacy-state-fields.json').read_text())
+legacy=json.loads((G/'v6-state-fields.json').read_text())
 fields=legacy+sorted(set(fields)-set(legacy))
 (G/'state.h').write_text('#pragma once\ntypedef struct {\n'+''.join('int '+f+';\n' for f in fields)+'} State;\n')
 (G/'state-fields.json').write_text(json.dumps(fields))
 def translate(s):
- s=re.sub(r'textbox_create\(global\.(ch1|ch2|tuto), (\d+), 1\);',lambda m:'return '+str(int(m[2])+({'tuto':0,'ch1':100,'ch2':200}[m[1]]))+';',s)
+ s=re.sub(r'textbox_create\(global\.(ch1|ch2|ch3|ch4|tuto), (\d+), 1\);',lambda m:'return '+str(int(m[2])+({'tuto':0,'ch1':100,'ch2':200,'ch3':400,'ch4':500}[m[1]]))+';',s)
  s=re.sub(r'instance_create\(x, y, (305|308)\);',lambda m:'return '+('-2' if m[1]=='305' else '-3')+';',s)
  s=re.sub(r'mixertips_double\((\d+), (\d+), (\d+), (\d+), (\d+), (\d+)\);',lambda m:f's->shouldpay={m[1]};s->rightdrink1={m[2]};s->rightdrink2={m[3]};s->big_able1={m[4]};s->big_able2={m[5]};s->tipping={m[6]};',s)
  s=re.sub(r'mixertips\((\d+), (\d+), (\d+), (\d+)\);',lambda m:f's->shouldpay={m[1]};s->rightdrink={m[2]};s->big_able={m[3]};s->tipping={m[4]};',s)
@@ -40,7 +44,7 @@ def translate(s):
  s=re.sub(r'\{\n        return 0;\n    case (\d+):',r'{\n    case \1:',s)
  s=s.replace('\n            case ', '\n                /* fall through */\n            case ')
  return s+'\nreturn 0;'
-(G/'rules.h').write_text('static int day_rule(State *s){\n'+translate(day)+'\n}\nstatic int mix_rule(State *s){\n'+translate(mix)+'\n}\nstatic int day2_rule(State *s){\n'+translate(day2)+'\n}\nstatic int mix2_rule(State *s){\n'+translate(mix2)+'\n}\n')
+(G/'rules.h').write_text('static int day_rule(State *s){\n'+translate(day)+'\n}\nstatic int mix_rule(State *s){\n'+translate(mix)+'\n}\nstatic int day2_rule(State *s){\n'+translate(day2)+'\n}\nstatic int mix2_rule(State *s){\n'+translate(mix2)+'\n}\nstatic int day3_rule(State *s){\n'+translate(day3)+'\n}\nstatic int mix3_rule(State *s){\n'+translate(mix3)+'\n}\nstatic int day4_rule(State *s){\n'+translate(day4)+'\n}\nstatic int mix4_rule(State *s){\n'+translate(mix4)+'\n}\n')
 # Original ingredient conditions and classification, including size and optional alcohol.
 recipes=[]
 for m in re.finditer(r'else if \((global.mod_aa[^\n]+)\)\s*\{([\s\S]*?global.drinkscore_a = (\d+);)',drinks):
@@ -64,15 +68,21 @@ for i,r in enumerate(recipes):
 (G/'recipes.h').write_text('#pragma once\ntypedef struct {const char *name;int amount[5],optional,ice,aged,blended,id,flavor,kind,size,alcohol,price;} Recipe;\nstatic const Recipe recipes[]={\n'+',\n'.join(rows)+'};\nstatic const int recipeBook[]={'+','.join(map(str,book))+'};\n#define RECIPE_COUNT '+str(len(recipes))+'\n#define BOOK_COUNT '+str(len(book))+'\n',encoding='utf8')
 (G/'recipes.json').write_text(json.dumps(recipes,indent=2))
 # Commands are compiled to explicit entry/exit functions for each page.
-actors=['gil','dana','kim','donovan','ingram','sei','doro','jamie','miki'];short={'gil':'gil','dan':'dana','dana':'dana','kim':'kim','don':'donovan','in':'ingram','sei':'sei','doro':'doro','jamie':'jamie','miki':'miki'}
-variants={a:[''] for a in actors};variants['sei'].append('mask')
-for filename in ['tutorial.txt','script1.txt','script2.txt']:
+actors=['gil','dana','kim','donovan','ingram','sei','doro','jamie','miki','alma','stella','art','stream','betty','deal'];short={'gil':'gil','dan':'dana','dana':'dana','kim':'kim','don':'donovan','in':'ingram','sei':'sei','doro':'doro','jamie':'jamie','miki':'miki','alma':'alma','stel':'stella','art':'art','stream':'stream','betty':'betty','deal':'deal'}
+previous=json.loads((G/'v6-metadata.json').read_text(encoding='utf8'))['faces']
+variants={a:list(previous.get(a,[''])) for a in actors}
+for filename in ['tutorial.txt','script1.txt','script2.txt','script3.txt','script4.txt']:
  for key,val in re.findall(r'\[XS:(\w+)face,([^\]]*)\]',(game/'scripts/eng'/filename).read_text(encoding='utf-8-sig')):
   actor=short[key]
   if val not in variants[actor]:variants[actor].append(val)
-variants['dana'].append('mask')
+assert variants['dana'][3]=='mask'
 def command(tag):
  if tag.startswith('HIDEALL:'):return 'memset(v->visible,0,sizeof(v->visible));'
+ if tag.startswith('BOOM:'):return '++v->boom;'
+ if tag.startswith('CHAT:'):return f'v->chat={dict(pachi=1,yeah=2,boo=3,no=4,w=5,aw=6).get(tag[5:],0)};'
+ if tag.startswith('CHANNEL:'):return 'v->news=1;'
+ if tag.startswith('CHANGE:'):return 'v->news=2;'
+ if tag.startswith('RUM:'):return 'v->rum=1;'
  if tag.startswith('ANNA:'):return 'v->annaUntil=v->now+3334;'
  if tag.startswith('SHOW:') or tag.startswith('SHOWF:'):
   x,a=tag.split(':')[1].split(',');a=a.replace('sprite_','');masked=a in ('seimask','danamask');a={'seimask':'sei','danamask':'dana'}.get(a,a);i=actors.index(a)
@@ -87,7 +97,7 @@ def command(tag):
  if tag.startswith('DON2'):return 's->orders=4;'
  return ''
 allblocks={};entries=[];enter={};leave={}
-for filename,offset in [('tutorial.txt',0),('script1.txt',100),('script2.txt',200),('gameover.txt',300)]:
+for filename,offset in [('tutorial.txt',0),('script1.txt',100),('script2.txt',200),('gameover.txt',300),('script3.txt',400),('script4.txt',500)]:
  block=offset;pending=''
  for raw in (game/'scripts/eng'/filename).read_text(encoding='utf-8-sig').splitlines():
   clean=' '.join(re.sub(r'\[[^\]]*\]','',raw).replace('#',' ').split())
@@ -96,7 +106,7 @@ for filename,offset in [('tutorial.txt',0),('script1.txt',100),('script2.txt',20
   # SHOW and emotion take effect at entry. Hides take effect after the spoken line.
   maskedraw=re.sub(r'\[[^\]]*\]',lambda m:' '*len(m[0]),raw)
   firsttext=next((i for i,c in enumerate(maskedraw) if not c.isspace()),len(raw))
-  def isbefore(pos,t):return t.startswith(('HIDEALL','ANNA','SHOW','XS:gilface','XS:danaface','XS:kimface','XS:donface','XS:seiface','XS:doroface','XS:jamieface','XS:mikiface')) or ('hide,' in t and pos<firsttext)
+  def isbefore(pos,t):return t.startswith(('HIDEALL','ANNA','SHOW','XS:gilface','XS:danaface','XS:kimface','XS:donface','XS:seiface','XS:doroface','XS:jamieface','XS:mikiface','XS:almaface','XS:stelface','XS:artface','XS:streamface','XS:bettyface','BOOM','CHAT','CHANNEL','RUM')) or ('hide,' in t and pos<firsttext)
   before=''.join(c for pos,c,t in cmds if isbefore(pos,t))
   after=''.join(c for pos,c,t in cmds if c and not isbefore(pos,t))
   if clean:
@@ -110,19 +120,19 @@ for filename,offset in [('tutorial.txt',0),('script1.txt',100),('script2.txt',20
   else:pending+=before+after
   for n in re.findall(r'\[E:(\d+)\]',raw):block=offset+int(n)
 assert 0 not in allblocks and 100 not in allblocks
-starts=[0]*306;counts=[0]*306
+starts=[0]*573;counts=[0]*573
 for b,ids in allblocks.items():starts[b]=ids[0];counts[b]=len(ids)
 (G/'story.h').write_text('#pragma once\ntypedef struct {const char *name,*text;int face;} Line;\nstatic const Line story[]={'+',\n'.join('{'+cstr(e['name'])+','+cstr(e['text'])+',0}' for e in entries)+'};\nstatic const int blockStart[]={'+','.join(map(str,starts))+'};\nstatic const int blockCount[]={'+','.join(map(str,counts))+'};\n',encoding='utf8')
 (G/'story.json').write_text(json.dumps({b:[entries[i] for i in ids] for b,ids in allblocks.items()},ensure_ascii=False,indent=2),encoding='utf8')
 def cases(commands):return '\n'.join(f'case {i}: {s} break;' for i,s in commands.items() if s)
-(G/'commands.h').write_text('static void page_enter(View *v){State *s=&v->state;(void)s;switch(blockStart[v->block]+v->line){'+cases(enter)+'}}\nstatic void page_leave(View *v){State *s=&v->state;(void)s;switch(blockStart[v->block]+v->line){'+cases(leave)+'}}\n')
+(G/'commands.h').write_text('static void page_enter(View *v){State *s=&v->state;v->chat=0;(void)s;switch(blockStart[v->block]+v->line){'+cases(enter)+'}}\nstatic void page_leave(View *v){State *s=&v->state;(void)s;switch(blockStart[v->block]+v->line){'+cases(leave)+'}}\n')
 # Composite full character bodies and facial layers at their original origins.
 gd=GameData(game/'data.win');sp={gd.string(gd.u(p)):p for p in gd.pointers('SPRT')}
 def origin(name):return struct.unpack_from('<ii',gd.data,sp[name]+48)
 def composite(names):
  base=gd.sprite(names[0][0]);ox,oy=origin(names[0][0])
- for name,dx,dy in names[1:]:
-  im=gd.sprite(name);x,y=origin(name);base.alpha_composite(im,(ox-x+dx,oy-y+dy))
+ for part in names[1:]:
+  name,dx,dy=part[:3];im=gd.sprite(name,part[3] if len(part)>3 else 0);x,y=origin(name);base.alpha_composite(im,(ox-x+dx,oy-y+dy))
  return base.resize((round(base.width*.5),round(base.height*.5)),Image.Resampling.NEAREST)
 layers={
  'gil':{'':['gil_spr','gil_eyes','gil_lips'],'cods':['gil_cods','gil_cods_eyes','gil_cods_lips'],'surprise':['gil_surprised','gil_surprised_eyes','gil_surprised_lips'],'fucked':['gil_spr','gil_fucked_up'],'angry':['gil_angry_spr','gil_angry_eyes','gil_lips']},
@@ -136,19 +146,35 @@ for f in ['angry','dogs','drunk','smug','think']:layers['doro'][f]=['dorothy_spr
 layers['jamie']={'':['jamie_spr','jamie_eyes','jamie_lips'],'surprise':['jamie_spr_surprised','jamie_eyes_surprised'],'shy':['jamie_spr_shy','jamie_eyes_shy']}
 layers['miki']={'':['miki_spr','miki_eyes','miki_lips'],'smile':['miki_spr','miki_smile_spr'],'edgy':['miki_edgy_spr','miki_edgy_eyes','miki_edgy_lips'],'edgelord':['miki_edgelord_spr','miki_edgy_eyes','miki_edgy_lips']}
 
+def sprite_names(indices):return [gd.string(gd.u(gd.pointers('SPRT')[i])) for i in indices]
+layers['alma']={f:sprite_names(ids) for f,ids in {
+ '':[308,310,309], 'drunk':[311,312,313], 'confused':[314,315,316],
+ 'drunkconcern':[317,318,319], 'serious':[320,321,322], 'sigh':[323,324],
+ 'worried':[325,326,327], 'smile':[328,329], 'smug':[330,331,332], 'concern':[333,335,334]}.items()}
+layers['stella']={f:sprite_names(ids) for f,ids in {
+ '':[336,339,342,338,337], 'surprise':[343,341,345,338,344],
+ 'concern':[346,339,348,338,347], 'baka':[349,340,351,338,350],
+ 'sad':[352,340,353,338,354], 'happy':[336,341,355,338]}.items()}
+layers['doro']['cry']=sprite_names([224]);layers['doro']['sad']=sprite_names([239,240,241])
+for f in ['concern','confused','sigh']:layers['doro'][f]=layers['doro']['']
+layers['dana']['closedsmile']=['dana_spr',('dana_eyes',0,0,1),'dana_lips']
+layers['art']={'':sprite_names([370,372,371]),'sigh':sprite_names([373,374])}
+layers['betty']={f:sprite_names(ids) for f,ids in {'':[375,377,376],'grumpy':[378,380,379],'sigh':[381,382],'drunk':[383,385,384]}.items()}
+layers['deal']={'':sprite_names([386,388,387])}
+layers['stream']={f:sprite_names(ids)+[(sprite_names([290])[0],-19,-220)] for f,ids in {'':[287,289,288],'ex':[291,289],'pout':[295,297,296],'drunk':[292,294,293],'drunkex':[298]}.items()}
 defs=[];tables=[]
 for a in actors:
  names=[]
  for i,f in enumerate(variants[a]):
   ls=layers[a][f];im=composite([(x,0,0) if isinstance(x,str) else x for x in ls]);name=f'actor_{a}_{i}';names.append('&'+name)
   im.save(G/(name+'.png'));defs.append('static const uint8_t px_'+name+'[]={'+','.join(map(str,im.tobytes()))+'};\nstatic const Sprite '+name+'={'+f'{im.width},{im.height},px_{name}'+'};')
- tables.append('{'+','.join(names+['NULL']*(8-len(names)))+'}')
-(G/'actors.h').write_text('#pragma once\n#define ACTOR_COUNT 9\nextern const Sprite *const actors[9][8];\n')
+ tables.append('{'+','.join(names+['NULL']*(12-len(names)))+'}')
+(G/'actors.h').write_text('#pragma once\n#define ACTOR_COUNT 15\nextern const Sprite *const actors[15][12];\n')
 im=gd.sprite('anna_channel').resize((round(gd.sprite('anna_channel').width*264/338),round(gd.sprite('anna_channel').height*264/338)),Image.Resampling.NEAREST)
 im.save(G/'anna_tv.png')
 defs.append('static const uint8_t px_anna_tv[]={'+','.join(map(str,im.tobytes()))+'};\nconst Sprite anna_tv={'+f'{im.width},{im.height},px_anna_tv'+'};')
-(G/'actors.h').write_text((G/'actors.h').read_text()+'extern const Sprite anna_tv;\n')
+(G/'actors.h').write_text((G/'actors.h').read_text()+'extern const Sprite anna_tv;\nstatic const int actorFaceCount[15]={'+','.join(str(len(variants[a])) for a in actors)+'};\n')
 old=(G/'assets.c').read_text().split('\n#include <stddef.h>')[0]
-(G/'assets.c').write_text(old+'\n#include <stddef.h>\n'+'\n'.join(defs)+'\nconst Sprite *const actors[9][8]={'+','.join(tables)+'};\n')
+(G/'assets.c').write_text(old+'\n#include <stddef.h>\n'+'\n'.join(defs)+'\nconst Sprite *const actors[15][12]={'+','.join(tables)+'};\n')
 (G/'day1-metadata.json').write_text(json.dumps({'pages':len(entries),'blocks':len(allblocks),'recipes':len(book),'recipe_variants':len(recipes),'faces':variants,'tokens':tok},ensure_ascii=False,indent=2),encoding='utf8')
 print('Generated',len(entries),'pages,',len(book),'recipes,',variants)

@@ -10,30 +10,30 @@ class Mixer(C.LittleEndianStructure):
 class State(C.LittleEndianStructure):
  _fields_=[(x,C.c_int32) for x in json.loads((P/'generated/state-fields.json').read_text())]
 class View(C.LittleEndianStructure):
- _fields_=[(n,C.c_int32) for n in ['block','line','mode','round','selected','recipe','overlay','audio']]+[('now',C.c_uint64),('mixer',Mixer),('state',State),('visible',C.c_int32*9),('position',C.c_int32*9),('face',C.c_int32*9),('saveError',C.c_int32),('cheapErrors',C.c_int32),('failed',C.c_int32),('annaUntil',C.c_uint64)]
+ _fields_=[(n,C.c_int32) for n in ['block','line','mode','round','selected','recipe','overlay','audio']]+[('now',C.c_uint64),('mixer',Mixer),('state',State),('visible',C.c_int32*15),('position',C.c_int32*15),('face',C.c_int32*15),('saveError',C.c_int32),('cheapErrors',C.c_int32),('failed',C.c_int32),('annaUntil',C.c_uint64)]+[(n,C.c_int32) for n in ['musicTrack','chat','news','rum','boom']]
 elf=ELFFile(io.BytesIO((P/'build/va11-3ds.elf').read_bytes()))
-machine=Uc(UC_ARCH_ARM,UC_MODE_ARM);machine.mem_map(0x100000,0xa00000)
+machine=Uc(UC_ARCH_ARM,UC_MODE_ARM);machine.mem_map(0x100000,0x3000000)
 machine.reg_write(UC_ARM_REG_C1_C0_2,0xf00000)
 machine.reg_write(UC_ARM_REG_FPEXC,0x40000000)
 for seg in elf.iter_segments():
  if seg['p_type']=='PT_LOAD':machine.mem_write(seg['p_vaddr'],seg.data())
-machine.mem_map(0xc00000,0x100000);machine.mem_map(0x1000000,0x200000)
+machine.mem_map(0x4000000,0x100000);machine.mem_map(0x5000000,0x200000)
 symbols={s.name:s['st_value'] for s in elf.get_section_by_name('.symtab').iter_symbols()}
-address=0x1100000
+address=0x5100000
 def call(name,*args):
  machine.reg_write(UC_ARM_REG_CPSR,0x10)
  for reg,arg in zip([UC_ARM_REG_R0,UC_ARM_REG_R1,UC_ARM_REG_R2,UC_ARM_REG_R3],args):machine.reg_write(reg,arg&0xffffffff)
- machine.reg_write(UC_ARM_REG_SP,0xcfff00);machine.reg_write(UC_ARM_REG_LR,0xd00000)
- for i,arg in enumerate(args[4:]):machine.mem_write(0xcfff00+i*4,int(arg).to_bytes(4,'little',signed=True))
- machine.emu_start(symbols[name],0xd00000,count=100000000)
- assert machine.reg_read(UC_ARM_REG_PC)==0xd00000,name
+ machine.reg_write(UC_ARM_REG_SP,0x40fff00);machine.reg_write(UC_ARM_REG_LR,0x4100000)
+ for i,arg in enumerate(args[4:]):machine.mem_write(0x40fff00+i*4,int(arg).to_bytes(4,'little',signed=True))
+ machine.emu_start(symbols[name],0x4100000,count=100000000)
+ assert machine.reg_read(UC_ARM_REG_PC)==0x4100000,name
  return machine.reg_read(UC_ARM_REG_R0)
 def put(v):machine.mem_write(address,bytes(v))
 def get():return View.from_buffer_copy(machine.mem_read(address,C.sizeof(View)))
 def snapshot(v,name):
- put(v);call('draw_screens',0x1000000,0x1050000,address)
+ put(v);call('draw_screens',0x5000000,0x5050000,address)
  canvas=Image.new('RGB',(416,512),(8,7,12))
- for base,w,y in [(0x1000000,400,8),(0x1050000,320,264)]:
+ for base,w,y in [(0x5000000,400,8),(0x5050000,320,264)]:
   raw=bytes(machine.mem_read(base,w*240*3));im=Image.frombytes('RGB',(240,w),raw,'raw','BGR').transpose(Image.Transpose.ROTATE_90);canvas.paste(im,((416-w)//2,y))
  (P/'previews').mkdir(exist_ok=True);canvas.save(P/'previews'/f'day1-{name}.png')
 recipes=json.loads((P/'generated/recipes.json').read_text());story=json.loads((P/'generated/story.json').read_text(encoding='utf8'))
@@ -59,6 +59,8 @@ for run in range(runs):
     assert v.mode==2
     snapshot(v,'end')
    break
+  if v.mode==7:
+   call('engine_finish_jukebox',address);continue
   if v.mode in (0,3):
    result=call('engine_advance_checkpoint',address)
    assert result==int(get().mode==2),('save outside end of day',v.block,v.line)

@@ -12,7 +12,7 @@ def pour(v,name,size='normal'):
  put(v);call('engine_serve',address);return get()
 
 # First two errors do not fail, the third cheap incorrect paid drink does.
-for day,client,stage,ending in [(1,1,4,301),(2,1,4,305),(2,4,8,301)]:
+for day,client,stage,ending in [(1,1,4,301),(2,1,4,305),(2,4,8,301),(3,1,3,304),(3,3,2,301),(4,1,3,301)]:
  v=initial(day,client,stage)
  for count in (1,2,3):
   v.mode=1;v.state.cur_client=client;v.state.cur_stage=stage
@@ -48,6 +48,7 @@ for i in range(1200):
   requested={3:'beer',4:'beer',5:'beer',7:'beer',6:'gpunch',8:'gpunch',9:'pdriver',10:'fweaver',11:'moblast',12:'btini',13:'btini',14:'srush',15:'pwman',16:'btini',174:'beer'}
   name=requested[v.state.orders];size='big' if v.state.orders in (3,4,6,8) else 'normal'
   pour(v,name,size)
+ elif v.mode==7:call('engine_finish_jukebox',address)
  else:
   v.cheapErrors=2;put(v);call('engine_advance_checkpoint',address)
 else:raise AssertionError('No break reached')
@@ -77,14 +78,18 @@ for i in range(1300):
   name=want.get(v.state.orders,'gpunch' if v.state.heldRecipe else 'scloud')
   size='big' if v.state.orders==22 and not v.state.heldRecipe else next(r['size'] for r in recipes if r['id']==name)
   pour(v,name,size)
+ elif v.mode==7:call('engine_finish_jukebox',address)
  else:call('engine_advance_checkpoint',address)
 else:raise AssertionError('Anna tag never triggered')
 # Preserve 0.4.1's 432-byte save prefix, initialize new fields safely.
 v=initial(2,4,2);v.mode=0;v.state.dondrunk1=1;v.face[0]=1
-legacy=bytes(v)[:432];machine.mem_write(0x1120000,legacy)
-assert call('engine_migrate',address,0x1120000,432)==1
-m=get();assert bytes(m)[:432]==legacy and not m.failed and not m.cheapErrors and not m.annaUntil
-assert C.sizeof(View)==448
+legacy=bytes(v)[:80]+bytes(v.state)[:240]+bytes(v.visible)[:36]+bytes(v.position)[:36]+bytes(v.face)[:36]+bytes(v.saveError.to_bytes(4,"little",signed=True));machine.mem_write(0x5120000,legacy)
+assert call('engine_migrate',address,0x5120000,432)==1
+m=get();assert m.state.dondrunk1==1 and m.face[0]==1 and m.block==v.block and not m.failed and not m.cheapErrors and not m.annaUntil
+legacy5=legacy+(2).to_bytes(4,'little')+bytes(4)+(1234).to_bytes(8,'little')
+machine.mem_write(0x5120000,legacy5);assert call('engine_migrate',address,0x5120000,448)==1
+m=get();assert m.cheapErrors==2 and m.annaUntil==1234 and m.state.dondrunk1==1 and m.face[0]==1
+assert C.sizeof(View)>448
 assert call('engine_can_save',address)==1
-report={'passed':True,'checks':['Both original Game Over scenes and safe-menu reload action','Three cheap wrong drinks; correct, expensive and unpaid cases','Break queue reset','Paired-order counting','Mulan Tea original block 251','Anna scripted TV appearance and expiry','432-byte legacy save migration; new size 448','Save eligibility rejects every page of Game Over'],'hardware_tested':False}
+report={'passed':True,'checks':['Both original Game Over scenes and safe-menu reload action','Three cheap wrong drinks; correct, expensive and unpaid cases','Break queue reset','Paired-order counting','Mulan Tea original block 251','Anna scripted TV appearance and expiry','432/448-byte legacy save migration','Save eligibility rejects every page of Game Over'],'hardware_tested':False}
 (P/'features-test-report.json').write_text(json.dumps(report,indent=2));print(json.dumps(report,indent=2))

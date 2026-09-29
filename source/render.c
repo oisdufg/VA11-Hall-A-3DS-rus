@@ -3,6 +3,7 @@
 #include "font.h"
 #include "story.h"
 #include "actors.h"
+#include "music.h"
 #include "recipes.h"
 #include "tokens.h"
 #include <stdio.h>
@@ -79,6 +80,26 @@ static const char *order(int n) {
     case 22:return "Большой Sunshine Cloud + Gut Punch";
     case 24:return "Похожий на чай: горький, женственный";
     case 25:return "Что-нибудь мягкое";
+    case 27:return "Bad Touch";
+    case 28:return "Необычный напиток (Promo)";
+    case 29:return "Большой Брендини";
+    case 30:return "Как обычно: пиво";
+    case 31:return "Bleeding Jane";
+    case 32:return "Напиток с изменённым названием";
+    case 33:return "В честь хорошего друга";
+    case 34:return "Два Бон Развязона";
+    case 35:return "Две Blue Fairy";
+    case 36:return "Напиток за $80";
+    case 37:return "Grizzly Temple";
+    case 38:return "Мерзкий: Manly или Promo";
+    case 39:return "Большой Bad Touch";
+    case 40:return "Что-нибудь, чтобы опьянеть";
+    case 41:return "Два пива";
+    case 42:return "Zen Star";
+    case 43:return "Два Брендини";
+    case 44:return "Два мужественных (Manly)";
+    case 45:return "Взрыв на Марсе";
+    case 46:return "Пиво";
     case 174:return "Пиво или другой алкоголь";
     default:return "Заказ посетителя";
     }
@@ -86,19 +107,21 @@ static const char *order(int n) {
 void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
     Screen t={top,400},b={bottom,320};
     rect(t,0,0,400,240,BG);rect(b,0,0,320,240,BG);
-    text(t,12,3,"VA-11 HALL-A",PINK);text(t,224,3,v->state.cur_day==2?"ДЕНЬ 2 / 0.5.0":"ДЕНЬ 1 / 0.5.0",MUTED);
+    text(t,12,3,"VA-11 HALL-A",PINK);text(t,224,3,v->state.cur_day==4?"ДЕНЬ 4 / 0.7.0":v->state.cur_day==3?"ДЕНЬ 3 / 0.7.0":v->state.cur_day==2?"ДЕНЬ 2 / 0.7.0":"ДЕНЬ 1 / 0.7.0",MUTED);
     sprite(t,10,22,&background);
     /* The original bar backdrop is drawn at (11,18) in room coordinates. */
     if(v->annaUntil)sprite(t,10+(239-11)*264/338,22+(44-18)*264/338,&anna_tv);
+    if(v->news){rect(t,198,39,72,25,0x15233c);text(t,202,44,"НОВОСТИ",CYAN);}
     int ln=blockStart[v->block]+v->line;
     const Line *line=&story[ln];
-    for(int i=0;i<9;++i)if(v->visible[i]) {
+    for(int i=0;i<ACTOR_COUNT;++i)if(v->visible[i]) {
         const Sprite *im=actors[i][v->face[i]];
         if(im)sprite(t,10+v->position[i]*264/338-im->w/2,148-im->h,im);
     }
     rect(t,274,22,7,126,BG);
     rect(t,281,25,108,122,PANEL);sprite(t,290,43,&jill);
     text(t,291,27,"ДЖИЛЛ",PINK);
+    if(v->chat){const char *reactions[]={"","Аплодисм.","Да-а-а!","Бу-у!","Нет!","Ха-ха!","О-о..."};rect(t,285,115,108,32,PANEL);text(t,290,115,"ЧАТ СТРИМА",PINK);text(t,290,131,reactions[v->chat],CYAN);}
     rect(t,8,148,384,91,0x171121);rect(t,8,148,384,1,PINK);
     if(v->mode==0) {
         text(t,16,151,line->name,CYAN);
@@ -119,11 +142,11 @@ void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
         text(t,16,178,"Время немного отдохнуть.",INK);
         text(t,16,210,"A: продолжить смену",PINK);
     } else if(v->mode==2) {
-        text(t,16,153,v->state.cur_day==2?"ВТОРОЙ ДЕНЬ ЗАВЕРШЁН":"ПЕРВЫЙ ДЕНЬ ЗАВЕРШЁН",CYAN);
+        text(t,16,153,v->state.cur_day==4?"ЧЕТВЁРТЫЙ ДЕНЬ ЗАВЕРШЁН":v->state.cur_day==3?"ТРЕТИЙ ДЕНЬ ЗАВЕРШЁН":v->state.cur_day==2?"ВТОРОЙ ДЕНЬ ЗАВЕРШЁН":"ПЕРВЫЙ ДЕНЬ ЗАВЕРШЁН",CYAN);
         text(t,16,178,"Выручка:",INK);number(t,120,178,v->state.cash,INK);
         text(t,196,178,"Чаевые:",INK);number(t,268,178,v->state.tips,INK);
         text(t,16,198,"Ошибки:",MUTED);number(t,88,198,v->state.mistakes,MUTED);
-        text(t,16,219,v->state.cur_day==1?"A: домой, день 2   START: выход":"SELECT: меню   START: выход",PINK);
+        text(t,16,219,v->state.cur_day==3?"A: домой, день 4   START: выход":v->state.cur_day==2?"A: домой, день 3   START: выход":v->state.cur_day==1?"A: домой, день 2   START: выход":"SELECT: меню   START: выход",PINK);
     } else {
         text(t,16,160,"Ошибка перехода. SELECT: меню",PINK);
         number(t,16,190,v->state.cur_client,INK);number(t,70,190,v->state.cur_stage,INK);
@@ -137,7 +160,7 @@ void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
         text(b,16,198,"START: выход",MUTED);
         return;
     }
-    text(b,8,4,v->state.cur_client==0?"БАР / ОБУЧЕНИЕ":v->state.cur_day==2?"БАР / ДЕНЬ 2":"БАР / ДЕНЬ 1",PINK);
+    text(b,8,4,v->state.cur_client==0?"БАР / ОБУЧЕНИЕ":v->state.cur_day==4?"БАР / ДЕНЬ 4":v->state.cur_day==3?"БАР / ДЕНЬ 3":v->state.cur_day==2?"БАР / ДЕНЬ 2":"БАР / ДЕНЬ 1",PINK);
     if(v->mode==1) {
         if(v->mixer.running) {
             text(b,8,25,v->now-v->mixer.started>=5000?"Взболтано! A: остановить":"Смешиваем... A: остановить",CYAN);
@@ -178,7 +201,7 @@ void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
         text(b,12,184,r->size==TOK_big?"Уже большой. Максимум 20 частей.":"Большой: удвой. Максимум 20.",MUTED);
         const char *flavor=r->flavor==TOK_sweet?"Сладкий":r->flavor==TOK_bitter?"Горький":r->flavor==TOK_spicy?"Острый":r->flavor==TOK_bubbly?"Газовый":"Кислый";
         text(b,12,200,flavor,CYAN);
-        text(b,100,200,r->kind==TOK_classy?"Изысканный":r->kind==TOK_girly?"Женственный":r->kind==TOK_manly?"Мужественный":"Классический",CYAN);
+        text(b,100,200,r->kind==TOK_classy?"Изысканный":r->kind==TOK_girly?"Женственный":r->kind==TOK_manly?"Мужественный":r->kind==TOK_promo?"Рекламный (Promo)":"Классический",CYAN);
         }
         text(b,12,220,"Y / B: закрыть   L/R: листать",PINK);
     } else if(v->overlay==2) {
@@ -186,11 +209,27 @@ void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
         text(b,18,80,"ПАУЗА",INK);
         text(b,18,110,v->failed?"A: главное меню":"A: сохранить и открыть меню",PINK);
         text(b,18,143,"B: вернуться к игре",MUTED);
+        text(b,18,165,"X: выбрать музыку",CYAN);
     }
 }
 
 void draw_menu(uint8_t *top,uint8_t *bottom,const View *v,const Menu *u) {
     Screen t={top,400},b={bottom,320};rect(t,0,0,400,240,BG);rect(b,0,0,320,240,BG);
+    if(u->screen==UI_MUSIC){
+        text(t,24,30,"МУЗЫКАЛЬНЫЙ АВТОМАТ",PINK);
+        text(t,24,68,u->notice?"Выбери музыку перед сменой.":"Музыка для этой смены",INK);
+        text(t,24,108,"Сейчас выбрано:",MUTED);
+        text(t,24,134,musicTitles[v->musicTrack],CYAN);
+        text(t,24,180,"Выбранный трек играет по кругу.",MUTED);
+        text(b,12,14,"ВВЕРХ/ВНИЗ: трек  </>: страница",PINK);
+        int first=(u->selection/5)*5;
+        for(int i=0;i<5 && first+i<MUSIC_COUNT;++i){
+            rect(b,8,48+i*28,304,25,first+i==u->selection?0x35253f:PANEL);
+            text(b,16,53+i*28,musicTitles[first+i],first+i==u->selection?CYAN:INK);
+        }
+        text(b,12,198,"A / касание: играть",PINK);
+        text(b,12,220,"B: оставить текущий трек",MUTED);return;
+    }
     if(u->screen==UI_CREDITS){
         rect(t,24,35,352,2,PINK);
         text(t,32,57,"VA-11 HALL-A / 3DS",PINK);
@@ -203,10 +242,21 @@ void draw_menu(uint8_t *top,uint8_t *bottom,const View *v,const Menu *u) {
         text(b,16,57,"Not affiliated with or endorsed",MUTED);
         text(b,16,75,"by the original creators.",MUTED);
         rect(b,16,105,288,1,0x51405a);
-        text(b,16,125,"Unofficial Russian translation",INK);
-        text(b,16,148,"Source: https://koshk.sbs/",CYAN);
-        text(b,16,174,"Credit to its translation team.",MUTED);
-        text(b,16,216,"A / touch: main menu",PINK);
+        text(b,16,216,"A / touch: continue",PINK);
+        return;
+    }
+    if(u->screen==UI_TRANSLATION){
+        rect(t,24,35,352,2,PINK);
+        text(t,32,57,"РУССКИЙ ПЕРЕВОД",PINK);
+        text(t,32,101,"В порте используется",INK);
+        text(t,32,124,"неофициальный русский перевод.",INK);
+        text(t,32,164,"Источник перевода:",MUTED);
+        text(t,32,189,"https://koshk.sbs/",CYAN);
+        text(b,16,42,"Спасибо команде перевода!",INK);
+        text(b,16,91,"Перевод создан фанатами",MUTED);
+        text(b,16,114,"и не является официальной",MUTED);
+        text(b,16,137,"локализацией Sukeban Games.",MUTED);
+        text(b,16,216,"A / касание: главное меню",PINK);
         return;
     }
     if(u->screen==UI_TITLE || u->screen==UI_NEW || u->screen==UI_HELP){
@@ -215,7 +265,7 @@ void draw_menu(uint8_t *top,uint8_t *bottom,const View *v,const Menu *u) {
         text(t,48,126,"Unofficial fan-made port",CYAN);
         text(t,48,167,"build with neumiraie",MUTED);
     }else{
-        text(t,12,6,v->state.cur_day==2?"КВАРТИРА ДЖИЛЛ / ДЕНЬ 2":"КВАРТИРА ДЖИЛЛ / ДЕНЬ 1",PINK);
+        text(t,12,6,v->state.cur_day==4?"КВАРТИРА ДЖИЛЛ / ДЕНЬ 4":v->state.cur_day==3?"КВАРТИРА ДЖИЛЛ / ДЕНЬ 3":v->state.cur_day==2?"КВАРТИРА ДЖИЛЛ / ДЕНЬ 2":"КВАРТИРА ДЖИЛЛ / ДЕНЬ 1",PINK);
         sprite(t,62,27,&home_room);
         text(t,48,219,"Почитаю перед работой...",CYAN);
     }
@@ -239,12 +289,14 @@ void draw_menu(uint8_t *top,uint8_t *bottom,const View *v,const Menu *u) {
     const char *title="",*items[4]={0};int count=3;
     if(u->screen==UI_TITLE){title="VA-11 HALL-A / 3DS 0.5.0";items[0]=u->hasSave?"Продолжить":"Продолжить (нет сохранения)";items[1]="Новая игра";items[2]="Управление";items[3]="Выход";count=4;}
     if(u->screen==UI_NEW){title="НОВАЯ ИГРА";items[0]="С обучением";items[1]="Сразу первый день";items[2]="Отмена";}
-    if(u->screen==UI_HOME){title=v->state.cur_day==2?"ДОМ / 14 ДЕКАБРЯ":"ДОМ / 13 ДЕКАБРЯ";items[0]="Телефон";items[1]="На работу";items[2]="Сохранить";}
+    if(u->screen==UI_HOME){title=v->state.cur_day==4?"ДОМ / 16 ДЕКАБРЯ":v->state.cur_day==3?"ДОМ / 15 ДЕКАБРЯ":v->state.cur_day==2?"ДОМ / 14 ДЕКАБРЯ":"ДОМ / 13 ДЕКАБРЯ";items[0]="Телефон";items[1]="На работу";items[2]="Сохранить";}
     if(u->screen==UI_PHONE){title="ТЕЛЕФОН";items[0]="Дополненная правда";items[1]="danger/u/";items[2]="Блог Киры Мики";}
     if(u->screen==UI_LIST){
         static const char *names[3][3]={{"Массовая эмиграция","Новая угроза: вандерлендеры","Киборг на каблуках"},{"Концерт Мики","Поговорим об Alice_Rabbit","Концерт Мики 2"},{"Как я отдыхаю","Концерт под куполом!","Спасибо, Глитч-Сити!"}};
         title=u->app==0?"НОВОСТИ":u->app==1?"DANGER/U/":"КИРА МИКИ";
         for(int i=0;i<3;++i)items[i]=names[u->app][i];
+        if(v->state.cur_day==4 && u->app==0){items[0]="Новости / 16 декабря";items[1]="Вторая статья";items[2]="Третья статья";}
+        if(v->state.cur_day==3 && u->app==0){items[0]="Новости / 15 декабря";items[1]="Вторая статья";items[2]="Третья статья";}
         if(v->state.cur_day==2 && u->app==0){items[0]="Местная героиня";items[1]=v->state.dondrunk1?"70% наших читателей...":"Беспорядки усиливаются";items[2]=v->state.dondrunk1?"Кем может быть Alice_Rabbit?":"Лечение токийского гриппа";}
     }
     text(b,12,10,title,PINK);

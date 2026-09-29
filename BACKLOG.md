@@ -3,7 +3,7 @@
 ## Deferred by request
 
 - [ ] Shop and purchases, item ownership and the original distraction mechanic. Until then, order hints remain readable and Mulan Tea is available without purchase.
-- [ ] Music selection and jukebox, correct tracks and transitions. The existing prototype audio loop remains available.
+- [ ] Original 12-slot playlists and automatic music transitions. Manual selection of 59 looping tracks and scripted jukebox prompts are implemented in 0.7.0.
 - [ ] Full salary calculation, bonuses, expenses, bills and their consequences. Current shift totals are preliminary; financial Game Over is not implemented.
 - [ ] Mouth movement, blinking and other character animation. Portraits and Anna's TV cameo use static frames.
 
@@ -15,7 +15,11 @@
 
 ## Later content
 
-- [ ] Day 3 onward.
+- [ ] Day 5 onward.
+- [ ] Test Day 4, music changes, DSP playback and 0.6.0 save migration on original 3DS hardware.
+- [ ] Original animated TV broadcasts and streaming-chat presentation. The current port uses static/text indicators.
+- [ ] Test Day 3 on original 3DS hardware, including old saves, paired orders and both failure scenes.
+- [ ] Update forum and Miki phone content as the days progress.
 - [ ] Full comparison against the original, including presentation and audio.
 
 ## Implemented in 0.5.0

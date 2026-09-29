@@ -12,18 +12,42 @@ static FILE *music;
 static ndspWaveBuf waves[3];
 static int16_t *audioBuffer;
 static bool dspReady;
+static int16_t *boomBuffer;
+static unsigned boomFrames;
+static ndspWaveBuf boomWave;
 static int audio_init(void) {
-    music=fopen("sdmc:/3ds/va11-3ds/music.pcm","rb");
-    if(!music)return 2;
-    if(R_FAILED(ndspInit())){fclose(music);music=NULL;return 0;}
+    if(R_FAILED(ndspInit()))return 0;
     dspReady=true;
     audioBuffer=linearAlloc(3*AUDIO_FRAMES*sizeof(int16_t));
-    if(!audioBuffer){ndspExit();dspReady=false;fclose(music);music=NULL;return 0;}
+    if(!audioBuffer){ndspExit();dspReady=false;return 0;}
     ndspSetOutputMode(NDSP_OUTPUT_STEREO);
     ndspChnReset(0);ndspChnSetInterp(0,NDSP_INTERP_LINEAR);ndspChnSetRate(0,22050);ndspChnSetFormat(0,NDSP_FORMAT_MONO_PCM16);
     float mix[12]={0};mix[0]=mix[1]=0.55f;ndspChnSetMix(0,mix);
     for(int i=0;i<3;++i){waves[i].data_vaddr=audioBuffer+i*AUDIO_FRAMES;waves[i].status=NDSP_WBUF_FREE;}
+    FILE *effect=fopen("sdmc:/3ds/va11-3ds/music/boom.pcm","rb");
+    if(effect){
+        fseek(effect,0,SEEK_END);long size=ftell(effect);rewind(effect);
+        if(size>0 && size<=22050*2*10){boomBuffer=linearAlloc((unsigned)size);if(boomBuffer)boomFrames=fread(boomBuffer,2,(unsigned)size/2,effect);}
+        fclose(effect);
+    }
     return 1;
+}
+static int audio_select(int track){
+    if(!dspReady)return 0;
+    ndspChnWaveBufClear(0);
+    if(music){fclose(music);music=NULL;}
+    for(int i=0;i<3;++i){memset(&waves[i],0,sizeof(waves[i]));waves[i].data_vaddr=audioBuffer+i*AUDIO_FRAMES;waves[i].status=NDSP_WBUF_FREE;}
+    char path[80];snprintf(path,sizeof(path),"sdmc:/3ds/va11-3ds/music/%03d.pcm",track);
+    music=fopen(path,"rb");
+    if(!music && track==0)music=fopen("sdmc:/3ds/va11-3ds/music.pcm","rb");
+    return music?1:2;
+}
+static void audio_boom(void){
+    if(!dspReady || !boomFrames)return;
+    ndspChnWaveBufClear(1);ndspChnReset(1);ndspChnSetRate(1,22050);ndspChnSetFormat(1,NDSP_FORMAT_MONO_PCM16);
+    float mix[12]={0};mix[0]=mix[1]=0.45f;ndspChnSetMix(1,mix);
+    memset(&boomWave,0,sizeof(boomWave));boomWave.data_vaddr=boomBuffer;boomWave.nsamples=boomFrames;
+    DSP_FlushDataCache(boomBuffer,boomFrames*2);ndspChnWaveBufAdd(1,&boomWave);
 }
 static void audio_tick(void) {
     if(!music || !dspReady)return;
@@ -38,7 +62,8 @@ static void audio_tick(void) {
     }
 }
 static void audio_exit(void) {
-    if(dspReady){ndspChnWaveBufClear(0);ndspExit();}
+    if(dspReady){ndspChnWaveBufClear(0);ndspChnWaveBufClear(1);ndspExit();}
+    if(boomBuffer)linearFree(boomBuffer);
     if(audioBuffer)linearFree(audioBuffer);
     if(music)fclose(music);
 }
@@ -53,7 +78,7 @@ static void write_save(View *v) {
     if(copy.mixer.running)mixer_reset(&copy.mixer);
     const char *tmp="sdmc:/3ds/va11-3ds/day1.tmp";
     FILE *f=fopen(tmp,"wb");if(!f){v->saveError=1;return;}
-    uint32_t header[3]={0x56413135,sizeof(copy),checksum_bytes(&copy,sizeof(copy))};
+    uint32_t header[3]={0x56413137,sizeof(copy),checksum_bytes(&copy,sizeof(copy))};
     int ok=fwrite(header,sizeof(header),1,f)==1 && fwrite(&copy,sizeof(copy),1,f)==1;
     if(fclose(f))ok=0;
     if(ok){remove("sdmc:/3ds/va11-3ds/day1.bak");rename("sdmc:/3ds/va11-3ds/day1.sav","sdmc:/3ds/va11-3ds/day1.bak");ok=rename(tmp,"sdmc:/3ds/va11-3ds/day1.sav")==0;}
@@ -93,10 +118,10 @@ static void save_shutdown(void) {
 static int load_file(View *v,const char *path) {
     FILE *f=fopen(path,"rb");if(!f)return 0;
     View copy;uint32_t h[3];unsigned char data[sizeof(View)];
-    int ok=fread(h,sizeof(h),1,f)==1 && ((h[0]==0x56413132 && h[1]==296) || (h[0]==0x56413134 && h[1]==432) || (h[0]==0x56413135 && h[1]==sizeof(copy))) && fread(data,h[1],1,f)==1;
+    int ok=fread(h,sizeof(h),1,f)==1 && ((h[0]==0x56413132 && h[1]==296) || (h[0]==0x56413134 && h[1]==432) || (h[0]==0x56413135 && h[1]==448) || (h[0]==0x56413136 && h[1]==520) || (h[0]==0x56413137 && h[1]==sizeof(copy))) && fread(data,h[1],1,f)==1;
     fclose(f);
     if(!ok || h[2]!=checksum_bytes(data,h[1]))return 0;
-    if(h[0]!=0x56413135){if(!engine_migrate(&copy,data,h[1]))return 0;}
+    if(h[0]!=0x56413137){if(!engine_migrate(&copy,data,h[1]))return 0;}
     else {memcpy(&copy,data,sizeof(copy));if(!engine_valid(&copy) || copy.failed)return 0;}
     int audio=v->audio;*v=copy;v->audio=audio;v->overlay=0;v->saveError=0;return 1;
 }
@@ -118,7 +143,7 @@ int main(void) {
     Menu menu;menu_init(&menu,loaded);menu.screen=UI_CREDITS;
     LightLock_Init(&saveLock);LightEvent_Init(&saveEvent,RESET_ONESHOT);
     saveThread=threadCreate(save_worker,NULL,16384,0x31,0,false);
-    View lastView={0};Menu lastMenu={0};int redraw=2,lastBlended=-1;
+    View lastView={0};Menu lastMenu={0};int redraw=2,lastBlended=-1,playingTrack=-1,lastBoom=v.boom;
     while(aptMainLoop()) {
         hidScanInput();u32 keys=hidKeysDown();v.now=osGetTime();engine_tick(&v);
         if(saveThread){LightLock_Lock(&saveLock);v.saveError=saveResult;LightLock_Unlock(&saveLock);}
@@ -140,6 +165,7 @@ int main(void) {
         }else if(v.overlay==2) {
             if(keys&KEY_A){v.overlay=0;save(&v);menu_init(&menu,1);}
             if(keys&KEY_B)v.overlay=0;
+            if(keys&KEY_X)menu_music(&menu,&v);
         } else if(v.overlay==1) {
             if(keys&(KEY_Y|KEY_B))v.overlay=0;
             if((keys&KEY_A) && recipes[recipeBook[v.recipe]].id==TOK_tea)engine_pour_tea(&v);
@@ -148,7 +174,7 @@ int main(void) {
         } else if(v.mode==6){if(keys&KEY_A)recover(&v,&menu);if(keys&KEY_B)menu_init(&menu,1);}
         else if(keys&KEY_SELECT)v.overlay=2;
         else if(keys&KEY_Y)v.overlay=1;
-        else if(v.mode==2 && v.state.cur_day==1){if(keys&KEY_A){engine_next_day(&v);menu.screen=UI_HOME;menu.selection=0;}}
+        else if(v.mode==2 && v.state.cur_day<4){if(keys&KEY_A){engine_next_day(&v);menu.screen=UI_HOME;menu.selection=0;}}
         else if(v.mode==0 || v.mode==3) {if(keys&KEY_A)advance(&v);}
         else if(v.mode==1) {
             if(keys&KEY_DUP)v.selected=(v.selected+4)%5;
@@ -175,6 +201,9 @@ int main(void) {
                 }
             }
         }
+        if(v.mode==7 && menu.screen==UI_GAME)menu_music(&menu,&v);
+        if(v.musicTrack!=playingTrack){v.audio=audio_select(v.musicTrack);playingTrack=v.musicTrack;}
+        if(v.boom!=lastBoom){audio_boom();lastBoom=v.boom;}
         audio_tick();
         View compare=v;compare.now=0;
         int blended=v.mixer.running && v.now-v.mixer.started>=5000;

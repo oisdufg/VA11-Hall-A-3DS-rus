@@ -1,5 +1,23 @@
 # Changes
 
+## 0.7.0 beta
+
+- Enabled Day 4: 72 story blocks, Art, Streaming-chan, Betty and Deal; 11 order hints, paired orders, branches, break and Game Over. The second drink's category is now passed to order rules. Alcohol accumulation follows the original single-order rule.
+- Day 3 completion opens the Day 4 apartment. News uses the earlier Donovan flags.
+- Added 59 selectable tracks streamed from SD, with a scripted jukebox prompt before shifts and after breaks. SELECT then X opens music selection during play. One chosen track loops; 12-slot playlists remain deferred.
+- Added Day 4 gunshot cues, compact stream-chat reactions, a static news indicator and a saved flag for Stella's rum gift. These are adapted presentation elements, not the original animated UI.
+- Preserved the previous field, token and expression indices, including Dana's masked face. Added migration from 0.6.0's 520-byte save layout. Music selection is stored in normal saves; selecting a track does not autosave.
+- Built for original 3DS ARMv6K. Day 4: 1,200 full-shift simulations, all 72 blocks reached. Music UI, touch selection, old saves and phone branches tested on the ARM binary. Hardware audio, SD I/O and frame rate remain unverified.
+
+## 0.6.0 beta
+
+- Added a separate Russian translation notice after developer credits, with koshk.sbs attribution. A or touch advances each screen without changing the save.
+- Added Day 3, Alma and Stella, additional Dorothy expressions, nine orders, paired drinks, branching dialogue and the corresponding Game Over scenes.
+- Day 2 now leads to the Day 3 apartment. News articles use the previous day's Donovan outcome; forum and Miki selections remain unchanged.
+- Preserved released token and state-field indices. Save migration supports 296-, 432- and 448-byte layouts; the new layout includes Day 3 flags and two new actors.
+- Autosaves remain restricted to day completion. Shop-related distraction, purchases, payroll, music selection and character animation remain deferred.
+- Validation: ARMv6K compilation; 1,000 Day 1, 700 Day 2 and 800 Day 3 simulations; all 72 reachable Day 3 blocks; startup navigation, legacy saves and Game Over checks. Hardware testing remains pending.
+
 ## Unreleased — source packaging and attribution
 
 - Added an explicit public source archive that excludes original game resources, translation files, generated game code and playable binaries. Existing local test archives remain unchanged and still contain game resources.

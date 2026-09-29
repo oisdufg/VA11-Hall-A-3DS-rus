@@ -7,12 +7,13 @@ typedef struct {
     uint64_t now;
     Mixer mixer;
     State state;
-    int visible[9],position[9],face[9];
+    int visible[15],position[15],face[15];
     int saveError;
     int cheapErrors,failed;
     uint64_t annaUntil;
+    int musicTrack,chat,news,rum,boom;
 } View;
-// mode: 0 dialogue, 1 mixing, 2 finished, 3 break, 4 error, 5 apartment, 6 Game Over.
+// mode: 0 dialogue, 1 mixing, 2 finished, 3 break, 4 error, 5 apartment, 6 Game Over, 7 jukebox.
 // overlay: 1 recipes, 2 pause. Legacy saves are converted by engine_migrate.
 void draw_screens(uint8_t *top, uint8_t *bottom, const View *view);
 void engine_start(View *v,int dayOnly);
@@ -21,6 +22,7 @@ int engine_advance_checkpoint(View *v);
 void engine_serve(View *v);
 int engine_valid(const View *v);
 void engine_next_day(View *v);
+void engine_finish_jukebox(View *v);
 int engine_migrate(View *v,const void *legacy,unsigned size);
 void engine_pour_tea(View *v);
 void engine_tick(View *v);

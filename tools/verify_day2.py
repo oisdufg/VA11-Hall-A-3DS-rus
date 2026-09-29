@@ -18,6 +18,8 @@ for run in range(700):
   if v.mode in (2,6):
    if run==0:assert v.mode==2
    break
+  if v.mode==7:
+   call('engine_finish_jukebox',address);continue
   if v.mode in (0,3):
    result=call('engine_advance_checkpoint',address)
    assert result==int(get().mode==2),('save outside end of day',v.block,v.line)
@@ -49,9 +51,9 @@ legacy=bytearray(296);struct.pack_into('<8i',legacy,0,119,0,0,0,0,0,0,1)
 lf=json.loads((P/'generated/legacy-state-fields.json').read_text())
 for field,val in {'cur_client':1,'cur_stage':9,'dondrunk1':1,'kimdrunk1':1,'bevid_a':37}.items():struct.pack_into('<i',legacy,80+lf.index(field)*4,val)
 struct.pack_into('<i',legacy,220,1);struct.pack_into('<i',legacy,244,185);struct.pack_into('<i',legacy,268,1)
-machine.mem_write(0x1120000,bytes(legacy));assert call('engine_migrate',address,0x1120000,296)==1
+machine.mem_write(0x5120000,bytes(legacy));assert call('engine_migrate',address,0x5120000,296)==1
 v=get();assert v.block==119 and v.line==0 and v.face[0]==1 and v.state.dondrunk1==1 and v.state.cur_day==1 and v.state.slotamount==1
-assert call('engine_migrate',address,0x1120000,295)==0
+assert call('engine_migrate',address,0x5120000,295)==0
 expected=set(range(201,269))
 assert expected<=seen2,('uncovered blocks',sorted(expected-seen2))
 report={'shift_simulations':700,'recipe_pairs':len(recipes)**2,'day2_blocks':sorted(seen2),'legacy_migration_tested':True,'notes':'All 68 Day 2 blocks reached, including Mulan Tea. Runs may finish the shift or reach Game Over. ARM execution; console I/O not emulated.'}

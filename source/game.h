@@ -5,6 +5,7 @@
 typedef struct {
     int amount[5];
     bool ice, aged, running, ready, blended;
+    int special; /* Uses the former padding; one-based bottled recipe index. */
     uint64_t started;
 } Mixer;
 void mixer_reset(Mixer *m);

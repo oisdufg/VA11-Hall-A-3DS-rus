@@ -8,7 +8,7 @@ room=gd.sprite('jillroom_default_spr')
 for name,x,y in [('jillblink_spr',142,127),('room_walls_spr',0,21),('shadows_spr',0,0),('room_kotatsu_spr',0,21),('catbreath_spr',97,137),('room_clothes_spr',0,21)]:room.alpha_composite(gd.sprite(name),(x,y))
 assets=[('home_room',room),('home_title',gd.sprite('jilltitle_spr').resize((400,225),Image.Resampling.NEAREST)),('home_logo',gd.sprite('intrologo2'))]
 for name,source in [('news','augmented_eye_long_base_spr'),('forum','dange_thread1'),('miki','miki_entry')]:
- for i in ([1,2,3,4,5,6,7,8,9,10,11,12,55,56,57,58,60] if name=='news' else range(1,4)):
+ for i in ([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,55,56,57,58,60] if name=='news' else range(1,4)):
   im=gd.sprite(source,i)
   bounds=im.convert('RGB').getbbox()
   if bounds:im=im.crop((0,0,im.width,min(im.height,max(188,bounds[3]+8))))

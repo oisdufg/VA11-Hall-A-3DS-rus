@@ -26,6 +26,7 @@ bool mixer_toggle(Mixer *m, uint64_t now) {
 }
 int mixer_identify(const Mixer *m) {
     if(!m->ready)return 0;
+    if(m->special)return m->special>=60 && m->special<=RECIPE_COUNT?m->special:0;
     for(int r=0;r<RECIPE_COUNT;++r) {
         const Recipe *p=&recipes[r];
         if(m->ice!=p->ice || m->aged!=p->aged || m->blended!=p->blended)continue;

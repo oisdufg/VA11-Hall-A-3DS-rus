@@ -2,12 +2,16 @@
 
 ## Deferred by request
 
-- [ ] Shop and purchases, item ownership and the original distraction mechanic. Until then, order hints remain readable and Mulan Tea is available without purchase.
+- [ ] Remaining shop products, wallpaper/table choices, interactive PC content and the original distraction mechanic. The 16 room decorations, purchases and ownership are implemented in 0.7.1. Order hints remain readable and Mulan Tea is available without purchase.
 - [ ] Original 12-slot playlists and automatic music transitions. Manual selection of 59 looping tracks and scripted jukebox prompts are implemented in 0.7.0.
-- [ ] Full salary calculation, bonuses, expenses, bills and their consequences. Current shift totals are preliminary; financial Game Over is not implemented.
+- [ ] Expenses, bills and financial Game Over. Daily commission, tips and bonuses for Days 1–5 are credited to the wallet in 0.7.1.
 - [ ] Mouth movement, blinking and other character animation. Portraits and Anna's TV cameo use static frames.
 
 ## Console verification
+
+- [ ] Test Day 5, special drinks, sound cues and version 8 save migration on original 3DS hardware.
+
+- [ ] Test 0.7.1 shop, decorations, payroll and old-save migration on original 3DS hardware.
 
 - [ ] Test tutorial-to-mixer input latency on the original 3DS LL.
 - [ ] Test Days 1–2, paired drinks, Mulan Tea, Anna's TV cameo and both Game Over scenes.
@@ -15,7 +19,7 @@
 
 ## Later content
 
-- [ ] Day 5 onward.
+- [ ] Day 6 onward. Day 5 is playable in 0.8.0.
 - [ ] Test Day 4, music changes, DSP playback and 0.6.0 save migration on original 3DS hardware.
 - [ ] Original animated TV broadcasts and streaming-chat presentation. The current port uses static/text indicators.
 - [ ] Test Day 3 on original 3DS hardware, including old saves, paired orders and both failure scenes.

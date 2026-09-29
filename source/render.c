@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include "menu.h"
 #include "home_assets.h"
+#include "shop_assets.h"
 
 typedef struct {uint8_t *p;int w;} Screen;
 static const uint32_t BG=0x110e1d, PANEL=0x21172e, INK=0xf0e6ec, MUTED=0xaa96b5, PINK=0xf56ea9, CYAN=0x6edbda;
@@ -50,6 +51,14 @@ static void number(Screen s,int x,int y,int n,uint32_t c) {
     do{buf[--k]=(char)('0'+value%10);value/=10;}while(value);
     if(n<0)buf[--k]='-';
     text(s,x,y,buf+k,c);
+}
+static void money(Screen s,int x,int y,int cents,uint32_t color){
+    char buf[24];int k=23;buf[k]=0;
+    unsigned value=(unsigned)cents;
+    buf[--k]=(char)('0'+value%10);value/=10;
+    buf[--k]=(char)('0'+value%10);value/=10;buf[--k]='.';
+    do{buf[--k]=(char)('0'+value%10);value/=10;}while(value);
+    buf[--k]='$';text(s,x,y,buf+k,color);
 }
 static void sprite(Screen s,int x,int y,const Sprite *im) {
     const uint8_t *p=im->rgba;
@@ -100,6 +109,10 @@ static const char *order(int n) {
     case 44:return "Два мужественных (Manly)";
     case 45:return "Взрыв на Марсе";
     case 46:return "Пиво";
+    case 47:return "Ром";case 48:return "Blue Fairy";case 49:return "Пиво";
+    case 50:return "Cobalt Velvet";case 51:return "Бон Развязон";case 52:return "Абсент";
+    case 53:return "Что-нибудь с алкоголем";case 54:return "Брендини";
+    case 55:return "Сладкий без алкоголя";case 56:return "Ровно 17 частей ингредиентов";case 57:return "Plumfume";
     case 174:return "Пиво или другой алкоголь";
     default:return "Заказ посетителя";
     }
@@ -107,8 +120,9 @@ static const char *order(int n) {
 void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
     Screen t={top,400},b={bottom,320};
     rect(t,0,0,400,240,BG);rect(b,0,0,320,240,BG);
-    text(t,12,3,"VA-11 HALL-A",PINK);text(t,224,3,v->state.cur_day==4?"ДЕНЬ 4 / 0.7.0":v->state.cur_day==3?"ДЕНЬ 3 / 0.7.0":v->state.cur_day==2?"ДЕНЬ 2 / 0.7.0":"ДЕНЬ 1 / 0.7.0",MUTED);
-    sprite(t,10,22,&background);
+    text(t,12,3,"VA-11 HALL-A",PINK);text(t,224,3,v->state.cur_day==5?"ДЕНЬ 5 / 0.8.0":v->state.cur_day==4?"ДЕНЬ 4 / 0.8.0":v->state.cur_day==3?"ДЕНЬ 3 / 0.8.0":v->state.cur_day==2?"ДЕНЬ 2 / 0.8.0":"ДЕНЬ 1 / 0.8.0",MUTED);
+    int shake=v->shakeUntil?((v->now/50)%2?2:-2):0;
+    sprite(t,10+shake,22,&background);
     /* The original bar backdrop is drawn at (11,18) in room coordinates. */
     if(v->annaUntil)sprite(t,10+(239-11)*264/338,22+(44-18)*264/338,&anna_tv);
     if(v->news){rect(t,198,39,72,25,0x15233c);text(t,202,44,"НОВОСТИ",CYAN);}
@@ -116,7 +130,7 @@ void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
     const Line *line=&story[ln];
     for(int i=0;i<ACTOR_COUNT;++i)if(v->visible[i]) {
         const Sprite *im=actors[i][v->face[i]];
-        if(im)sprite(t,10+v->position[i]*264/338-im->w/2,148-im->h,im);
+        if(im)sprite(t,10+shake+v->position[i]*264/338-im->w/2,148-im->h,im);
     }
     rect(t,274,22,7,126,BG);
     rect(t,281,25,108,122,PANEL);sprite(t,290,43,&jill);
@@ -142,11 +156,12 @@ void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
         text(t,16,178,"Время немного отдохнуть.",INK);
         text(t,16,210,"A: продолжить смену",PINK);
     } else if(v->mode==2) {
-        text(t,16,153,v->state.cur_day==4?"ЧЕТВЁРТЫЙ ДЕНЬ ЗАВЕРШЁН":v->state.cur_day==3?"ТРЕТИЙ ДЕНЬ ЗАВЕРШЁН":v->state.cur_day==2?"ВТОРОЙ ДЕНЬ ЗАВЕРШЁН":"ПЕРВЫЙ ДЕНЬ ЗАВЕРШЁН",CYAN);
+        text(t,16,153,v->state.cur_day==5?"ПЯТЫЙ ДЕНЬ ЗАВЕРШЁН":v->state.cur_day==4?"ЧЕТВЁРТЫЙ ДЕНЬ ЗАВЕРШЁН":v->state.cur_day==3?"ТРЕТИЙ ДЕНЬ ЗАВЕРШЁН":v->state.cur_day==2?"ВТОРОЙ ДЕНЬ ЗАВЕРШЁН":"ПЕРВЫЙ ДЕНЬ ЗАВЕРШЁН",CYAN);
         text(t,16,178,"Выручка:",INK);number(t,120,178,v->state.cash,INK);
         text(t,196,178,"Чаевые:",INK);number(t,268,178,v->state.tips,INK);
         text(t,16,198,"Ошибки:",MUTED);number(t,88,198,v->state.mistakes,MUTED);
-        text(t,16,219,v->state.cur_day==3?"A: домой, день 4   START: выход":v->state.cur_day==2?"A: домой, день 3   START: выход":v->state.cur_day==1?"A: домой, день 2   START: выход":"SELECT: меню   START: выход",PINK);
+        text(t,144,198,"Заработок:",CYAN);money(t,232,198,v->lastPayCents,CYAN);
+        text(t,16,219,v->state.cur_day==4?"A: домой, день 5   START: выход":v->state.cur_day==3?"A: домой, день 4   START: выход":v->state.cur_day==2?"A: домой, день 3   START: выход":v->state.cur_day==1?"A: домой, день 2   START: выход":"SELECT: меню   START: выход",PINK);
     } else {
         text(t,16,160,"Ошибка перехода. SELECT: меню",PINK);
         number(t,16,190,v->state.cur_client,INK);number(t,70,190,v->state.cur_stage,INK);
@@ -160,7 +175,7 @@ void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
         text(b,16,198,"START: выход",MUTED);
         return;
     }
-    text(b,8,4,v->state.cur_client==0?"БАР / ОБУЧЕНИЕ":v->state.cur_day==4?"БАР / ДЕНЬ 4":v->state.cur_day==3?"БАР / ДЕНЬ 3":v->state.cur_day==2?"БАР / ДЕНЬ 2":"БАР / ДЕНЬ 1",PINK);
+    text(b,8,4,v->state.cur_client==0?"БАР / ОБУЧЕНИЕ":v->state.cur_day==5?"БАР / ДЕНЬ 5":v->state.cur_day==4?"БАР / ДЕНЬ 4":v->state.cur_day==3?"БАР / ДЕНЬ 3":v->state.cur_day==2?"БАР / ДЕНЬ 2":"БАР / ДЕНЬ 1",PINK);
     if(v->mode==1) {
         if(v->mixer.running) {
             text(b,8,25,v->now-v->mixer.started>=5000?"Взболтано! A: остановить":"Смешиваем... A: остановить",CYAN);
@@ -188,11 +203,11 @@ void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
         const Recipe *r=&recipes[recipeBook[v->recipe]];
         text(b,12,12,"РЕЦЕПТЫ   < L / R >",PINK);
         text(b,12,36,r->name,CYAN);
-        if(r->id==TOK_tea){
-            text(b,12,65,"Готовый напиток: чай Мулан.",INK);
+        if(r->id==TOK_tea || r->id==TOK_rum || r->id==TOK_abs || r->id==TOK_fed){
+            text(b,12,65,"Готовый напиток из бутылки.",INK);
             text(b,12,90,"Шейкер не нужен.",MUTED);
-            text(b,12,120,v->mode==1?"A: налить   X: затем подать":"Наливать можно при заказе.",CYAN);
-            text(b,12,155,"Доступен без покупки в бете.",MUTED);
+            text(b,12,120,!engine_extra_available(v,r->id)?"Пока недоступно.":v->mode==1?"A: налить   X: затем подать":"Наливать можно при заказе.",CYAN);
+            text(b,12,155,r->id==TOK_tea?"Доступен без покупки в бете.":r->id==TOK_fed?"Классический, с алкоголем.":"Доступность зависит от Стеллы.",MUTED);
         }else{
         for(int i=0;i<5;++i){text(b,12,60+i*16,names[i],INK);if(i==4 && r->optional)text(b,172,60+i*16,"по вкусу",INK);else number(b,172,60+i*16,r->amount[i],INK);}
         text(b,12,146,r->ice?"Лёд: да":"Лёд: нет",CYAN);
@@ -215,6 +230,22 @@ void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
 
 void draw_menu(uint8_t *top,uint8_t *bottom,const View *v,const Menu *u) {
     Screen t={top,400},b={bottom,320};rect(t,0,0,400,240,BG);rect(b,0,0,320,240,BG);
+    if(u->screen==UI_SHOP){
+        text(t,16,8,"МАГАЗИН / УКРАШЕНИЯ ДЛЯ ДОМА",PINK);
+        sprite(t,62,27,&home_room);
+        for(int i=0;i<SHOP_COUNT;++i)if(v->purchases&(1u<<i))sprite(t,62,48,shopItems[i].decoration);
+        text(t,16,220,"Кошелёк:",CYAN);money(t,96,220,v->walletCents,CYAN);
+        text(b,12,8,shopItems[u->selection].name,PINK);
+        text(b,12,28,"Цена:",MUTED);money(b,64,28,shopItems[u->selection].price*100,MUTED);
+        int first=(u->selection/5)*5;
+        for(int i=0;i<5 && first+i<SHOP_COUNT;++i){
+            int n=first+i;rect(b,8,48+i*28,304,25,n==u->selection?0x35253f:PANEL);
+            text(b,16,53+i*28,shopItems[n].name,(v->purchases&(1u<<n))?MUTED:n==u->selection?CYAN:INK);
+            if(v->purchases&(1u<<n))text(b,284,53+i*28,"+",CYAN);
+        }
+        const char *notice=u->notice==1?"Купить? A: да / B: отмена":u->notice==2?"Куплено. Сохранись дома.":u->notice==3?"Недостаточно денег.":u->notice==4?"Уже куплено.":"A / касание: выбрать покупку";
+        text(b,12,196,notice,CYAN);text(b,12,220,"B: домой  </>: страница",PINK);return;
+    }
     if(u->screen==UI_MUSIC){
         text(t,24,30,"МУЗЫКАЛЬНЫЙ АВТОМАТ",PINK);
         text(t,24,68,u->notice?"Выбери музыку перед сменой.":"Музыка для этой смены",INK);
@@ -259,15 +290,20 @@ void draw_menu(uint8_t *top,uint8_t *bottom,const View *v,const Menu *u) {
         text(b,16,216,"A / касание: главное меню",PINK);
         return;
     }
-    if(u->screen==UI_TITLE || u->screen==UI_NEW || u->screen==UI_HELP){
+    if(u->screen==UI_TITLE || u->screen==UI_NEW || u->screen==UI_HELP || u->screen==UI_TEST_DAYS){
         rect(t,24,48,352,2,PINK);
         text(t,48,82,"VA-11 HALL-A / NINTENDO 3DS",PINK);
         text(t,48,126,"Unofficial fan-made port",CYAN);
         text(t,48,167,"build with neumiraie",MUTED);
+#ifdef VA11_TEST_MODE
+        text(t,24,192,"ТЕСТ: дни 1-5 / кошелёк $20000",CYAN);
+        text(t,24,215,"Отдельное тестовое сохранение",PINK);
+#endif
     }else{
-        text(t,12,6,v->state.cur_day==4?"КВАРТИРА ДЖИЛЛ / ДЕНЬ 4":v->state.cur_day==3?"КВАРТИРА ДЖИЛЛ / ДЕНЬ 3":v->state.cur_day==2?"КВАРТИРА ДЖИЛЛ / ДЕНЬ 2":"КВАРТИРА ДЖИЛЛ / ДЕНЬ 1",PINK);
+        text(t,12,6,v->state.cur_day==5?"КВАРТИРА ДЖИЛЛ / ДЕНЬ 5":v->state.cur_day==4?"КВАРТИРА ДЖИЛЛ / ДЕНЬ 4":v->state.cur_day==3?"КВАРТИРА ДЖИЛЛ / ДЕНЬ 3":v->state.cur_day==2?"КВАРТИРА ДЖИЛЛ / ДЕНЬ 2":"КВАРТИРА ДЖИЛЛ / ДЕНЬ 1",PINK);
         sprite(t,62,27,&home_room);
-        text(t,48,219,"Почитаю перед работой...",CYAN);
+        for(int i=0;i<SHOP_COUNT;++i)if(v->purchases&(1u<<i))sprite(t,62,48,shopItems[i].decoration);
+        text(t,24,219,"Кошелёк:",CYAN);money(t,104,219,v->walletCents,CYAN);
     }
     if(u->screen==UI_ARTICLE){
         const Sprite *im=menu_phone_page(v,u);
@@ -286,10 +322,14 @@ void draw_menu(uint8_t *top,uint8_t *bottom,const View *v,const Menu *u) {
         text(b,12,146,"Смешать: менее 5 секунд.\nВзболтать: от 5 секунд.\nАвтосейв: в конце дня.",CYAN);
         text(b,12,218,"A / B: назад",PINK);return;
     }
-    const char *title="",*items[4]={0};int count=3;
-    if(u->screen==UI_TITLE){title="VA-11 HALL-A / 3DS 0.5.0";items[0]=u->hasSave?"Продолжить":"Продолжить (нет сохранения)";items[1]="Новая игра";items[2]="Управление";items[3]="Выход";count=4;}
+    const char *title="",*items[5]={0};int count=3;
+    if(u->screen==UI_TITLE){title="VA-11 HALL-A / 3DS 0.8.0";items[0]=u->hasSave?"Продолжить":"Продолжить (нет сохранения)";items[1]="Новая игра";items[2]="Управление";items[3]="Выход";count=4;}
+#ifdef VA11_TEST_MODE
+    if(u->screen==UI_TITLE){title="VA-11 HALL-A / 0.8.0 TEST";items[2]="Тест: выбрать день";}
+    if(u->screen==UI_TEST_DAYS){title="ТЕСТ: КВАРТИРА ПЕРЕД СМЕНОЙ";items[0]="День 1";items[1]="День 2";items[2]="День 3";items[3]="День 4";items[4]="День 5";count=5;}
+#endif
     if(u->screen==UI_NEW){title="НОВАЯ ИГРА";items[0]="С обучением";items[1]="Сразу первый день";items[2]="Отмена";}
-    if(u->screen==UI_HOME){title=v->state.cur_day==4?"ДОМ / 16 ДЕКАБРЯ":v->state.cur_day==3?"ДОМ / 15 ДЕКАБРЯ":v->state.cur_day==2?"ДОМ / 14 ДЕКАБРЯ":"ДОМ / 13 ДЕКАБРЯ";items[0]="Телефон";items[1]="На работу";items[2]="Сохранить";}
+    if(u->screen==UI_HOME){title=v->state.cur_day==5?"ДОМ / 17 ДЕКАБРЯ":v->state.cur_day==4?"ДОМ / 16 ДЕКАБРЯ":v->state.cur_day==3?"ДОМ / 15 ДЕКАБРЯ":v->state.cur_day==2?"ДОМ / 14 ДЕКАБРЯ":"ДОМ / 13 ДЕКАБРЯ";items[0]="Телефон";items[1]="На работу";items[2]="Сохранить";items[3]="Магазин";count=4;}
     if(u->screen==UI_PHONE){title="ТЕЛЕФОН";items[0]="Дополненная правда";items[1]="danger/u/";items[2]="Блог Киры Мики";}
     if(u->screen==UI_LIST){
         static const char *names[3][3]={{"Массовая эмиграция","Новая угроза: вандерлендеры","Киборг на каблуках"},{"Концерт Мики","Поговорим об Alice_Rabbit","Концерт Мики 2"},{"Как я отдыхаю","Концерт под куполом!","Спасибо, Глитч-Сити!"}};
@@ -299,10 +339,11 @@ void draw_menu(uint8_t *top,uint8_t *bottom,const View *v,const Menu *u) {
         if(v->state.cur_day==3 && u->app==0){items[0]="Новости / 15 декабря";items[1]="Вторая статья";items[2]="Третья статья";}
         if(v->state.cur_day==2 && u->app==0){items[0]="Местная героиня";items[1]=v->state.dondrunk1?"70% наших читателей...":"Беспорядки усиливаются";items[2]=v->state.dondrunk1?"Кем может быть Alice_Rabbit?":"Лечение токийского гриппа";}
     }
+    if(u->screen==UI_LIST && v->state.cur_day==5 && u->app==0){items[0]="Новости / 17 декабря";items[1]="Вторая статья";items[2]="Третья статья";}
     text(b,12,10,title,PINK);
-    for(int i=0;i<count;++i)button(b,16,48+i*38,288,items[i],u->selection==i);
+    for(int i=0;i<count;++i)button(b,16,48+i*(u->screen==UI_TEST_DAYS?30:38),288,items[i],u->selection==i);
     if(u->screen==UI_NEW && u->hasSave)text(b,12,174,"Текущий прогресс будет заменён.",MUTED);
-    if(u->screen==UI_HOME && u->notice)text(b,12,174,"Сохранение отправлено на SD.",CYAN);
+    if(u->screen==UI_HOME && u->notice)text(b,12,198,"Сохранение отправлено на SD.",CYAN);
     text(b,12,218,"A: выбрать   B: назад",PINK);
     if(v->saveError)text(b,12,196,"Ошибка записи SD!",PINK);
 }

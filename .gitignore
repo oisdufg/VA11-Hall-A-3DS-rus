@@ -1,5 +1,6 @@
 # Local builds and extracted game resources
 /build/
+/build-test/
 /generated/
 /sd/
 /previews/
@@ -71,6 +72,7 @@ gameover.txt
 # Generated game content can contain assets even when represented as C/JSON
 assets.c
 home_assets.c
+shop_assets.c
 story.h
 story.json
 rules.h

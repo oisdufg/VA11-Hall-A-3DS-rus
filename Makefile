@@ -5,7 +5,7 @@ endif
 CC := $(DEVKITARM)/bin/arm-none-eabi-gcc
 THREEDSXTOOL := $(DEVKITPRO)/tools/bin/3dsxtool
 TARGET := sd/3ds/va11-3ds/va11-3ds
-SOURCES := source/main.c source/engine.c source/game.c source/render.c source/menu.c generated/assets.c generated/home_assets.c
+SOURCES := source/main.c source/engine.c source/game.c source/render.c source/menu.c generated/assets.c generated/home_assets.c generated/shop_assets.c
 OBJECTS := $(patsubst %.c,build/%.o,$(SOURCES))
 ARCH := -march=armv6k -mtune=mpcore -mfloat-abi=hard -mfpu=vfp -marm
 CFLAGS := $(ARCH) -O2 -g -Wall -Wextra -Werror -mword-relocations -ffunction-sections -fdata-sections -fno-strict-aliasing -D__3DS__ -Isource -Igenerated -I$(DEVKITPRO)/libctru/include

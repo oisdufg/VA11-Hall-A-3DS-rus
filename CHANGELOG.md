@@ -1,5 +1,21 @@
 # Changes
 
+## 0.8.0 beta
+
+- Enabled Day 5: 61 story blocks, 11 orders, Taylor, Virgilio and Dorothy’s new expression. Day 4 completion opens the Day 5 apartment and December 17 news.
+- Added rum, absinthe and Plumfume to the recipe book. Rum/absinthe availability follows earlier Stella orders; the 17-unit order reads actual shaker quantities.
+- Added Day 5 Game Over, both jukebox stops, BANG/CRASH sound cues and a brief screen shake. Mouth/blink animation remains deferred.
+- Save version 9 migrates previous wallet, decorations and story progress. Day 5 payroll is credited once. The separate TEST launcher now selects Days 1–5.
+- ARM checks: 1,200 Day 5 simulations covering all 61 blocks, special drinks, failure routes and version 8 migration. Hardware playback and SD persistence remain unverified.
+
+## 0.7.1 beta
+
+- Added an apartment shop with 16 room decorations and original prices, purchase confirmation, balance checks and persistent ownership. Bought decorations appear in the room; purchases at an exact balance are accepted.
+- Added a wallet in cents and once-per-day settlement of commission, tips, flawless and daily bonuses for Days 1–4. Failed shifts receive no settlement. Bills and distraction remain deferred.
+- Save version 8 stores the economy after the existing version 7 layout. Older saves preserve story progress; unknown earnings from earlier days are not invented. Purchases use existing manual/end-of-day saves, with no new automatic SD writes.
+- Prepared isolated Day 5 story/controllers and ARM rule checks; Day 5 is not yet playable.
+- Hardware shop rendering, SD persistence and performance still need console testing.
+
 ## 0.7.0 beta
 
 - Enabled Day 4: 72 story blocks, Art, Streaming-chan, Betty and Deal; 11 order hints, paired orders, branches, break and Game Over. The second drink's category is now passed to order rules. Alcohol accumulation follows the original single-order rule.

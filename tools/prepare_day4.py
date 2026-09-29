@@ -1,15 +1,17 @@
-"""Prepare staged Day 4 logic from the owner's game; leaves Days 1-3 intact."""
+"""Prepare isolated Day 4 or Day 5 logic from the owner's game."""
 from pathlib import Path
 import argparse
 import json
 import re
 
 
-def prepare(game, decompiled, project):
+def prepare(game, decompiled, project, day=4):
+    assert day in (4, 5)
+    offset = (day + 1) * 100
     generated = project / 'generated'
-    output = generated / 'day4'
+    output = generated / f'day{day}'
     output.mkdir(exist_ok=True)
-    scripts = [(decompiled / f'gml_Script_{name}4control.gml').read_text()
+    scripts = [(decompiled / f'gml_Script_{name}{day}control.gml').read_text()
                for name in ('day', 'mix')]
     # Shop-related distraction remains deferred, as in Days 1-3.
     scripts[0] = re.sub(r'choose\([^)]*\)', '0', scripts[0]).replace('distractioncheck()', '1')
@@ -20,12 +22,12 @@ def prepare(game, decompiled, project):
         if word not in tokens:
             tokens[word] = max(tokens.values()) + 1
     additional = set(re.findall(r'global\.(\w+)', ''.join(scripts)))
-    additional -= {'ch4'} | {f'odstr{i}' for i in range(200)}
+    additional -= {f'ch{day}'} | {f'odstr{i}' for i in range(200)}
     fields = prior_fields + sorted(additional - set(prior_fields))
 
     def translate(source):
-        source = re.sub(r'textbox_create\(global.ch4, (\d+), 1\);',
-                        lambda m: f'return {500 + int(m[1])};', source)
+        source = re.sub(rf'textbox_create\(global.ch{day}, (\d+), 1\);',
+                        lambda m: f'return {offset + int(m[1])};', source)
         source = re.sub(r'instance_create\(x, y, (305|308)\);',
                         lambda m: 'return ' + ('-2' if m[1] == '305' else '-3') + ';', source)
         source = re.sub(r'mixertips_double\((\d+), (\d+), (\d+), (\d+), (\d+), (\d+)\);',
@@ -45,29 +47,29 @@ def prepare(game, decompiled, project):
 
     (output / 'state.h').write_text('#pragma once\ntypedef struct {\n' + ''.join(f'int {f};\n' for f in fields) + '} State;\n')
     (output / 'rules.c').write_text('#include "state.h"\n' + ''.join(
-        f'int {name}4_rule(State *s){{\n{translate(script)}}}\n'
+        f'int {name}{day}_rule(State *s){{\n{translate(script)}}}\n'
         for name, script in zip(('day', 'mix'), scripts)))
     (output / 'state-fields.json').write_text(json.dumps(fields))
     (output / 'tokens.json').write_text(json.dumps(tokens))
-    text = (game / 'scripts/eng/script4.txt').read_text(encoding='utf-8-sig')
+    text = (game / f'scripts/eng/script{day}.txt').read_text(encoding='utf-8-sig')
     blocks = {}
     current = None
     # E tags delimit blocks even when attached to the previous spoken line.
     for part in re.split(r'(\[E:\d+\])', text):
         match = re.fullmatch(r'\[E:(\d+)\]', part)
         if match:
-            current = 500 + int(match[1])
+            current = offset + int(match[1])
         elif current is not None and re.sub(r'\[[^\]]*\]', '', part).strip():
             blocks[current] = part
     (output / 'story.json').write_text(json.dumps(blocks, ensure_ascii=False, indent=2), encoding='utf8')
-    referenced = sorted({500 + int(n) for s in scripts for n in re.findall(r'textbox_create\(global.ch4, (\d+), 1\)', s)})
+    referenced = sorted({offset + int(n) for s in scripts for n in re.findall(rf'textbox_create\(global.ch{day}, (\d+), 1\)', s)})
     assert set(referenced) <= blocks.keys(), 'Rule refers to a missing story block'
     faces = {}
     for actor, face in re.findall(r'\[XS:(\w+)face,([^\]]*)\]', text):
         faces.setdefault(actor, set()).add(face)
     manifest = {
         'status': 'staged logic; not yet enabled in the playable build',
-        'offset': 500, 'story_blocks': sorted(blocks), 'rule_blocks': referenced,
+        'offset': offset, 'story_blocks': sorted(blocks), 'rule_blocks': referenced,
         'actors': sorted(set(re.findall(r'\[SHOWF?:[^,]+,sprite_(\w+)\]', text))),
         'faces': {a: sorted(v) for a, v in faces.items()},
         'command_types': sorted(set(re.findall(r'\[([^:\]]+):', text))),
@@ -77,8 +79,8 @@ def prepare(game, decompiled, project):
         'new_tokens': {k: v for k, v in tokens.items() if k not in old_tokens},
         'preserved_state_prefix': len(prior_fields),
         'pending': ['Actor composition and rendering', 'Runtime commands and story pages',
-                    'Second-drink kind and alcohol handling', 'Day 3 to Day 4 apartment transition',
-                    'Save migration', 'Day 4 phone news', 'Full shift and console checks'],
+                    'Special drinks and ingredient totals', f'Day {day-1} to Day {day} apartment transition',
+                    'Save migration', f'Day {day} phone news', 'Full shift and console checks'],
     }
     (output / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf8')
     print(json.dumps(manifest, ensure_ascii=False, indent=2))

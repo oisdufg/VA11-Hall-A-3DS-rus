@@ -59,7 +59,7 @@ v=pour(v,'sstar');assert v.cheapErrors==3 and v.failed and v.block==305
 v=initial(2,2,7,2);v.state.slotamount=2
 v=pour(v,'scloud','big');v=pour(v,'gpunch');assert v.cheapErrors==0 and not v.failed
 # Tea is poured directly, selects the original Miki response and resets errors.
-v=initial(2,4,2,2);v.overlay=1;put(v);call('engine_pour_tea',address);v=get()
+v=initial(2,4,2,2);v.overlay=1;put(v);call('engine_pour_special',address,json.loads((P/'generated/day1-metadata.json').read_text(encoding='utf8'))['tokens']['tea']);v=get()
 assert v.overlay==0 and v.mixer.ready and sum(v.mixer.amount)==0
 call('engine_serve',address);v=get();assert v.block==251 and v.state.rightdrink and v.cheapErrors==0
 snapshot(v,'mulan-tea-response')

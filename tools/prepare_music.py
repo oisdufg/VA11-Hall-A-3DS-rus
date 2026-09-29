@@ -38,6 +38,8 @@ def prepare(game,decompiled,project):
         data=pcm(names[sound]);(dest/f'{index:03}.pcm').write_bytes(data)
         rows.append({'index':index,'title':title,'source':names[sound],'bytes':len(data)})
     (dest/'boom.pcm').write_bytes(pcm('shot'))
+    (dest/'bang.pcm').write_bytes(pcm('plomamentazon'))
+    (dest/'crash.pcm').write_bytes(pcm('carcrash'))
     (project/'generated/music.h').write_text('#pragma once\n#define MUSIC_COUNT '+str(len(rows))+'\nstatic const char *const musicTitles[]={'+','.join(cstr(r['title']) for r in rows)+'};\n')
     (project/'generated/music-manifest.json').write_text(json.dumps(rows,indent=2))
     print('Prepared',len(rows),'tracks;',sum(r['bytes'] for r in rows),'PCM bytes')

@@ -9,7 +9,7 @@ def package_public(project):
     project = Path(project).resolve()
     relative = [Path(name) for name in (
         '.gitignore', 'README.md', 'THIRD_PARTY.md', 'CHANGELOG.md',
-        'BACKLOG.md', 'Makefile', 'DAY4_PROGRESS.md',
+        'BACKLOG.md', 'Makefile', 'DAY4_PROGRESS.md', 'DAY5_PROGRESS.md',
         'source/engine.c', 'source/game.c', 'source/game.h', 'source/main.c',
         'source/menu.c', 'source/menu.h', 'source/render.c', 'source/render.h',
         'tools/build_local.py', 'tools/elf2_3dsx.py', 'tools/package_public.py',
@@ -18,6 +18,9 @@ def package_public(project):
         'tools/verify_features.py', 'tools/verify_day3.py',
         'tools/prepare_day4.py', 'tools/prepare_day4_assets.py', 'tools/verify_day4_rules.py',
         'tools/prepare_music.py', 'tools/verify_day4.py', 'tools/verify_music.py',
+        'tools/prepare_shop.py', 'tools/verify_shop.py', 'tools/prepare_day5.py', 'tools/verify_day5_rules.py', 'tools/verify_day5.py',
+        'tools/prepare_day5_assets.py',
+        'TEST-BUILD.md', 'tools/verify_test_build.py', 'tools/package_test.py',
         'tools/font/LICENSE.txt', 'tools/font/NotoSansMono-Regular.ttf',
     )]
     # Only third-party license notices are included from this directory.

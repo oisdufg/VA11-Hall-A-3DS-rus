@@ -12,6 +12,7 @@ def package_public(project):
         'BACKLOG.md', 'Makefile', 'DAY4_PROGRESS.md', 'DAY5_PROGRESS.md',
         'source/engine.c', 'source/game.c', 'source/game.h', 'source/main.c',
         'source/menu.c', 'source/menu.h', 'source/render.c', 'source/render.h',
+        'source/ui_text.c', 'source/ui_text.h',
         'tools/build_local.py', 'tools/elf2_3dsx.py', 'tools/package_public.py',
         'tools/prepare.py', 'tools/prepare_day1.py', 'tools/prepare_home.py',
         'tools/verify_day1.py', 'tools/verify_day2.py', 'tools/verify_menu.py',

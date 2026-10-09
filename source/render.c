@@ -1,4 +1,5 @@
 #include "render.h"
+#include "ui_text.h"
 #include "assets.h"
 #include "font.h"
 #include "story.h"
@@ -68,64 +69,15 @@ static void button(Screen s,int x,int y,int w,const char *label,bool active) {
     rect(s,x,y,w,25,active?0x44304f:0x211c2b);
     rect(s,x,y,w,1,active?PINK:0x51405a);text(s,x+6,y+5,label,active?INK:MUTED);
 }
-static const char *order(int n) {
-    switch(n) {
-    case 1:return "Сахарный прилив";case 2:return "Взрыв на Луне";
-    case 3:case 4:return "Большое пиво";case 5:case 7:return "Пиво";
-    case 6:return "Большой горький, без алкоголя";
-    case 8:return "Большой Удар по печени";
-    case 9:return "Сваебой (или Суплекс)";
-    case 10:return "Бон Развязон";
-    case 11:return "Маленький сладкий со льдом";
-    case 12:return "Изысканный напиток (classy)";
-    case 13:case 16:return "Брендини";
-    case 14:return "Что-нибудь успокаивающее";
-    case 15:return "Пианист / Пианистка";
-    case 17:return "Как обычно: пиво";
-    case 18:case 23:return "Взрыв на Марсе (Marsblast)";
-    case 19:case 26:return "Что-нибудь горькое";
-    case 20:return "Пианистка";
-    case 21:return "Взрыв на Луне";
-    case 22:return "Большой Sunshine Cloud + Gut Punch";
-    case 24:return "Похожий на чай: горький, женственный";
-    case 25:return "Что-нибудь мягкое";
-    case 27:return "Bad Touch";
-    case 28:return "Необычный напиток (Promo)";
-    case 29:return "Большой Брендини";
-    case 30:return "Как обычно: пиво";
-    case 31:return "Bleeding Jane";
-    case 32:return "Напиток с изменённым названием";
-    case 33:return "В честь хорошего друга";
-    case 34:return "Два Бон Развязона";
-    case 35:return "Две Blue Fairy";
-    case 36:return "Напиток за $80";
-    case 37:return "Grizzly Temple";
-    case 38:return "Мерзкий: Manly или Promo";
-    case 39:return "Большой Bad Touch";
-    case 40:return "Что-нибудь, чтобы опьянеть";
-    case 41:return "Два пива";
-    case 42:return "Zen Star";
-    case 43:return "Два Брендини";
-    case 44:return "Два мужественных (Manly)";
-    case 45:return "Взрыв на Марсе";
-    case 46:return "Пиво";
-    case 47:return "Ром";case 48:return "Blue Fairy";case 49:return "Пиво";
-    case 50:return "Cobalt Velvet";case 51:return "Бон Развязон";case 52:return "Абсент";
-    case 53:return "Что-нибудь с алкоголем";case 54:return "Брендини";
-    case 55:return "Сладкий без алкоголя";case 56:return "Ровно 17 частей ингредиентов";case 57:return "Plumfume";
-    case 174:return "Пиво или другой алкоголь";
-    default:return "Заказ посетителя";
-    }
-}
 void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
     Screen t={top,400},b={bottom,320};
     rect(t,0,0,400,240,BG);rect(b,0,0,320,240,BG);
-    text(t,12,3,"VA-11 HALL-A",PINK);text(t,224,3,v->state.cur_day==5?"ДЕНЬ 5 / 0.8.0":v->state.cur_day==4?"ДЕНЬ 4 / 0.8.0":v->state.cur_day==3?"ДЕНЬ 3 / 0.8.0":v->state.cur_day==2?"ДЕНЬ 2 / 0.8.0":"ДЕНЬ 1 / 0.8.0",MUTED);
+    text(t,12,3,uiStrings[UI_VA_11_HALL_A],PINK);text(t,224,3,ui_day_badge(v->state.cur_day),MUTED);
     int shake=v->shakeUntil?((v->now/50)%2?2:-2):0;
     sprite(t,10+shake,22,&background);
     /* The original bar backdrop is drawn at (11,18) in room coordinates. */
     if(v->annaUntil)sprite(t,10+(239-11)*264/338,22+(44-18)*264/338,&anna_tv);
-    if(v->news){rect(t,198,39,72,25,0x15233c);text(t,202,44,"НОВОСТИ",CYAN);}
+    if(v->news){rect(t,198,39,72,25,0x15233c);text(t,202,44,uiStrings[UI_NOVOSTI],CYAN);}
     int ln=blockStart[v->block]+v->line;
     const Line *line=&story[ln];
     for(int i=0;i<ACTOR_COUNT;++i)if(v->visible[i]) {
@@ -134,176 +86,175 @@ void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
     }
     rect(t,274,22,7,126,BG);
     rect(t,281,25,108,122,PANEL);sprite(t,290,43,&jill);
-    text(t,291,27,"ДЖИЛЛ",PINK);
-    if(v->chat){const char *reactions[]={"","Аплодисм.","Да-а-а!","Бу-у!","Нет!","Ха-ха!","О-о..."};rect(t,285,115,108,32,PANEL);text(t,290,115,"ЧАТ СТРИМА",PINK);text(t,290,131,reactions[v->chat],CYAN);}
+    text(t,291,27,uiStrings[UI_DZHILL],PINK);
+    if(v->chat){rect(t,285,115,108,32,PANEL);text(t,290,115,uiStrings[UI_CHAT_STRIMA],PINK);text(t,290,131,ui_chat_reaction(v->chat),CYAN);}
     rect(t,8,148,384,91,0x171121);rect(t,8,148,384,1,PINK);
     if(v->mode==0) {
         text(t,16,151,line->name,CYAN);
         text(t,16,168,line->text,INK);
-        text(t,335,151,"A >>",PINK);
+        text(t,335,151,uiStrings[UI_A],PINK);
     } else if(v->mode==1) {
-        text(t,16,153,"ЗАКАЗ",CYAN);
-        text(t,16,174,order(v->state.orders),INK);
-        text(t,16,196,v->state.slotamount==2?(v->state.heldRecipe?"Напиток 2/2. X: подать оба":"Напиток 1/2. X: отложить в слот"):"Y: рецепт   A: шейкер   X: подать",MUTED);
-        text(t,16,215,"B: сброс   L: лёд   R: выдержка",MUTED);
+        text(t,16,153,uiStrings[UI_ZAKAZ],CYAN);
+        text(t,16,174,ui_order_hint(v->state.orders),INK);
+        text(t,16,196,v->state.slotamount==2?(v->state.heldRecipe?uiStrings[UI_NAPITOK_2_2_X_PODAT_OBA]:uiStrings[UI_NAPITOK_1_2_X_OTLOZHIT_V_SLOT]):uiStrings[UI_Y_RETSEPT_A_SHEYKER_X_PODAT],MUTED);
+        text(t,16,215,uiStrings[UI_B_SBROS_L_LD_R_VYDERZHKA],MUTED);
     } else if(v->mode==6) {
-        text(t,16,153,"GAME OVER",PINK);
-        text(t,16,177,"Дана отправила Джилл домой.",INK);
-        text(t,16,199,"A: загрузить / начать заново",CYAN);
-        text(t,16,219,"B: главное меню",MUTED);
+        text(t,16,153,uiStrings[UI_GAME_OVER],PINK);
+        text(t,16,177,uiStrings[UI_DANA_OTPRAVILA_DZHILL_DOMOY],INK);
+        text(t,16,199,uiStrings[UI_A_ZAGRUZIT_NACHAT_ZANOVO],CYAN);
+        text(t,16,219,uiStrings[UI_B_GLAVNOE_MENYU],MUTED);
     } else if(v->mode==3) {
-        text(t,16,153,"ПЕРЕРЫВ",CYAN);
-        text(t,16,178,"Время немного отдохнуть.",INK);
-        text(t,16,210,"A: продолжить смену",PINK);
+        text(t,16,153,uiStrings[UI_PERERYV],CYAN);
+        text(t,16,178,uiStrings[UI_VREMYA_NEMNOGO_OTDOHNUT],INK);
+        text(t,16,210,uiStrings[UI_A_PRODOLZHIT_SMENU],PINK);
     } else if(v->mode==2) {
-        text(t,16,153,v->state.cur_day==5?"ПЯТЫЙ ДЕНЬ ЗАВЕРШЁН":v->state.cur_day==4?"ЧЕТВЁРТЫЙ ДЕНЬ ЗАВЕРШЁН":v->state.cur_day==3?"ТРЕТИЙ ДЕНЬ ЗАВЕРШЁН":v->state.cur_day==2?"ВТОРОЙ ДЕНЬ ЗАВЕРШЁН":"ПЕРВЫЙ ДЕНЬ ЗАВЕРШЁН",CYAN);
-        text(t,16,178,"Выручка:",INK);number(t,120,178,v->state.cash,INK);
-        text(t,196,178,"Чаевые:",INK);number(t,268,178,v->state.tips,INK);
-        text(t,16,198,"Ошибки:",MUTED);number(t,88,198,v->state.mistakes,MUTED);
-        text(t,144,198,"Заработок:",CYAN);money(t,232,198,v->lastPayCents,CYAN);
-        text(t,16,219,v->state.cur_day==4?"A: домой, день 5   START: выход":v->state.cur_day==3?"A: домой, день 4   START: выход":v->state.cur_day==2?"A: домой, день 3   START: выход":v->state.cur_day==1?"A: домой, день 2   START: выход":"SELECT: меню   START: выход",PINK);
+        text(t,16,153,ui_day_completed(v->state.cur_day),CYAN);
+        text(t,16,178,uiStrings[UI_VYRUCHKA],INK);number(t,120,178,v->state.cash,INK);
+        text(t,196,178,uiStrings[UI_CHAEVYE],INK);number(t,268,178,v->state.tips,INK);
+        text(t,16,198,uiStrings[UI_OSHIBKI],MUTED);number(t,88,198,v->state.mistakes,MUTED);
+        text(t,144,198,uiStrings[UI_ZARABOTOK],CYAN);money(t,232,198,v->lastPayCents,CYAN);
+        text(t,16,219,ui_next_day_hint(v->state.cur_day),PINK);
     } else {
-        text(t,16,160,"Ошибка перехода. SELECT: меню",PINK);
+        text(t,16,160,uiStrings[UI_OSHIBKA_PEREHODA_SELECT_MENYU],PINK);
         number(t,16,190,v->state.cur_client,INK);number(t,70,190,v->state.cur_stage,INK);
     }
     if(v->mode==6){
-        text(b,16,22,"СМЕНА ОКОНЧЕНА ДОСРОЧНО",PINK);
-        text(b,16,63,"Последний сейв сохранён.",INK);
-        text(b,16,94,"A: загрузить сохранение",CYAN);
-        text(b,16,118,"Без сейва: новый первый день.",MUTED);
-        text(b,16,158,"B: главное меню",INK);
-        text(b,16,198,"START: выход",MUTED);
+        text(b,16,22,uiStrings[UI_SMENA_OKONCHENA_DOSROCHNO],PINK);
+        text(b,16,63,uiStrings[UI_POSLEDNIY_SEYV_SOHRANN],INK);
+        text(b,16,94,uiStrings[UI_A_ZAGRUZIT_SOHRANENIE],CYAN);
+        text(b,16,118,uiStrings[UI_BEZ_SEYVA_NOVYY_PERVYY_DEN],MUTED);
+        text(b,16,158,uiStrings[UI_B_GLAVNOE_MENYU],INK);
+        text(b,16,198,uiStrings[UI_START_VYHOD],MUTED);
         return;
     }
-    text(b,8,4,v->state.cur_client==0?"БАР / ОБУЧЕНИЕ":v->state.cur_day==5?"БАР / ДЕНЬ 5":v->state.cur_day==4?"БАР / ДЕНЬ 4":v->state.cur_day==3?"БАР / ДЕНЬ 3":v->state.cur_day==2?"БАР / ДЕНЬ 2":"БАР / ДЕНЬ 1",PINK);
+    text(b,8,4,ui_bar_heading(v->state.cur_day,v->state.cur_client==0),PINK);
     if(v->mode==1) {
         if(v->mixer.running) {
-            text(b,8,25,v->now-v->mixer.started>=5000?"Взболтано! A: остановить":"Смешиваем... A: остановить",CYAN);
-        } else if(v->mixer.ready)text(b,8,25,mixer_identify(&v->mixer)?recipes[mixer_identify(&v->mixer)-1].name:"Неудачный коктейль: B сброс",CYAN);
-        else text(b,8,25,"Добавь ингредиенты. Y: рецепт",MUTED);
-    } else text(b,8,25,"A: читать дальше   Y: рецепты",MUTED);
-    const char *names[]={"Адельгид","Бронсон-экстракт","Порошковая дельта","Фланергид","Кармотрин"};
+            text(b,8,25,v->now-v->mixer.started>=5000?uiStrings[UI_VZBOLTANO_A_OSTANOVIT]:uiStrings[UI_SMESHIVAEM_A_OSTANOVIT],CYAN);
+        } else if(v->mixer.ready)text(b,8,25,mixer_identify(&v->mixer)?recipes[mixer_identify(&v->mixer)-1].name:uiStrings[UI_NEUDACHNYY_KOKTEYL_B_SBROS],CYAN);
+        else text(b,8,25,uiStrings[UI_DOBAV_INGREDIENTY_Y_RETSEPT],MUTED);
+    } else text(b,8,25,uiStrings[UI_A_CHITAT_DALSHE_Y_RETSEPTY],MUTED);
     uint32_t colors[]={0xf16c97,0xdbc167,0x7299e7,0x82d092,0xc695dd};
     for(int i=0;i<5;++i) {
         int y=49+i*23;
         rect(b,7,y,306,21,i==v->selected?0x35253f:PANEL);rect(b,7,y,3,21,colors[i]);
-        text(b,15,y+3,names[i],colors[i]);
-        text(b,224,y+3,"-",MUTED);number(b,252,y+3,v->mixer.amount[i],INK);text(b,292,y+3,"+",INK);
+        text(b,15,y+3,ui_ingredient_name(i),colors[i]);
+        text(b,224,y+3,uiStrings[UI_EMPTY_2],MUTED);number(b,252,y+3,v->mixer.amount[i],INK);text(b,292,y+3,uiStrings[UI_EMPTY_3],INK);
     }
-    button(b,8,168,145,v->mixer.ice?"L: Лёд [ДА]":"L: Лёд [нет]",v->mixer.ice);
-    button(b,160,168,152,v->mixer.aged?"R: Выдержка [ДА]":"R: Выдержка [-]",v->mixer.aged);
-    button(b,8,198,96,"B: Сброс",v->mode==1);
-    button(b,110,198,100,v->mixer.running?"A: Стоп":"A: Шейкер",v->mode==1&&!v->mixer.ready);
-    button(b,216,198,96,"X: Подать",v->mode==1&&v->mixer.ready);
-    text(b,8,226,"START: выход",MUTED);
-    text(b,168,226,v->audio==1?"Звук: включён":v->audio==2?"Звук: нет PCM":"Звук: нет DSP",MUTED);
-    if(v->saveError)text(b,8,226,"Ошибка записи SD!",PINK);
+    button(b,8,168,145,v->mixer.ice?uiStrings[UI_L_LD_DA]:uiStrings[UI_L_LD_NET],v->mixer.ice);
+    button(b,160,168,152,v->mixer.aged?uiStrings[UI_R_VYDERZHKA_DA]:uiStrings[UI_R_VYDERZHKA],v->mixer.aged);
+    button(b,8,198,96,uiStrings[UI_B_SBROS],v->mode==1);
+    button(b,110,198,100,v->mixer.running?uiStrings[UI_A_STOP]:uiStrings[UI_A_SHEYKER],v->mode==1&&!v->mixer.ready);
+    button(b,216,198,96,uiStrings[UI_X_PODAT],v->mode==1&&v->mixer.ready);
+    text(b,8,226,uiStrings[UI_START_VYHOD],MUTED);
+    text(b,168,226,v->audio==1?uiStrings[UI_ZVUK_VKLYUCHN]:v->audio==2?uiStrings[UI_ZVUK_NET_PCM]:uiStrings[UI_ZVUK_NET_DSP],MUTED);
+    if(v->saveError)text(b,8,226,uiStrings[UI_OSHIBKA_ZAPISI_SD],PINK);
     if(v->overlay==1) {
         rect(b,0,0,320,240,BG);rect(b,4,3,312,2,PINK);
         const Recipe *r=&recipes[recipeBook[v->recipe]];
-        text(b,12,12,"РЕЦЕПТЫ   < L / R >",PINK);
+        text(b,12,12,uiStrings[UI_RETSEPTY_L_R],PINK);
         text(b,12,36,r->name,CYAN);
         if(r->id==TOK_tea || r->id==TOK_rum || r->id==TOK_abs || r->id==TOK_fed){
-            text(b,12,65,"Готовый напиток из бутылки.",INK);
-            text(b,12,90,"Шейкер не нужен.",MUTED);
-            text(b,12,120,!engine_extra_available(v,r->id)?"Пока недоступно.":v->mode==1?"A: налить   X: затем подать":"Наливать можно при заказе.",CYAN);
-            text(b,12,155,r->id==TOK_tea?"Доступен без покупки в бете.":r->id==TOK_fed?"Классический, с алкоголем.":"Доступность зависит от Стеллы.",MUTED);
+            text(b,12,65,uiStrings[UI_GOTOVYY_NAPITOK_IZ_BUTYLKI],INK);
+            text(b,12,90,uiStrings[UI_SHEYKER_NE_NUZHEN],MUTED);
+            text(b,12,120,!engine_extra_available(v,r->id)?uiStrings[UI_POKA_NEDOSTUPNO]:v->mode==1?uiStrings[UI_A_NALIT_X_ZATEM_PODAT]:uiStrings[UI_NALIVAT_MOZHNO_PRI_ZAKAZE],CYAN);
+            text(b,12,155,r->id==TOK_tea?uiStrings[UI_DOSTUPEN_BEZ_POKUPKI_V_BETE]:r->id==TOK_fed?uiStrings[UI_KLASSICHESKIY_S_ALKOGOLEM]:uiStrings[UI_DOSTUPNOST_ZAVISIT_OT_STELLY],MUTED);
         }else{
-        for(int i=0;i<5;++i){text(b,12,60+i*16,names[i],INK);if(i==4 && r->optional)text(b,172,60+i*16,"по вкусу",INK);else number(b,172,60+i*16,r->amount[i],INK);}
-        text(b,12,146,r->ice?"Лёд: да":"Лёд: нет",CYAN);
-        text(b,124,146,r->aged?"Выдержка: да":"Выдержка: нет",CYAN);
-        text(b,12,166,r->blended?"Взболтать: 5 секунд и дольше.":"Смешать: менее 5 секунд.",INK);
-        text(b,12,184,r->size==TOK_big?"Уже большой. Максимум 20 частей.":"Большой: удвой. Максимум 20.",MUTED);
-        const char *flavor=r->flavor==TOK_sweet?"Сладкий":r->flavor==TOK_bitter?"Горький":r->flavor==TOK_spicy?"Острый":r->flavor==TOK_bubbly?"Газовый":"Кислый";
+        for(int i=0;i<5;++i){text(b,12,60+i*16,ui_ingredient_name(i),INK);if(i==4 && r->optional)text(b,172,60+i*16,uiStrings[UI_PO_VKUSU],INK);else number(b,172,60+i*16,r->amount[i],INK);}
+        text(b,12,146,r->ice?uiStrings[UI_LD_DA]:uiStrings[UI_LD_NET],CYAN);
+        text(b,124,146,r->aged?uiStrings[UI_VYDERZHKA_DA]:uiStrings[UI_VYDERZHKA_NET],CYAN);
+        text(b,12,166,r->blended?uiStrings[UI_VZBOLTAT_5_SEKUND_I_DOLSHE]:uiStrings[UI_SMESHAT_MENEE_5_SEKUND],INK);
+        text(b,12,184,r->size==TOK_big?uiStrings[UI_UZHE_BOLSHOY_MAKSIMUM_20_CHASTEY]:uiStrings[UI_BOLSHOY_UDVOY_MAKSIMUM_20],MUTED);
+        const char *flavor=r->flavor==TOK_sweet?uiStrings[UI_SLADKIY]:r->flavor==TOK_bitter?uiStrings[UI_GORKIY]:r->flavor==TOK_spicy?uiStrings[UI_OSTRYY]:r->flavor==TOK_bubbly?uiStrings[UI_GAZOVYY]:uiStrings[UI_KISLYY];
         text(b,12,200,flavor,CYAN);
-        text(b,100,200,r->kind==TOK_classy?"Изысканный":r->kind==TOK_girly?"Женственный":r->kind==TOK_manly?"Мужественный":r->kind==TOK_promo?"Рекламный (Promo)":"Классический",CYAN);
+        text(b,100,200,r->kind==TOK_classy?uiStrings[UI_IZYSKANNYY]:r->kind==TOK_girly?uiStrings[UI_ZHENSTVENNYY]:r->kind==TOK_manly?uiStrings[UI_MUZHESTVENNYY]:r->kind==TOK_promo?uiStrings[UI_REKLAMNYY_PROMO]:uiStrings[UI_KLASSICHESKIY],CYAN);
         }
-        text(b,12,220,"Y / B: закрыть   L/R: листать",PINK);
+        text(b,12,220,uiStrings[UI_Y_B_ZAKRYT_L_R_LISTAT],PINK);
     } else if(v->overlay==2) {
         rect(b,4,60,312,125,BG);rect(b,4,60,312,2,PINK);
-        text(b,18,80,"ПАУЗА",INK);
-        text(b,18,110,v->failed?"A: главное меню":"A: сохранить и открыть меню",PINK);
-        text(b,18,143,"B: вернуться к игре",MUTED);
-        text(b,18,165,"X: выбрать музыку",CYAN);
+        text(b,18,80,uiStrings[UI_PAUZA],INK);
+        text(b,18,110,v->failed?uiStrings[UI_A_GLAVNOE_MENYU]:uiStrings[UI_A_SOHRANIT_I_OTKRYT_MENYU],PINK);
+        text(b,18,143,uiStrings[UI_B_VERNUTSYA_K_IGRE],MUTED);
+        text(b,18,165,uiStrings[UI_X_VYBRAT_MUZYKU],CYAN);
     }
 }
 
 void draw_menu(uint8_t *top,uint8_t *bottom,const View *v,const Menu *u) {
     Screen t={top,400},b={bottom,320};rect(t,0,0,400,240,BG);rect(b,0,0,320,240,BG);
     if(u->screen==UI_SHOP){
-        text(t,16,8,"МАГАЗИН / УКРАШЕНИЯ ДЛЯ ДОМА",PINK);
+        text(t,16,8,uiStrings[UI_MAGAZIN_UKRASHENIYA_DLYA_DOMA],PINK);
         sprite(t,62,27,&home_room);
         for(int i=0;i<SHOP_COUNT;++i)if(v->purchases&(1u<<i))sprite(t,62,48,shopItems[i].decoration);
-        text(t,16,220,"Кошелёк:",CYAN);money(t,96,220,v->walletCents,CYAN);
+        text(t,16,220,uiStrings[UI_KOSHELK],CYAN);money(t,96,220,v->walletCents,CYAN);
         text(b,12,8,shopItems[u->selection].name,PINK);
-        text(b,12,28,"Цена:",MUTED);money(b,64,28,shopItems[u->selection].price*100,MUTED);
+        text(b,12,28,uiStrings[UI_TSENA],MUTED);money(b,64,28,shopItems[u->selection].price*100,MUTED);
         int first=(u->selection/5)*5;
         for(int i=0;i<5 && first+i<SHOP_COUNT;++i){
             int n=first+i;rect(b,8,48+i*28,304,25,n==u->selection?0x35253f:PANEL);
             text(b,16,53+i*28,shopItems[n].name,(v->purchases&(1u<<n))?MUTED:n==u->selection?CYAN:INK);
-            if(v->purchases&(1u<<n))text(b,284,53+i*28,"+",CYAN);
+            if(v->purchases&(1u<<n))text(b,284,53+i*28,uiStrings[UI_EMPTY_3],CYAN);
         }
-        const char *notice=u->notice==1?"Купить? A: да / B: отмена":u->notice==2?"Куплено. Сохранись дома.":u->notice==3?"Недостаточно денег.":u->notice==4?"Уже куплено.":"A / касание: выбрать покупку";
-        text(b,12,196,notice,CYAN);text(b,12,220,"B: домой  </>: страница",PINK);return;
+        const char *notice=u->notice==1?uiStrings[UI_KUPIT_A_DA_B_OTMENA]:u->notice==2?uiStrings[UI_KUPLENO_SOHRANIS_DOMA]:u->notice==3?uiStrings[UI_NEDOSTATOCHNO_DENEG]:u->notice==4?uiStrings[UI_UZHE_KUPLENO]:uiStrings[UI_A_KASANIE_VYBRAT_POKUPKU];
+        text(b,12,196,notice,CYAN);text(b,12,220,uiStrings[UI_B_DOMOY_STRANITSA],PINK);return;
     }
     if(u->screen==UI_MUSIC){
-        text(t,24,30,"МУЗЫКАЛЬНЫЙ АВТОМАТ",PINK);
-        text(t,24,68,u->notice?"Выбери музыку перед сменой.":"Музыка для этой смены",INK);
-        text(t,24,108,"Сейчас выбрано:",MUTED);
+        text(t,24,30,uiStrings[UI_MUZYKALNYY_AVTOMAT],PINK);
+        text(t,24,68,u->notice?uiStrings[UI_VYBERI_MUZYKU_PERED_SMENOY]:uiStrings[UI_MUZYKA_DLYA_ETOY_SMENY],INK);
+        text(t,24,108,uiStrings[UI_SEYCHAS_VYBRANO],MUTED);
         text(t,24,134,musicTitles[v->musicTrack],CYAN);
-        text(t,24,180,"Выбранный трек играет по кругу.",MUTED);
-        text(b,12,14,"ВВЕРХ/ВНИЗ: трек  </>: страница",PINK);
+        text(t,24,180,uiStrings[UI_VYBRANNYY_TREK_IGRAET_PO_KRUGU],MUTED);
+        text(b,12,14,uiStrings[UI_VVERH_VNIZ_TREK_STRANITSA],PINK);
         int first=(u->selection/5)*5;
         for(int i=0;i<5 && first+i<MUSIC_COUNT;++i){
             rect(b,8,48+i*28,304,25,first+i==u->selection?0x35253f:PANEL);
             text(b,16,53+i*28,musicTitles[first+i],first+i==u->selection?CYAN:INK);
         }
-        text(b,12,198,"A / касание: играть",PINK);
-        text(b,12,220,"B: оставить текущий трек",MUTED);return;
+        text(b,12,198,uiStrings[UI_A_KASANIE_IGRAT],PINK);
+        text(b,12,220,uiStrings[UI_B_OSTAVIT_TEKUSCHIY_TREK],MUTED);return;
     }
     if(u->screen==UI_CREDITS){
         rect(t,24,35,352,2,PINK);
-        text(t,32,57,"VA-11 HALL-A / 3DS",PINK);
-        text(t,32,94,"Original game developed by",MUTED);
-        text(t,32,116,"Sukeban Games",INK);
-        text(t,32,149,"Music by Garoad",INK);
-        text(t,32,174,"Published by Ysbryd Games",INK);
-        text(t,32,211,"Unofficial fan-made port",CYAN);
-        text(b,16,21,"build with neumiraie",PINK);
-        text(b,16,57,"Not affiliated with or endorsed",MUTED);
-        text(b,16,75,"by the original creators.",MUTED);
+        text(t,32,57,uiStrings[UI_VA_11_HALL_A_3DS],PINK);
+        text(t,32,94,uiStrings[UI_ORIGINAL_GAME_DEVELOPED_BY],MUTED);
+        text(t,32,116,uiStrings[UI_SUKEBAN_GAMES],INK);
+        text(t,32,149,uiStrings[UI_MUSIC_BY_GAROAD],INK);
+        text(t,32,174,uiStrings[UI_PUBLISHED_BY_YSBRYD_GAMES],INK);
+        text(t,32,211,uiStrings[UI_UNOFFICIAL_FAN_MADE_PORT],CYAN);
+        text(b,16,21,uiStrings[UI_BUILD_WITH_NEUMIRAIE],PINK);
+        text(b,16,57,uiStrings[UI_NOT_AFFILIATED_WITH_OR_ENDORSED],MUTED);
+        text(b,16,75,uiStrings[UI_BY_THE_ORIGINAL_CREATORS],MUTED);
         rect(b,16,105,288,1,0x51405a);
-        text(b,16,216,"A / touch: continue",PINK);
+        text(b,16,216,uiStrings[UI_A_TOUCH_CONTINUE],PINK);
         return;
     }
     if(u->screen==UI_TRANSLATION){
         rect(t,24,35,352,2,PINK);
-        text(t,32,57,"РУССКИЙ ПЕРЕВОД",PINK);
-        text(t,32,101,"В порте используется",INK);
-        text(t,32,124,"неофициальный русский перевод.",INK);
-        text(t,32,164,"Источник перевода:",MUTED);
-        text(t,32,189,"https://koshk.sbs/",CYAN);
-        text(b,16,42,"Спасибо команде перевода!",INK);
-        text(b,16,91,"Перевод создан фанатами",MUTED);
-        text(b,16,114,"и не является официальной",MUTED);
-        text(b,16,137,"локализацией Sukeban Games.",MUTED);
-        text(b,16,216,"A / касание: главное меню",PINK);
+        text(t,32,57,uiStrings[UI_RUSSKIY_PEREVOD],PINK);
+        text(t,32,101,uiStrings[UI_V_PORTE_ISPOLZUETSYA],INK);
+        text(t,32,124,uiStrings[UI_NEOFITSIALNYY_RUSSKIY_PEREVOD],INK);
+        text(t,32,164,uiStrings[UI_ISTOCHNIK_PEREVODA],MUTED);
+        text(t,32,189,uiStrings[UI_HTTPS_KOSHK_SBS],CYAN);
+        text(b,16,42,uiStrings[UI_SPASIBO_KOMANDE_PEREVODA],INK);
+        text(b,16,91,uiStrings[UI_PEREVOD_SOZDAN_FANATAMI],MUTED);
+        text(b,16,114,uiStrings[UI_I_NE_YAVLYAETSYA_OFITSIALNOY],MUTED);
+        text(b,16,137,uiStrings[UI_LOKALIZATSIEY_SUKEBAN_GAMES],MUTED);
+        text(b,16,216,uiStrings[UI_A_KASANIE_GLAVNOE_MENYU],PINK);
         return;
     }
     if(u->screen==UI_TITLE || u->screen==UI_NEW || u->screen==UI_HELP || u->screen==UI_TEST_DAYS){
         rect(t,24,48,352,2,PINK);
-        text(t,48,82,"VA-11 HALL-A / NINTENDO 3DS",PINK);
-        text(t,48,126,"Unofficial fan-made port",CYAN);
-        text(t,48,167,"build with neumiraie",MUTED);
+        text(t,48,82,uiStrings[UI_VA_11_HALL_A_NINTENDO_3DS],PINK);
+        text(t,48,126,uiStrings[UI_UNOFFICIAL_FAN_MADE_PORT],CYAN);
+        text(t,48,167,uiStrings[UI_BUILD_WITH_NEUMIRAIE],MUTED);
 #ifdef VA11_TEST_MODE
-        text(t,24,192,"ТЕСТ: дни 1-5 / кошелёк $20000",CYAN);
-        text(t,24,215,"Отдельное тестовое сохранение",PINK);
+        text(t,24,192,uiStrings[UI_TEST_DNI_1_5_KOSHELK_20000],CYAN);
+        text(t,24,215,uiStrings[UI_OTDELNOE_TESTOVOE_SOHRANENIE],PINK);
 #endif
     }else{
-        text(t,12,6,v->state.cur_day==5?"КВАРТИРА ДЖИЛЛ / ДЕНЬ 5":v->state.cur_day==4?"КВАРТИРА ДЖИЛЛ / ДЕНЬ 4":v->state.cur_day==3?"КВАРТИРА ДЖИЛЛ / ДЕНЬ 3":v->state.cur_day==2?"КВАРТИРА ДЖИЛЛ / ДЕНЬ 2":"КВАРТИРА ДЖИЛЛ / ДЕНЬ 1",PINK);
+        text(t,12,6,ui_apartment_heading(v->state.cur_day),PINK);
         sprite(t,62,27,&home_room);
         for(int i=0;i<SHOP_COUNT;++i)if(v->purchases&(1u<<i))sprite(t,62,48,shopItems[i].decoration);
-        text(t,24,219,"Кошелёк:",CYAN);money(t,104,219,v->walletCents,CYAN);
+        text(t,24,219,uiStrings[UI_KOSHELK],CYAN);money(t,104,219,v->walletCents,CYAN);
     }
     if(u->screen==UI_ARTICLE){
         const Sprite *im=menu_phone_page(v,u);
@@ -311,39 +262,39 @@ void draw_menu(uint8_t *top,uint8_t *bottom,const View *v,const Menu *u) {
             const uint8_t *p=im->rgba+((yy+u->scroll)*im->w+xx)*4;
             if(p[3]>127)pixel(b,60+xx,24+yy,((uint32_t)p[0]<<16)|((uint32_t)p[1]<<8)|p[2]);
         }
-        text(b,8,3,u->app==0?"ДОПОЛНЕННАЯ ПРАВДА":u->app==1?"DANGER/U/":"БЛОГ КИРЫ МИКИ",PINK);
-        text(b,12,96,"ВВЕРХ",MUTED);text(b,270,96,"ВНИЗ",MUTED);
-        text(b,12,220,"B: назад   вверх/вниз: листать",PINK);
+        text(b,8,3,u->app==0?uiStrings[UI_DOPOLNENNAYA_PRAVDA]:u->app==1?uiStrings[UI_DANGER_U]:uiStrings[UI_BLOG_KIRY_MIKI],PINK);
+        text(b,12,96,uiStrings[UI_VVERH],MUTED);text(b,270,96,uiStrings[UI_VNIZ],MUTED);
+        text(b,12,220,uiStrings[UI_B_NAZAD_VVERH_VNIZ_LISTAT],PINK);
         return;
     }
     if(u->screen==UI_HELP){
-        text(b,12,8,"УПРАВЛЕНИЕ",PINK);
-        text(b,12,36,"A: диалог / шейкер\nX: подать   B: сброс\nY: рецепты   L/R: лёд/выдержка\nКрестовина: ингредиенты\nSELECT: пауза и главное меню\nSTART: сохранить и выйти",INK);
-        text(b,12,146,"Смешать: менее 5 секунд.\nВзболтать: от 5 секунд.\nАвтосейв: в конце дня.",CYAN);
-        text(b,12,218,"A / B: назад",PINK);return;
+        text(b,12,8,uiStrings[UI_UPRAVLENIE],PINK);
+        text(b,12,36,uiStrings[UI_A_DIALOG_SHEYKER_NX_PODAT_B_SBROS_NY_RETSEPTY_L_R_LD],INK);
+        text(b,12,146,uiStrings[UI_SMESHAT_MENEE_5_SEKUND_NVZBOLTAT_OT_5_SEKUND_NAVTOSE],CYAN);
+        text(b,12,218,uiStrings[UI_A_B_NAZAD],PINK);return;
     }
-    const char *title="",*items[5]={0};int count=3;
-    if(u->screen==UI_TITLE){title="VA-11 HALL-A / 3DS 0.8.0";items[0]=u->hasSave?"Продолжить":"Продолжить (нет сохранения)";items[1]="Новая игра";items[2]="Управление";items[3]="Выход";count=4;}
+    const char *title=uiStrings[UI_EMPTY],*items[5]={0};int count=3;
+    if(u->screen==UI_TITLE){title=uiStrings[UI_VA_11_HALL_A_3DS_0_8_0];items[0]=u->hasSave?uiStrings[UI_PRODOLZHIT]:uiStrings[UI_PRODOLZHIT_NET_SOHRANENIYA];items[1]=uiStrings[UI_NOVAYA_IGRA];items[2]=uiStrings[UI_UPRAVLENIE_2];items[3]=uiStrings[UI_VYHOD];count=4;}
 #ifdef VA11_TEST_MODE
-    if(u->screen==UI_TITLE){title="VA-11 HALL-A / 0.8.0 TEST";items[2]="Тест: выбрать день";}
-    if(u->screen==UI_TEST_DAYS){title="ТЕСТ: КВАРТИРА ПЕРЕД СМЕНОЙ";items[0]="День 1";items[1]="День 2";items[2]="День 3";items[3]="День 4";items[4]="День 5";count=5;}
+    if(u->screen==UI_TITLE){title=uiStrings[UI_VA_11_HALL_A_0_8_0_TEST];items[2]=uiStrings[UI_TEST_VYBRAT_DEN];}
+    if(u->screen==UI_TEST_DAYS){title=uiStrings[UI_TEST_KVARTIRA_PERED_SMENOY];items[0]=uiStrings[UI_DEN_1];items[1]=uiStrings[UI_DEN_2];items[2]=uiStrings[UI_DEN_3];items[3]=uiStrings[UI_DEN_4];items[4]=uiStrings[UI_DEN_5];count=5;}
 #endif
-    if(u->screen==UI_NEW){title="НОВАЯ ИГРА";items[0]="С обучением";items[1]="Сразу первый день";items[2]="Отмена";}
-    if(u->screen==UI_HOME){title=v->state.cur_day==5?"ДОМ / 17 ДЕКАБРЯ":v->state.cur_day==4?"ДОМ / 16 ДЕКАБРЯ":v->state.cur_day==3?"ДОМ / 15 ДЕКАБРЯ":v->state.cur_day==2?"ДОМ / 14 ДЕКАБРЯ":"ДОМ / 13 ДЕКАБРЯ";items[0]="Телефон";items[1]="На работу";items[2]="Сохранить";items[3]="Магазин";count=4;}
-    if(u->screen==UI_PHONE){title="ТЕЛЕФОН";items[0]="Дополненная правда";items[1]="danger/u/";items[2]="Блог Киры Мики";}
+    if(u->screen==UI_NEW){title=uiStrings[UI_NOVAYA_IGRA_2];items[0]=uiStrings[UI_S_OBUCHENIEM];items[1]=uiStrings[UI_SRAZU_PERVYY_DEN];items[2]=uiStrings[UI_OTMENA];}
+    if(u->screen==UI_HOME){title=ui_apartment_date(v->state.cur_day);items[0]=uiStrings[UI_TELEFON];items[1]=uiStrings[UI_NA_RABOTU];items[2]=uiStrings[UI_SOHRANIT];items[3]=uiStrings[UI_MAGAZIN];count=4;}
+    if(u->screen==UI_PHONE){title=uiStrings[UI_TELEFON_2];items[0]=uiStrings[UI_DOPOLNENNAYA_PRAVDA_2];items[1]=uiStrings[UI_DANGER_U_2];items[2]=uiStrings[UI_BLOG_KIRY_MIKI_2];}
     if(u->screen==UI_LIST){
-        static const char *names[3][3]={{"Массовая эмиграция","Новая угроза: вандерлендеры","Киборг на каблуках"},{"Концерт Мики","Поговорим об Alice_Rabbit","Концерт Мики 2"},{"Как я отдыхаю","Концерт под куполом!","Спасибо, Глитч-Сити!"}};
-        title=u->app==0?"НОВОСТИ":u->app==1?"DANGER/U/":"КИРА МИКИ";
+        const char *names[3][3]={{uiStrings[UI_MASSOVAYA_EMIGRATSIYA],uiStrings[UI_NOVAYA_UGROZA_VANDERLENDERY],uiStrings[UI_KIBORG_NA_KABLUKAH]},{uiStrings[UI_KONTSERT_MIKI],uiStrings[UI_POGOVORIM_OB_ALICE_RABBIT],uiStrings[UI_KONTSERT_MIKI_2]},{uiStrings[UI_KAK_YA_OTDYHAYU],uiStrings[UI_KONTSERT_POD_KUPOLOM],uiStrings[UI_SPASIBO_GLITCH_SITI]}};
+        title=u->app==0?uiStrings[UI_NOVOSTI]:u->app==1?uiStrings[UI_DANGER_U]:uiStrings[UI_KIRA_MIKI];
         for(int i=0;i<3;++i)items[i]=names[u->app][i];
-        if(v->state.cur_day==4 && u->app==0){items[0]="Новости / 16 декабря";items[1]="Вторая статья";items[2]="Третья статья";}
-        if(v->state.cur_day==3 && u->app==0){items[0]="Новости / 15 декабря";items[1]="Вторая статья";items[2]="Третья статья";}
-        if(v->state.cur_day==2 && u->app==0){items[0]="Местная героиня";items[1]=v->state.dondrunk1?"70% наших читателей...":"Беспорядки усиливаются";items[2]=v->state.dondrunk1?"Кем может быть Alice_Rabbit?":"Лечение токийского гриппа";}
+        if(v->state.cur_day==4 && u->app==0){items[0]=uiStrings[UI_NOVOSTI_16_DEKABRYA];items[1]=uiStrings[UI_VTORAYA_STATYA];items[2]=uiStrings[UI_TRETYA_STATYA];}
+        if(v->state.cur_day==3 && u->app==0){items[0]=uiStrings[UI_NOVOSTI_15_DEKABRYA];items[1]=uiStrings[UI_VTORAYA_STATYA];items[2]=uiStrings[UI_TRETYA_STATYA];}
+        if(v->state.cur_day==2 && u->app==0){items[0]=uiStrings[UI_MESTNAYA_GEROINYA];items[1]=v->state.dondrunk1?uiStrings[UI_70_NASHIH_CHITATELEY]:uiStrings[UI_BESPORYADKI_USILIVAYUTSYA];items[2]=v->state.dondrunk1?uiStrings[UI_KEM_MOZHET_BYT_ALICE_RABBIT]:uiStrings[UI_LECHENIE_TOKIYSKOGO_GRIPPA];}
     }
-    if(u->screen==UI_LIST && v->state.cur_day==5 && u->app==0){items[0]="Новости / 17 декабря";items[1]="Вторая статья";items[2]="Третья статья";}
+    if(u->screen==UI_LIST && v->state.cur_day==5 && u->app==0){items[0]=uiStrings[UI_NOVOSTI_17_DEKABRYA];items[1]=uiStrings[UI_VTORAYA_STATYA];items[2]=uiStrings[UI_TRETYA_STATYA];}
     text(b,12,10,title,PINK);
     for(int i=0;i<count;++i)button(b,16,48+i*(u->screen==UI_TEST_DAYS?30:38),288,items[i],u->selection==i);
-    if(u->screen==UI_NEW && u->hasSave)text(b,12,174,"Текущий прогресс будет заменён.",MUTED);
-    if(u->screen==UI_HOME && u->notice)text(b,12,198,"Сохранение отправлено на SD.",CYAN);
-    text(b,12,218,"A: выбрать   B: назад",PINK);
-    if(v->saveError)text(b,12,196,"Ошибка записи SD!",PINK);
+    if(u->screen==UI_NEW && u->hasSave)text(b,12,174,uiStrings[UI_TEKUSCHIY_PROGRESS_BUDET_ZAMENN],MUTED);
+    if(u->screen==UI_HOME && u->notice)text(b,12,198,uiStrings[UI_SOHRANENIE_OTPRAVLENO_NA_SD],CYAN);
+    text(b,12,218,uiStrings[UI_A_VYBRAT_B_NAZAD],PINK);
+    if(v->saveError)text(b,12,196,uiStrings[UI_OSHIBKA_ZAPISI_SD],PINK);
 }

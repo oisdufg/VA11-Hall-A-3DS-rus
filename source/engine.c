@@ -16,35 +16,57 @@ static void block(View *v,int n) {
     if(n<=0 || n>=662 || !blockCount[n]){v->mode=4;return;}
     v->block=n;v->line=0;v->mode=0;page_enter(v);
 }
+static int day_rule_for(State *s) {
+    switch(s->cur_day) {
+    case 2:return day2_rule(s);
+    case 3:return day3_rule(s);
+    case 4:return day4_rule(s);
+    case 5:return day5_rule(s);
+    default:return day_rule(s);
+    }
+}
+static int mix_rule_for(State *s) {
+    switch(s->cur_day) {
+    case 2:return mix2_rule(s);
+    case 3:return mix3_rule(s);
+    case 4:return mix4_rule(s);
+    case 5:return mix5_rule(s);
+    default:return mix_rule(s);
+    }
+}
+static int resume_after_music(View *v) {
+    State *s=&v->state;
+    s->juke=0;
+    switch(s->cur_day) {
+    case 5:
+        if(s->cur_client==-2){s->cur_client=2;s->cur_stage=1;return 0;}
+        return 609;
+    case 2:
+        if(s->cur_client==-3){s->cur_client=4;s->cur_stage=1;return 0;}
+        return s->kimdrunk1?202:203;
+    case 4:
+        if(s->cur_client==-2){s->cur_client=3;s->cur_stage=1;return 0;}
+        return 502;
+    case 3:
+        if(s->cur_client==-2){s->cur_client=3;s->cur_stage=1;return 0;}
+        return 402;
+    default:
+        if(s->cur_client==-2){s->cur_client=3;s->cur_stage=1;return 0;}
+        return 102;
+    }
+}
 static void dispatch(View *v) {
     State *s=&v->state;
     if(v->failed){v->mode=6;return;}
     if(s->juke==1){v->mode=7;return;}
     if(s->juke) {
-        s->juke=0;
-        if(s->cur_day==5){
-            if(s->cur_client==-2){s->cur_client=2;s->cur_stage=1;}
-            else {block(v,609);return;}
-        }
-        else if(s->cur_day==2){
-            if(s->cur_client==-3){s->cur_client=4;s->cur_stage=1;}
-            else {block(v,s->kimdrunk1?202:203);return;}
-        }
-        else if(s->cur_day==4){
-            if(s->cur_client==-2){s->cur_client=3;s->cur_stage=1;}
-            else {block(v,502);return;}
-        }
-        else if(s->cur_day==3){
-            if(s->cur_client==-2){s->cur_client=3;s->cur_stage=1;}
-            else {block(v,402);return;}
-        }
-        else if(s->cur_client==-2){s->cur_client=3;s->cur_stage=1;}
-        else {block(v,102);return;}
+        int next=resume_after_music(v);
+        if(next){block(v,next);return;}
     }
     if(s->mix){v->mode=1;mixer_reset(&v->mixer);return;}
     for(int i=0;i<3;++i) {
         int client=s->cur_client,phase=s->cur_stage;
-        int n=s->cur_day==5?day5_rule(s):s->cur_day==4?day4_rule(s):s->cur_day==3?day3_rule(s):s->cur_day==2?day2_rule(s):day_rule(s);
+        int n=day_rule_for(s);
         if(n){block(v,n);return;}
         if(client==s->cur_client && phase==s->cur_stage)break;
     }
@@ -98,7 +120,7 @@ void engine_serve(View *v) {
     s->exdrink_a=(r->id==TOK_tea || r->id==TOK_rum || r->id==TOK_abs || r->id==TOK_fed)?r->id:0;
     s->mod_aa=v->mixer.amount[0];s->mod_ba=v->mixer.amount[1];s->mod_ca=v->mixer.amount[2];s->mod_da=v->mixer.amount[3];s->mod_ea=v->mixer.amount[4];
     s->rightdrink=s->rightdrink1=s->rightdrink2=0;
-    int n=s->cur_day==5?mix5_rule(s):s->cur_day==4?mix4_rule(s):s->cur_day==3?mix3_rule(s):s->cur_day==2?mix2_rule(s):mix_rule(s);
+    int n=mix_rule_for(s);
     if(s->shouldpay){
         int correct=s->slotamount==2?(s->rightdrink1 && s->rightdrink2):s->rightdrink;
         if(correct)v->cheapErrors=0;

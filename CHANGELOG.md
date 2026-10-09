@@ -1,5 +1,11 @@
 # Changes
 
+## Unreleased — code organization
+
+- Moved interface text, ingredient labels, day headings and order hints out of `render.c` into `ui_text.c`.
+- Split input handling by game mode and menu screen; replaced day-rule selection chains with `switch` dispatch. Save layout and gameplay rules are unchanged.
+- Rebuilt normal and test 3DS binaries and verified Days 1–5, menus, shop and the test launcher on the ARM build. Real-console checks remain pending.
+
 ## 0.8.0 beta
 
 - Enabled Day 5: 61 story blocks, 11 orders, Taylor, Virgilio and Dorothy’s new expression. Day 4 completion opens the Day 5 apartment and December 17 news.

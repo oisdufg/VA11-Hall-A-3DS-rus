@@ -147,6 +147,79 @@ static void advance(View *v){
     if(engine_advance_checkpoint(v))save(v);
 }
 static void serve(View *v){engine_serve(v);}
+static unsigned navigation_from_keys(u32 keys,int *tx,int *ty){
+    unsigned nav=0;
+    if(keys&KEY_DUP)nav|=NAV_UP;
+    if(keys&KEY_DDOWN)nav|=NAV_DOWN;
+    if(keys&KEY_DLEFT)nav|=NAV_LEFT;
+    if(keys&KEY_DRIGHT)nav|=NAV_RIGHT;
+    if(keys&KEY_A)nav|=NAV_A;
+    if(keys&KEY_B)nav|=NAV_B;
+    *tx=*ty=0;
+    if(keys&KEY_TOUCH){touchPosition p;hidTouchRead(&p);*tx=p.px;*ty=p.py;nav|=NAV_TOUCH;}
+    return nav;
+}
+static void mixer_touch(View *v){
+    touchPosition p;hidTouchRead(&p);
+    if(p.py>=49 && p.py<164 && p.px>=7 && p.px<313){
+        int i=(p.py-49)/23;v->selected=i;
+        if(p.px>=280)mixer_add(&v->mixer,i,1);
+        else if(p.px>=213 && p.px<247)mixer_add(&v->mixer,i,-1);
+        return;
+    }
+    if(p.py>=168 && p.py<193 && !v->mixer.running && !v->mixer.ready){
+        if(p.px>=8 && p.px<153)v->mixer.ice=!v->mixer.ice;
+        if(p.px>=160 && p.px<312)v->mixer.aged=!v->mixer.aged;
+        return;
+    }
+    if(p.py>=198 && p.py<223){
+        if(p.px>=8 && p.px<104){mixer_reset(&v->mixer);v->state.heldRecipe=0;}
+        if(p.px>=110 && p.px<210)mixer_toggle(&v->mixer,v->now);
+        if(p.px>=216 && p.px<312)serve(v);
+    }
+}
+static void mixer_keys(View *v,u32 keys){
+    if(keys&KEY_DUP)v->selected=(v->selected+4)%5;
+    if(keys&KEY_DDOWN)v->selected=(v->selected+1)%5;
+    if(keys&KEY_DLEFT)mixer_add(&v->mixer,v->selected,-1);
+    if(keys&KEY_DRIGHT)mixer_add(&v->mixer,v->selected,1);
+    if(keys&KEY_B){mixer_reset(&v->mixer);v->state.heldRecipe=0;}
+    if(keys&KEY_A)mixer_toggle(&v->mixer,v->now);
+    if(keys&KEY_X)serve(v);
+    if(!v->mixer.running && !v->mixer.ready){
+        if(keys&KEY_L)v->mixer.ice=!v->mixer.ice;
+        if(keys&KEY_R)v->mixer.aged=!v->mixer.aged;
+    }
+    if(keys&KEY_TOUCH)mixer_touch(v);
+}
+static void game_input(View *v,Menu *menu,u32 keys){
+    if(v->overlay==2){
+        if(keys&KEY_A){v->overlay=0;save(v);menu_init(menu,1);}
+        if(keys&KEY_B)v->overlay=0;
+        if(keys&KEY_X)menu_music(menu,v);
+        return;
+    }
+    if(v->overlay==1){
+        if(keys&(KEY_Y|KEY_B))v->overlay=0;
+        if(keys&KEY_A)engine_pour_special(v,recipes[recipeBook[v->recipe]].id);
+        if(keys&(KEY_L|KEY_DLEFT))v->recipe=(v->recipe+BOOK_COUNT-1)%BOOK_COUNT;
+        if(keys&(KEY_R|KEY_DRIGHT))v->recipe=(v->recipe+1)%BOOK_COUNT;
+        return;
+    }
+    if(v->mode==6){
+        if(keys&KEY_A)recover(v,menu);
+        if(keys&KEY_B)menu_init(menu,1);
+        return;
+    }
+    if(keys&KEY_SELECT){v->overlay=2;return;}
+    if(keys&KEY_Y){v->overlay=1;return;}
+    if(v->mode==2 && v->state.cur_day<5){
+        if(keys&KEY_A){engine_next_day(v);menu->screen=UI_HOME;menu->selection=0;}
+        return;
+    }
+    if(v->mode==0 || v->mode==3){if(keys&KEY_A)advance(v);return;}
+    if(v->mode==1)mixer_keys(v,keys);
+}
 int main(void) {
     gfxInitDefault();gfxSet3D(false);
     View v={0};v.audio=audio_init();engine_start(&v,0);
@@ -161,58 +234,13 @@ int main(void) {
         if(saveThread){LightLock_Lock(&saveLock);v.saveError=saveResult;LightLock_Unlock(&saveLock);}
         if(keys&KEY_START){if(menu.hasSave)save(&v);break;}
         if(menu.screen!=UI_GAME){
-            unsigned nav=0;
-            if(keys&KEY_DUP)nav|=NAV_UP;
-            if(keys&KEY_DDOWN)nav|=NAV_DOWN;
-            if(keys&KEY_DLEFT)nav|=NAV_LEFT;
-            if(keys&KEY_DRIGHT)nav|=NAV_RIGHT;
-            if(keys&KEY_A)nav|=NAV_A;
-            if(keys&KEY_B)nav|=NAV_B;
             int tx=0,ty=0;
-            if(keys&KEY_TOUCH){touchPosition p;hidTouchRead(&p);tx=p.px;ty=p.py;nav|=NAV_TOUCH;}
+            unsigned nav=navigation_from_keys(keys,&tx,&ty);
             int action=menu_input(&menu,&v,nav,tx,ty);
             if(action==ACT_SAVE)save(&v);
             if(action==ACT_LOAD)recover(&v,&menu);
             if(action==ACT_EXIT){if(menu.hasSave)save(&v);break;}
-        }else if(v.overlay==2) {
-            if(keys&KEY_A){v.overlay=0;save(&v);menu_init(&menu,1);}
-            if(keys&KEY_B)v.overlay=0;
-            if(keys&KEY_X)menu_music(&menu,&v);
-        } else if(v.overlay==1) {
-            if(keys&(KEY_Y|KEY_B))v.overlay=0;
-            if(keys&KEY_A)engine_pour_special(&v,recipes[recipeBook[v.recipe]].id);
-            if(keys&(KEY_L|KEY_DLEFT))v.recipe=(v.recipe+BOOK_COUNT-1)%BOOK_COUNT;
-            if(keys&(KEY_R|KEY_DRIGHT))v.recipe=(v.recipe+1)%BOOK_COUNT;
-        } else if(v.mode==6){if(keys&KEY_A)recover(&v,&menu);if(keys&KEY_B)menu_init(&menu,1);}
-        else if(keys&KEY_SELECT)v.overlay=2;
-        else if(keys&KEY_Y)v.overlay=1;
-        else if(v.mode==2 && v.state.cur_day<5){if(keys&KEY_A){engine_next_day(&v);menu.screen=UI_HOME;menu.selection=0;}}
-        else if(v.mode==0 || v.mode==3) {if(keys&KEY_A)advance(&v);}
-        else if(v.mode==1) {
-            if(keys&KEY_DUP)v.selected=(v.selected+4)%5;
-            if(keys&KEY_DDOWN)v.selected=(v.selected+1)%5;
-            if(keys&KEY_DLEFT)mixer_add(&v.mixer,v.selected,-1);
-            if(keys&KEY_DRIGHT)mixer_add(&v.mixer,v.selected,1);
-            if(keys&KEY_B){mixer_reset(&v.mixer);v.state.heldRecipe=0;}
-            if(keys&KEY_A)mixer_toggle(&v.mixer,v.now);
-            if(keys&KEY_X)serve(&v);
-            if(!v.mixer.running&&!v.mixer.ready){if(keys&KEY_L)v.mixer.ice=!v.mixer.ice;if(keys&KEY_R)v.mixer.aged=!v.mixer.aged;}
-            if(keys&KEY_TOUCH) {
-                touchPosition p;hidTouchRead(&p);
-                if(p.py>=49 && p.py<164 && p.px>=7 && p.px<313) {
-                    int i=(p.py-49)/23;v.selected=i;
-                    if(p.px>=280)mixer_add(&v.mixer,i,1);
-                    else if(p.px>=213 && p.px<247)mixer_add(&v.mixer,i,-1);
-                } else if(p.py>=168 && p.py<193 && !v.mixer.running && !v.mixer.ready) {
-                    if(p.px>=8 && p.px<153)v.mixer.ice=!v.mixer.ice;
-                    if(p.px>=160 && p.px<312)v.mixer.aged=!v.mixer.aged;
-                } else if(p.py>=198 && p.py<223) {
-                    if(p.px>=8 && p.px<104){mixer_reset(&v.mixer);v.state.heldRecipe=0;}
-                    if(p.px>=110 && p.px<210)mixer_toggle(&v.mixer,v.now);
-                    if(p.px>=216 && p.px<312)serve(&v);
-                }
-            }
-        }
+        }else game_input(&v,&menu,keys);
         if(v.mode==7 && menu.screen==UI_GAME)menu_music(&menu,&v);
         if(v.musicTrack!=playingTrack){v.audio=audio_select(v.musicTrack);playingTrack=v.musicTrack;}
         if(v.boom!=lastBoom){if(v.boom>lastBoom)audio_effect(0);lastBoom=v.boom;}

@@ -98,7 +98,7 @@ SD:/3ds/va11-3ds/music/... (59 tracks plus boom.pcm)
 
 You do not need to replace `boot.firm` or change your Luma settings.
 
-Copy the entire `music` directory when updating to 0.8.0, including the new `bang.pcm` and `crash.pcm` effects. Allow at least 500 MB of free space for the unpacked build. If the console reports no DSP, music cannot play until DSP support is available; dialogue remains playable. A missing track is reported as missing PCM. Older `music.pcm` is used only as a fallback for the default track.
+Copy the entire `music` directory when updating to 0.9.0, including the `bang.pcm` and `crash.pcm` effects. Allow at least 500 MB of free space for the unpacked build. If the console reports no DSP, music cannot play until DSP support is available; dialogue remains playable. A missing track is reported as missing PCM. Older `music.pcm` is used only as a fallback for the default track.
 
 ### Saves
 
@@ -116,9 +116,10 @@ Keep `day1.sav` and `day1.bak` when updating. Starting a new game replaces your 
 
 This is a work-in-progress homebrew implementation. Content and features are being added gradually; it is not yet a complete port of the original game. The current dialogue and interface are primarily in Russian.
 
-### Included in 0.8.0 beta
+### Included in 0.9.0 beta
 
-- Tutorial, Days 1–5, main menu, apartment and phone. Press A at the end of a completed day to enter the next apartment, through Day 5.
+- Tutorial, Days 1–6, main menu, apartment and phone. Press A at the end of a completed day to enter the next apartment, through Day 6.
+- Day 6 is a day off with Dana. Press A to advance the conversation and Y to drink a beer (up to 12). Dialogue changes with the beer count and earlier Stella orders. The day has no cocktail orders or shift pay.
 - Day 3 conversations with Alma, Donovan, Stella, Sei and Dorothy, including paired orders and branching responses.
 - Day 3 news follows Donovan's Day 2 outcome. Forum and Miki pages still use the earlier selection.
 - Day 4 story, Art, Streaming-chan, Betty and Deal, paired orders, Game Over and branching news. Stream reactions are shown as compact text; the TV bulletin has a static indicator.
@@ -141,7 +142,7 @@ New games start with an empty wallet. Earnings are credited once when a day ends
 
 Purchases are stored by **Сохранить**, START, or the next end-of-day autosave. Buying does not trigger an SD write. Keep `day1.sav` and `day1.bak` when updating. Old saves retain story progress; previous days' earnings cannot be reconstructed because those saves did not store them. A loaded completed shift can be paid once into the new wallet. Otherwise income begins with the next completed shift.
 
-This shop currently covers room decorations. Download codes, wallpaper/table choices, interactive computer content, distraction penalties and bills remain in [BACKLOG.md](BACKLOG.md), along with playlists and character animation. Day 5 includes all 61 story blocks, Taylor, Virgilio, 11 orders, Game Over and December 17 news. It passed 1,200 ARM simulations; real-console testing is still needed.
+This shop currently covers room decorations. Download codes, wallpaper/table choices, interactive computer content, distraction penalties and bills remain in [BACKLOG.md](BACKLOG.md), along with playlists and character animation. Day 5 includes all 61 story blocks, Taylor, Virgilio, 11 orders, Game Over and December 17 news. Day 6 includes all 18 reachable dialogue blocks, beer branches and December 18 news. ARM checks passed; real-console testing is still needed.
 
 ## Credits and License
 

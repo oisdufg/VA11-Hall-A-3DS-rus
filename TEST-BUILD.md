@@ -1,13 +1,13 @@
-# Test launcher 0.8.0
+# Test launcher 0.9.0
 
-Install the regular 0.8.0 package first, then extract the test archive onto the SD card. The test executable lives in `3ds/va11-3ds-test/`, alongside the regular installation. It uses music from `3ds/va11-3ds/music/`.
+Install the regular 0.9.0 package first, then extract the test archive onto the SD card. The test executable lives in `3ds/va11-3ds-test/`, alongside the regular installation. It uses music from `3ds/va11-3ds/music/`.
 
-Launch **VA-11 HALL-A TEST** in Homebrew Launcher. After the startup notices, choose **Тест: выбрать день** and select Day 1–5. Each selection starts a fresh test apartment with $20,000, no purchased decorations and default previous-day story flags. Day 5 starts without the earlier Stella rum gift, so its extra bottle is absinthe. A normal playthrough retains your actual previous choices.
+Launch **VA-11 HALL-A TEST** in Homebrew Launcher. After the startup notices, choose **Тест: выбрать день** and select Day 1–6. Each selection starts a fresh test apartment with $20,000, no purchased decorations and default previous-day story flags. Day 5 starts without the earlier Stella rum gift, so its extra bottle is absinthe. A normal playthrough retains your actual previous choices. Day 6 is a day off: after leaving the apartment, press A for dialogue and Y to drink a beer.
 
 - **Телефон** opens the phone apps.
 - **Магазин** opens the shop. A or touch selects a product; confirm again to buy. B cancels or returns home.
 - **Сохранить** saves the test session. START saves and exits.
-- **На работу** starts the selected day's shift.
+- **На работу** starts the selected day; Day 6 opens the day-off story.
 - From the apartment, B returns to the title. During a shift, SELECT then A saves and returns to the title.
 - **Продолжить** resumes the test session. Choosing a day again resets the in-memory test progress; it becomes persistent on the next save.
 

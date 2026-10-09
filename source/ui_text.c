@@ -3,11 +3,11 @@
 /* Compiled into the 3DS binary, so drawing never reads text from the SD card. */
 const char *const uiStrings[UI_STRING_COUNT] = {
     [UI_VA_11_HALL_A] = "VA-11 HALL-A",
-    [UI_DEN_5_0_8_0] = "ДЕНЬ 5 / 0.8.0",
-    [UI_DEN_4_0_8_0] = "ДЕНЬ 4 / 0.8.0",
-    [UI_DEN_3_0_8_0] = "ДЕНЬ 3 / 0.8.0",
-    [UI_DEN_2_0_8_0] = "ДЕНЬ 2 / 0.8.0",
-    [UI_DEN_1_0_8_0] = "ДЕНЬ 1 / 0.8.0",
+    [UI_DEN_5_0_8_0] = "ДЕНЬ 5 / 0.9.0",
+    [UI_DEN_4_0_8_0] = "ДЕНЬ 4 / 0.9.0",
+    [UI_DEN_3_0_8_0] = "ДЕНЬ 3 / 0.9.0",
+    [UI_DEN_2_0_8_0] = "ДЕНЬ 2 / 0.9.0",
+    [UI_DEN_1_0_8_0] = "ДЕНЬ 1 / 0.9.0",
     [UI_NOVOSTI] = "НОВОСТИ",
     [UI_DZHILL] = "ДЖИЛЛ",
     [UI_EMPTY] = "",
@@ -153,7 +153,7 @@ const char *const uiStrings[UI_STRING_COUNT] = {
     [UI_LOKALIZATSIEY_SUKEBAN_GAMES] = "локализацией Sukeban Games.",
     [UI_A_KASANIE_GLAVNOE_MENYU] = "A / касание: главное меню",
     [UI_VA_11_HALL_A_NINTENDO_3DS] = "VA-11 HALL-A / NINTENDO 3DS",
-    [UI_TEST_DNI_1_5_KOSHELK_20000] = "ТЕСТ: дни 1-5 / кошелёк $20000",
+    [UI_TEST_DNI_1_5_KOSHELK_20000] = "ТЕСТ: дни 1-6 / кошелёк $20000",
     [UI_OTDELNOE_TESTOVOE_SOHRANENIE] = "Отдельное тестовое сохранение",
     [UI_KVARTIRA_DZHILL_DEN_5] = "КВАРТИРА ДЖИЛЛ / ДЕНЬ 5",
     [UI_KVARTIRA_DZHILL_DEN_4] = "КВАРТИРА ДЖИЛЛ / ДЕНЬ 4",
@@ -170,15 +170,15 @@ const char *const uiStrings[UI_STRING_COUNT] = {
     [UI_A_DIALOG_SHEYKER_NX_PODAT_B_SBROS_NY_RETSEPTY_L_R_LD] = "A: диалог / шейкер\nX: подать   B: сброс\nY: рецепты   L/R: лёд/выдержка\nКрестовина: ингредиенты\nSELECT: пауза и главное меню\nSTART: сохранить и выйти",
     [UI_SMESHAT_MENEE_5_SEKUND_NVZBOLTAT_OT_5_SEKUND_NAVTOSE] = "Смешать: менее 5 секунд.\nВзболтать: от 5 секунд.\nАвтосейв: в конце дня.",
     [UI_A_B_NAZAD] = "A / B: назад",
-    [UI_VA_11_HALL_A_3DS_0_8_0] = "VA-11 HALL-A / 3DS 0.8.0",
+    [UI_VA_11_HALL_A_3DS_0_8_0] = "VA-11 HALL-A / 3DS 0.9.0",
     [UI_PRODOLZHIT] = "Продолжить",
     [UI_PRODOLZHIT_NET_SOHRANENIYA] = "Продолжить (нет сохранения)",
     [UI_NOVAYA_IGRA] = "Новая игра",
     [UI_UPRAVLENIE_2] = "Управление",
     [UI_VYHOD] = "Выход",
-    [UI_VA_11_HALL_A_0_8_0_TEST] = "VA-11 HALL-A / 0.8.0 TEST",
+    [UI_VA_11_HALL_A_0_8_0_TEST] = "VA-11 HALL-A / 0.9.0 TEST",
     [UI_TEST_VYBRAT_DEN] = "Тест: выбрать день",
-    [UI_TEST_KVARTIRA_PERED_SMENOY] = "ТЕСТ: КВАРТИРА ПЕРЕД СМЕНОЙ",
+    [UI_TEST_KVARTIRA_PERED_SMENOY] = "ТЕСТ: ВЫБРАТЬ ДЕНЬ",
     [UI_DEN_1] = "День 1",
     [UI_DEN_2] = "День 2",
     [UI_DEN_3] = "День 3",
@@ -224,20 +224,33 @@ const char *const uiStrings[UI_STRING_COUNT] = {
     [UI_TEKUSCHIY_PROGRESS_BUDET_ZAMENN] = "Текущий прогресс будет заменён.",
     [UI_SOHRANENIE_OTPRAVLENO_NA_SD] = "Сохранение отправлено на SD.",
     [UI_A_VYBRAT_B_NAZAD] = "A: выбрать   B: назад",
+    [UI_DAY6_BADGE] = "ДЕНЬ 6 / 0.9.0",
+    [UI_DAY6_COMPLETED] = "ВЫХОДНОЙ ЗАВЕРШЁН",
+    [UI_DAY6_NEXT] = "A: домой, день 6   START: выход",
+    [UI_DAY6_SCENE] = "ДОМ / ВЫХОДНОЙ",
+    [UI_DAY6_APARTMENT] = "КВАРТИРА ДЖИЛЛ / ДЕНЬ 6",
+    [UI_DAY6_DATE] = "ДОМ / 18 ДЕКАБРЯ",
+    [UI_DAY6_BEER_LABEL] = "Выпито банок:",
+    [UI_DAY6_DRINK_HINT] = "Y: выпить пиво (до 12)",
+    [UI_DAY6_DIALOGUE_HINT] = "A: дальше   Y: пиво",
+    [UI_DAY6_NO_SHIFT] = "Сегодня бар был закрыт.",
+    [UI_DAY6_FINISH_HINT] = "SELECT: меню   START: выход",
+    [UI_DAY6_TEST_LABEL] = "День 6",
+    [UI_DAY6_NEWS_TITLE] = "Новости / 18 декабря",
 };
 
-static const UiStringId dayBadges[]={UI_DEN_1_0_8_0,UI_DEN_2_0_8_0,UI_DEN_3_0_8_0,UI_DEN_4_0_8_0,UI_DEN_5_0_8_0};
-static const UiStringId dayCompleted[]={UI_PERVYY_DEN_ZAVERSHN,UI_VTOROY_DEN_ZAVERSHN,UI_TRETIY_DEN_ZAVERSHN,UI_CHETVRTYY_DEN_ZAVERSHN,UI_PYATYY_DEN_ZAVERSHN};
-static const UiStringId nextDayHints[]={UI_A_DOMOY_DEN_2_START_VYHOD,UI_A_DOMOY_DEN_3_START_VYHOD,UI_A_DOMOY_DEN_4_START_VYHOD,UI_A_DOMOY_DEN_5_START_VYHOD,UI_SELECT_MENYU_START_VYHOD};
-static const UiStringId barHeadings[]={UI_BAR_DEN_1,UI_BAR_DEN_2,UI_BAR_DEN_3,UI_BAR_DEN_4,UI_BAR_DEN_5};
-static const UiStringId apartmentHeadings[]={UI_KVARTIRA_DZHILL_DEN_1,UI_KVARTIRA_DZHILL_DEN_2,UI_KVARTIRA_DZHILL_DEN_3,UI_KVARTIRA_DZHILL_DEN_4,UI_KVARTIRA_DZHILL_DEN_5};
-static const UiStringId apartmentDates[]={UI_DOM_13_DEKABRYA,UI_DOM_14_DEKABRYA,UI_DOM_15_DEKABRYA,UI_DOM_16_DEKABRYA,UI_DOM_17_DEKABRYA};
+static const UiStringId dayBadges[]={UI_DEN_1_0_8_0,UI_DEN_2_0_8_0,UI_DEN_3_0_8_0,UI_DEN_4_0_8_0,UI_DEN_5_0_8_0,UI_DAY6_BADGE};
+static const UiStringId dayCompleted[]={UI_PERVYY_DEN_ZAVERSHN,UI_VTOROY_DEN_ZAVERSHN,UI_TRETIY_DEN_ZAVERSHN,UI_CHETVRTYY_DEN_ZAVERSHN,UI_PYATYY_DEN_ZAVERSHN,UI_DAY6_COMPLETED};
+static const UiStringId nextDayHints[]={UI_A_DOMOY_DEN_2_START_VYHOD,UI_A_DOMOY_DEN_3_START_VYHOD,UI_A_DOMOY_DEN_4_START_VYHOD,UI_A_DOMOY_DEN_5_START_VYHOD,UI_DAY6_NEXT,UI_DAY6_FINISH_HINT};
+static const UiStringId barHeadings[]={UI_BAR_DEN_1,UI_BAR_DEN_2,UI_BAR_DEN_3,UI_BAR_DEN_4,UI_BAR_DEN_5,UI_DAY6_SCENE};
+static const UiStringId apartmentHeadings[]={UI_KVARTIRA_DZHILL_DEN_1,UI_KVARTIRA_DZHILL_DEN_2,UI_KVARTIRA_DZHILL_DEN_3,UI_KVARTIRA_DZHILL_DEN_4,UI_KVARTIRA_DZHILL_DEN_5,UI_DAY6_APARTMENT};
+static const UiStringId apartmentDates[]={UI_DOM_13_DEKABRYA,UI_DOM_14_DEKABRYA,UI_DOM_15_DEKABRYA,UI_DOM_16_DEKABRYA,UI_DOM_17_DEKABRYA,UI_DAY6_DATE};
 static const UiStringId ingredients[]={UI_ADELGID,UI_BRONSON_EKSTRAKT,UI_POROSHKOVAYA_DELTA,UI_FLANERGID,UI_KARMOTRIN};
 static const UiStringId chatReactions[]={UI_EMPTY,UI_APLODISM,UI_DA_A_A,UI_BU_U,UI_NET,UI_HA_HA,UI_O_O};
-static int day_index(int day){return day>=1 && day<=5?day-1:0;}
+static int day_index(int day){return day>=1 && day<=6?day-1:0;}
 const char *ui_day_badge(int day){return uiStrings[dayBadges[day_index(day)]];}
 const char *ui_day_completed(int day){return uiStrings[dayCompleted[day_index(day)]];}
-const char *ui_next_day_hint(int day){return uiStrings[nextDayHints[day>=1 && day<=4?day-1:4]];}
+const char *ui_next_day_hint(int day){return uiStrings[nextDayHints[day>=1 && day<=6?day-1:5]];}
 const char *ui_bar_heading(int day,int tutorial){return tutorial?uiStrings[UI_BAR_OBUCHENIE]:uiStrings[barHeadings[day_index(day)]];}
 const char *ui_apartment_heading(int day){return uiStrings[apartmentHeadings[day_index(day)]];}
 const char *ui_apartment_date(int day){return uiStrings[apartmentDates[day_index(day)]];}

@@ -10,7 +10,7 @@ class Mixer(C.LittleEndianStructure):
 class State(C.LittleEndianStructure):
  _fields_=[(x,C.c_int32) for x in json.loads((P/'generated/state-fields.json').read_text())]
 class View(C.LittleEndianStructure):
- _fields_=[(n,C.c_int32) for n in ['block','line','mode','round','selected','recipe','overlay','audio']]+[('now',C.c_uint64),('mixer',Mixer),('state',State),('visible',C.c_int32*17),('position',C.c_int32*17),('face',C.c_int32*17),('saveError',C.c_int32),('cheapErrors',C.c_int32),('failed',C.c_int32),('annaUntil',C.c_uint64)]+[(n,C.c_int32) for n in ['musicTrack','chat','news','rum','boom','economyPadding','walletCents','purchases','paidDay','lastPayCents']]+[('shakeUntil',C.c_uint64),('bang',C.c_int32),('crash',C.c_int32)]
+ _fields_=[(n,C.c_int32) for n in ['block','line','mode','round','selected','recipe','overlay','audio']]+[('now',C.c_uint64),('mixer',Mixer),('state',State),('visible',C.c_int32*17),('position',C.c_int32*17),('face',C.c_int32*17),('saveError',C.c_int32),('cheapErrors',C.c_int32),('failed',C.c_int32),('annaUntil',C.c_uint64)]+[(n,C.c_int32) for n in ['musicTrack','chat','news','rum','boom','day6Beers','walletCents','purchases','paidDay','lastPayCents']]+[('shakeUntil',C.c_uint64),('bang',C.c_int32),('crash',C.c_int32)]
 elf=ELFFile(io.BytesIO((P/'build/va11-3ds.elf').read_bytes()))
 machine=Uc(UC_ARCH_ARM,UC_MODE_ARM);machine.mem_map(0x100000,0x3000000)
 machine.reg_write(UC_ARM_REG_C1_C0_2,0xf00000)

@@ -1,5 +1,11 @@
 # Changes
 
+## 0.9.0 beta
+
+- Added Day 6, a day off with Dana: all 18 reachable dialogue blocks, Stella-dependent lines and beer-count branches. Y drinks one beer, up to 12; A advances the conversation.
+- Added the Day 6 scene, December 18 phone news and a completion checkpoint without shift pay. Day 5 completion now opens the Day 6 apartment.
+- Extended the separate TEST launcher to Days 1–6. ARM checks cover all Day 6 branches and the test launcher; original 3DS hardware still needs testing.
+
 ## Unreleased — code organization
 
 - Moved interface text, ingredient labels, day headings and order hints out of `render.c` into `ui_text.c`.

@@ -11,6 +11,7 @@
 #include "menu.h"
 #include "home_assets.h"
 #include "shop_assets.h"
+#include "day6_assets.h"
 
 typedef struct {uint8_t *p;int w;} Screen;
 static const uint32_t BG=0x110e1d, PANEL=0x21172e, INK=0xf0e6ec, MUTED=0xaa96b5, PINK=0xf56ea9, CYAN=0x6edbda;
@@ -65,6 +66,12 @@ static void sprite(Screen s,int x,int y,const Sprite *im) {
     const uint8_t *p=im->rgba;
     for(int yy=0;yy<im->h;++yy)for(int xx=0;xx<im->w;++xx,p+=4)if(p[3]>127)pixel(s,x+xx,y+yy,((uint32_t)p[0]<<16)|((uint32_t)p[1]<<8)|p[2]);
 }
+static void sprite_scaled(Screen s,int x,int y,int w,int h,const Sprite *im) {
+    for(int yy=0;yy<h;++yy)for(int xx=0;xx<w;++xx) {
+        const uint8_t *p=im->rgba+4*((yy*im->h/h)*im->w+xx*im->w/w);
+        if(p[3]>127)pixel(s,x+xx,y+yy,((uint32_t)p[0]<<16)|((uint32_t)p[1]<<8)|p[2]);
+    }
+}
 static void button(Screen s,int x,int y,int w,const char *label,bool active) {
     rect(s,x,y,w,25,active?0x44304f:0x211c2b);
     rect(s,x,y,w,1,active?PINK:0x51405a);text(s,x+6,y+5,label,active?INK:MUTED);
@@ -74,13 +81,15 @@ void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
     rect(t,0,0,400,240,BG);rect(b,0,0,320,240,BG);
     text(t,12,3,uiStrings[UI_VA_11_HALL_A],PINK);text(t,224,3,ui_day_badge(v->state.cur_day),MUTED);
     int shake=v->shakeUntil?((v->now/50)%2?2:-2):0;
-    sprite(t,10+shake,22,&background);
+    bool day6Home=v->state.cur_day==6 && v->block>=702;
+    if(day6Home)sprite_scaled(t,10,22,264,151,v->day6Beers>=7?&day6_scene_drunk:&day6_scene);
+    else sprite(t,10+shake,22,&background);
     /* The original bar backdrop is drawn at (11,18) in room coordinates. */
     if(v->annaUntil)sprite(t,10+(239-11)*264/338,22+(44-18)*264/338,&anna_tv);
     if(v->news){rect(t,198,39,72,25,0x15233c);text(t,202,44,uiStrings[UI_NOVOSTI],CYAN);}
     int ln=blockStart[v->block]+v->line;
     const Line *line=&story[ln];
-    for(int i=0;i<ACTOR_COUNT;++i)if(v->visible[i]) {
+    for(int i=0;i<ACTOR_COUNT;++i)if(v->visible[i] && !day6Home) {
         const Sprite *im=actors[i][v->face[i]];
         if(im)sprite(t,10+shake+v->position[i]*264/338-im->w/2,148-im->h,im);
     }
@@ -109,10 +118,13 @@ void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
         text(t,16,210,uiStrings[UI_A_PRODOLZHIT_SMENU],PINK);
     } else if(v->mode==2) {
         text(t,16,153,ui_day_completed(v->state.cur_day),CYAN);
-        text(t,16,178,uiStrings[UI_VYRUCHKA],INK);number(t,120,178,v->state.cash,INK);
-        text(t,196,178,uiStrings[UI_CHAEVYE],INK);number(t,268,178,v->state.tips,INK);
-        text(t,16,198,uiStrings[UI_OSHIBKI],MUTED);number(t,88,198,v->state.mistakes,MUTED);
-        text(t,144,198,uiStrings[UI_ZARABOTOK],CYAN);money(t,232,198,v->lastPayCents,CYAN);
+        if(v->state.cur_day==6)text(t,16,184,uiStrings[UI_DAY6_NO_SHIFT],INK);
+        else {
+            text(t,16,178,uiStrings[UI_VYRUCHKA],INK);number(t,120,178,v->state.cash,INK);
+            text(t,196,178,uiStrings[UI_CHAEVYE],INK);number(t,268,178,v->state.tips,INK);
+            text(t,16,198,uiStrings[UI_OSHIBKI],MUTED);number(t,88,198,v->state.mistakes,MUTED);
+            text(t,144,198,uiStrings[UI_ZARABOTOK],CYAN);money(t,232,198,v->lastPayCents,CYAN);
+        }
         text(t,16,219,ui_next_day_hint(v->state.cur_day),PINK);
     } else {
         text(t,16,160,uiStrings[UI_OSHIBKA_PEREHODA_SELECT_MENYU],PINK);
@@ -125,6 +137,22 @@ void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
         text(b,16,118,uiStrings[UI_BEZ_SEYVA_NOVYY_PERVYY_DEN],MUTED);
         text(b,16,158,uiStrings[UI_B_GLAVNOE_MENYU],INK);
         text(b,16,198,uiStrings[UI_START_VYHOD],MUTED);
+        return;
+    }
+    if(v->state.cur_day==6){
+        text(b,12,12,uiStrings[UI_DAY6_SCENE],PINK);
+        text(b,12,44,uiStrings[UI_DAY6_BEER_LABEL],INK);number(b,148,44,v->day6Beers,CYAN);
+        for(int i=0;i<12;++i)rect(b,12+i*25,73,19,12,i<v->day6Beers?PINK:PANEL);
+        if(v->mode==0 && v->block>=702)text(b,12,115,uiStrings[UI_DAY6_DRINK_HINT],CYAN);
+        if(v->mode==0)text(b,12,151,uiStrings[UI_DAY6_DIALOGUE_HINT],INK);
+        text(b,12,218,uiStrings[UI_START_VYHOD],MUTED);
+        if(v->overlay==2){
+            rect(b,4,60,312,125,BG);rect(b,4,60,312,2,PINK);
+            text(b,18,80,uiStrings[UI_PAUZA],INK);
+            text(b,18,110,uiStrings[UI_A_SOHRANIT_I_OTKRYT_MENYU],PINK);
+            text(b,18,143,uiStrings[UI_B_VERNUTSYA_K_IGRE],MUTED);
+            text(b,18,165,uiStrings[UI_X_VYBRAT_MUZYKU],CYAN);
+        }
         return;
     }
     text(b,8,4,ui_bar_heading(v->state.cur_day,v->state.cur_client==0),PINK);
@@ -273,11 +301,11 @@ void draw_menu(uint8_t *top,uint8_t *bottom,const View *v,const Menu *u) {
         text(b,12,146,uiStrings[UI_SMESHAT_MENEE_5_SEKUND_NVZBOLTAT_OT_5_SEKUND_NAVTOSE],CYAN);
         text(b,12,218,uiStrings[UI_A_B_NAZAD],PINK);return;
     }
-    const char *title=uiStrings[UI_EMPTY],*items[5]={0};int count=3;
+    const char *title=uiStrings[UI_EMPTY],*items[6]={0};int count=3;
     if(u->screen==UI_TITLE){title=uiStrings[UI_VA_11_HALL_A_3DS_0_8_0];items[0]=u->hasSave?uiStrings[UI_PRODOLZHIT]:uiStrings[UI_PRODOLZHIT_NET_SOHRANENIYA];items[1]=uiStrings[UI_NOVAYA_IGRA];items[2]=uiStrings[UI_UPRAVLENIE_2];items[3]=uiStrings[UI_VYHOD];count=4;}
 #ifdef VA11_TEST_MODE
     if(u->screen==UI_TITLE){title=uiStrings[UI_VA_11_HALL_A_0_8_0_TEST];items[2]=uiStrings[UI_TEST_VYBRAT_DEN];}
-    if(u->screen==UI_TEST_DAYS){title=uiStrings[UI_TEST_KVARTIRA_PERED_SMENOY];items[0]=uiStrings[UI_DEN_1];items[1]=uiStrings[UI_DEN_2];items[2]=uiStrings[UI_DEN_3];items[3]=uiStrings[UI_DEN_4];items[4]=uiStrings[UI_DEN_5];count=5;}
+    if(u->screen==UI_TEST_DAYS){title=uiStrings[UI_TEST_KVARTIRA_PERED_SMENOY];items[0]=uiStrings[UI_DEN_1];items[1]=uiStrings[UI_DEN_2];items[2]=uiStrings[UI_DEN_3];items[3]=uiStrings[UI_DEN_4];items[4]=uiStrings[UI_DEN_5];items[5]=uiStrings[UI_DAY6_TEST_LABEL];count=6;}
 #endif
     if(u->screen==UI_NEW){title=uiStrings[UI_NOVAYA_IGRA_2];items[0]=uiStrings[UI_S_OBUCHENIEM];items[1]=uiStrings[UI_SRAZU_PERVYY_DEN];items[2]=uiStrings[UI_OTMENA];}
     if(u->screen==UI_HOME){title=ui_apartment_date(v->state.cur_day);items[0]=uiStrings[UI_TELEFON];items[1]=uiStrings[UI_NA_RABOTU];items[2]=uiStrings[UI_SOHRANIT];items[3]=uiStrings[UI_MAGAZIN];count=4;}
@@ -291,8 +319,9 @@ void draw_menu(uint8_t *top,uint8_t *bottom,const View *v,const Menu *u) {
         if(v->state.cur_day==2 && u->app==0){items[0]=uiStrings[UI_MESTNAYA_GEROINYA];items[1]=v->state.dondrunk1?uiStrings[UI_70_NASHIH_CHITATELEY]:uiStrings[UI_BESPORYADKI_USILIVAYUTSYA];items[2]=v->state.dondrunk1?uiStrings[UI_KEM_MOZHET_BYT_ALICE_RABBIT]:uiStrings[UI_LECHENIE_TOKIYSKOGO_GRIPPA];}
     }
     if(u->screen==UI_LIST && v->state.cur_day==5 && u->app==0){items[0]=uiStrings[UI_NOVOSTI_17_DEKABRYA];items[1]=uiStrings[UI_VTORAYA_STATYA];items[2]=uiStrings[UI_TRETYA_STATYA];}
+    if(u->screen==UI_LIST && v->state.cur_day==6 && u->app==0){items[0]=uiStrings[UI_DAY6_NEWS_TITLE];items[1]=uiStrings[UI_VTORAYA_STATYA];items[2]=uiStrings[UI_TRETYA_STATYA];}
     text(b,12,10,title,PINK);
-    for(int i=0;i<count;++i)button(b,16,48+i*(u->screen==UI_TEST_DAYS?30:38),288,items[i],u->selection==i);
+    for(int i=0;i<count;++i)button(b,16,48+i*(u->screen==UI_TEST_DAYS?26:38),288,items[i],u->selection==i);
     if(u->screen==UI_NEW && u->hasSave)text(b,12,174,uiStrings[UI_TEKUSCHIY_PROGRESS_BUDET_ZAMENN],MUTED);
     if(u->screen==UI_HOME && u->notice)text(b,12,198,uiStrings[UI_SOHRANENIE_OTPRAVLENO_NA_SD],CYAN);
     text(b,12,218,uiStrings[UI_A_VYBRAT_B_NAZAD],PINK);

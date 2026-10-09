@@ -12,7 +12,7 @@ typedef struct {
     int cheapErrors,failed;
     uint64_t annaUntil;
     int musicTrack,chat,news,rum,boom;
-    int economyPadding;
+    int day6Beers; /* Reuses a zeroed save field; the binary save layout stays the same. */
     int walletCents;
     unsigned purchases;
     int paidDay,lastPayCents;
@@ -37,3 +37,4 @@ void engine_settle(View *v);
 int engine_buy(View *v,int item);
 int engine_extra_available(const View *v,int token);
 void engine_pour_special(View *v,int token);
+void engine_day6_drink(View *v);

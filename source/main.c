@@ -212,8 +212,12 @@ static void game_input(View *v,Menu *menu,u32 keys){
         return;
     }
     if(keys&KEY_SELECT){v->overlay=2;return;}
-    if(keys&KEY_Y){v->overlay=1;return;}
-    if(v->mode==2 && v->state.cur_day<5){
+    if(keys&KEY_Y){
+        if(v->state.cur_day==6)engine_day6_drink(v);
+        else v->overlay=1;
+        return;
+    }
+    if(v->mode==2 && v->state.cur_day<6){
         if(keys&KEY_A){engine_next_day(v);menu->screen=UI_HOME;menu->selection=0;}
         return;
     }

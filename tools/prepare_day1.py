@@ -46,7 +46,27 @@ def translate(s):
  s=re.sub(r'\{\n        return 0;\n    case (\d+):',r'{\n    case \1:',s)
  s=s.replace('\n            case ', '\n                /* fall through */\n            case ')
  return s+'\nreturn 0;'
-(G/'rules.h').write_text('static int day_rule(State *s){\n'+translate(day)+'\n}\nstatic int mix_rule(State *s){\n'+translate(mix)+'\n}\nstatic int day2_rule(State *s){\n'+translate(day2)+'\n}\nstatic int mix2_rule(State *s){\n'+translate(mix2)+'\n}\nstatic int day3_rule(State *s){\n'+translate(day3)+'\n}\nstatic int mix3_rule(State *s){\n'+translate(mix3)+'\n}\nstatic int day4_rule(State *s){\n'+translate(day4)+'\n}\nstatic int mix4_rule(State *s){\n'+translate(mix4)+'\n}\nstatic int day5_rule(State *s){\n'+translate(day5)+'\n}\nstatic int mix5_rule(State *s){\n'+translate(mix5)+'\n}\n')
+# Day 6 is a day off. Its original controller switches rooms between stages,
+# but has no mixer rule. These are its story branches after each room transition.
+day6_rule='''static int day6_rule(State *s,int beers){
+switch(s->cur_stage){
+case 1:return 701;
+case 2:return 702;
+case 3:return 703;
+case 4:return s->stel1==TOK_right && s->stel2==TOK_right?705:704;
+case 5:return 706;
+case 6:return beers>=2?707:708;
+case 7:return 709;
+case 8:return beers>=4?710:711;
+case 9:return 712;
+case 10:return beers>=6?713:714;
+case 11:return 715;
+case 12:return beers==12?716:beers>8?717:718;
+case 13:return -3;
+default:return 0;
+}}
+'''
+(G/'rules.h').write_text('static int day_rule(State *s){\n'+translate(day)+'\n}\nstatic int mix_rule(State *s){\n'+translate(mix)+'\n}\nstatic int day2_rule(State *s){\n'+translate(day2)+'\n}\nstatic int mix2_rule(State *s){\n'+translate(mix2)+'\n}\nstatic int day3_rule(State *s){\n'+translate(day3)+'\n}\nstatic int mix3_rule(State *s){\n'+translate(mix3)+'\n}\nstatic int day4_rule(State *s){\n'+translate(day4)+'\n}\nstatic int mix4_rule(State *s){\n'+translate(mix4)+'\n}\nstatic int day5_rule(State *s){\n'+translate(day5)+'\n}\nstatic int mix5_rule(State *s){\n'+translate(mix5)+'\n}\n'+day6_rule)
 # Original ingredient conditions and classification, including size and optional alcohol.
 recipes=[]
 for m in re.finditer(r'else if \((global.mod_aa[^\n]+)\)\s*\{([\s\S]*?global.drinkscore_a = (\d+);)',drinks):
@@ -75,7 +95,7 @@ for i,r in enumerate(recipes):
 actors=['gil','dana','kim','donovan','ingram','sei','doro','jamie','miki','alma','stella','art','stream','betty','deal','taylor','virgilio'];short={'gil':'gil','dan':'dana','dana':'dana','kim':'kim','don':'donovan','in':'ingram','sei':'sei','doro':'doro','jamie':'jamie','miki':'miki','alma':'alma','stel':'stella','art':'art','stream':'stream','betty':'betty','deal':'deal','taylor':'taylor','virgilio':'virgilio'}
 previous=json.loads((G/'v8-metadata.json').read_text(encoding='utf8'))['faces']
 variants={a:list(previous.get(a,[''])) for a in actors}
-for filename in ['tutorial.txt','script1.txt','script2.txt','script3.txt','script4.txt','script5.txt']:
+for filename in ['tutorial.txt','script1.txt','script2.txt','script3.txt','script4.txt','script5.txt','script6.txt']:
  for key,val in re.findall(r'\[XS:(\w+)face,([^\]]*)\]',(game/'scripts/eng'/filename).read_text(encoding='utf-8-sig')):
   actor=short[key]
   if val not in variants[actor]:variants[actor].append(val)
@@ -83,6 +103,8 @@ assert variants['dana'][3]=='mask'
 def command(tag):
  if tag.startswith(('SHOW:','SHOWF:')) and 'doro_shake' in tag:
   return command(tag.replace('doro_shake','doro'))+'v->shakeUntil=v->now+500;'
+ if tag.startswith(('SHOW:','SHOWF:')) and 'codec_' in tag:
+  return '' # Day 6 room props are represented by the static apartment scene.
  if tag.startswith('HIDEALL:'):return 'memset(v->visible,0,sizeof(v->visible));'
  if tag.startswith('BANG:'):return '++v->bang;'
  if tag.startswith('CRASH:'):return '++v->crash;v->shakeUntil=v->now+500;'
@@ -106,7 +128,7 @@ def command(tag):
  if tag.startswith('DON2'):return 's->orders=4;'
  return ''
 allblocks={};entries=[];enter={};leave={}
-for filename,offset in [('tutorial.txt',0),('script1.txt',100),('script2.txt',200),('gameover.txt',300),('script3.txt',400),('script4.txt',500),('script5.txt',600)]:
+for filename,offset in [('tutorial.txt',0),('script1.txt',100),('script2.txt',200),('gameover.txt',300),('script3.txt',400),('script4.txt',500),('script5.txt',600),('script6.txt',700)]:
  block=offset;pending=''
  for raw in (game/'scripts/eng'/filename).read_text(encoding='utf-8-sig').splitlines():
   clean=' '.join(re.sub(r'\[[^\]]*\]','',raw).replace('#',' ').split())
@@ -129,7 +151,7 @@ for filename,offset in [('tutorial.txt',0),('script1.txt',100),('script2.txt',20
   else:pending+=before+after
   for n in re.findall(r'\[E:(\d+)\]',raw):block=offset+int(n)
 assert 0 not in allblocks and 100 not in allblocks
-starts=[0]*662;counts=[0]*662
+starts=[0]*719;counts=[0]*719
 for b,ids in allblocks.items():starts[b]=ids[0];counts[b]=len(ids)
 (G/'story.h').write_text('#pragma once\ntypedef struct {const char *name,*text;int face;} Line;\nstatic const Line story[]={'+',\n'.join('{'+cstr(e['name'])+','+cstr(e['text'])+',0}' for e in entries)+'};\nstatic const int blockStart[]={'+','.join(map(str,starts))+'};\nstatic const int blockCount[]={'+','.join(map(str,counts))+'};\n',encoding='utf8')
 (G/'story.json').write_text(json.dumps({b:[entries[i] for i in ids] for b,ids in allblocks.items()},ensure_ascii=False,indent=2),encoding='utf8')

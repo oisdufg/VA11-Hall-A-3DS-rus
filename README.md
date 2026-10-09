@@ -98,7 +98,7 @@ SD:/3ds/va11-3ds/music/... (59 tracks plus boom.pcm)
 
 You do not need to replace `boot.firm` or change your Luma settings.
 
-Copy the entire `music` directory when updating to 0.9.0, including the `bang.pcm` and `crash.pcm` effects. Allow at least 500 MB of free space for the unpacked build. If the console reports no DSP, music cannot play until DSP support is available; dialogue remains playable. A missing track is reported as missing PCM. Older `music.pcm` is used only as a fallback for the default track.
+Copy the entire `music` directory when updating to 0.10.0, including the `bang.pcm` and `crash.pcm` effects. Allow at least 500 MB of free space for the unpacked build. If the console reports no DSP, music cannot play until DSP support is available; dialogue remains playable. A missing track is reported as missing PCM. Older `music.pcm` is used only as a fallback for the default track.
 
 ### Saves
 
@@ -116,33 +116,34 @@ Keep `day1.sav` and `day1.bak` when updating. Starting a new game replaces your 
 
 This is a work-in-progress homebrew implementation. Content and features are being added gradually; it is not yet a complete port of the original game. The current dialogue and interface are primarily in Russian.
 
-### Included in 0.9.0 beta
+### Included in 0.10.0 beta
 
-- Tutorial, Days 1–6, main menu, apartment and phone. Press A at the end of a completed day to enter the next apartment, through Day 6.
+- Tutorial, Days 1–7, main menu, apartment and phone. Press A at the end of a completed day to enter the next apartment, through Day 7.
 - Day 6 is a day off with Dana. Press A to advance the conversation and Y to drink a beer (up to 12). Dialogue changes with the beer count and earlier Stella orders. The day has no cocktail orders or shift pay.
+- Day 7 returns to the bar with Brian, Stella, Art, Virgilio and Cass. It has 61 reachable dialogue blocks, 11 scripted orders, a branch after the break based on Stella's two drinks, and December 19 news.
 - Day 3 conversations with Alma, Donovan, Stella, Sei and Dorothy, including paired orders and branching responses.
 - Day 3 news follows Donovan's Day 2 outcome. Forum and Miki pages still use the earlier selection.
 - Day 4 story, Art, Streaming-chan, Betty and Deal, paired orders, Game Over and branching news. Stream reactions are shown as compact text; the TV bulletin has a static indicator.
 - 59 selectable music tracks, scripted jukebox stops and Day 4 gunshot cues. Audio streams from SD as 22.05 kHz mono PCM.
 - 25 standard cocktails, Mulan Tea, rum, absinthe and Plumfume. Open the bottled drink in the recipe book, press A to pour, then X to serve. Rum/absinthe unlock from Day 5 according to earlier Stella orders.
 - An apartment shop with 16 decorations at original prices. Owned items appear in the room.
-- A persistent wallet, daily commission, tips, flawless bonus and daily bonus for Days 1–5.
+- A persistent wallet, daily commission, tips and a shift bonus for Days 1–5 and 7. Day 6 has no pay.
 - The original cheap-wrong-drink Game Over rule and Dana's corresponding scenes.
 - Anna's scripted Day 2 TV cameo, shown as a static frame.
 - Startup credits for the original developers, composer and publisher.
 - A separate unofficial Russian translation notice linking to koshk.sbs.
 
-Day 4 has passed 1,200 ARM shift simulations covering all 72 story blocks. Jukebox navigation and migration of the 0.6.0 save layout also passed. Real-console input, SD saves, audio playback and performance still need testing. Two unused Day 3 blocks remain unreachable as in the original scripts.
+Day 7 passed 400 ARM shift simulations covering all 61 reachable story blocks and both paths after the break. Save migration from 0.9.0 and the earlier layouts passed. Real-console input, SD saves, audio playback and performance still need testing. Two unused Day 3 blocks remain unreachable as in the original scripts.
 
 ### Apartment shop
 
 Open **Магазин** from the apartment before work. Up/Down selects a product; Left/Right moves five entries. Press A or touch a row to request a purchase, then confirm with A or a second touch. B cancels confirmation; press B again to return home. A `+` marks an owned item. Duplicate purchases and purchases without enough money are blocked.
 
-New games start with an empty wallet. Earnings are credited once when a day ends: tips, 5% of revenue per remaining allowance out of six mistakes, $500 for a flawless shift, and the original daily bonus ($500/$300/$300/$400/$300 for Days 1–5). Amounts retain cents. Bills are not deducted yet.
+New games start with an empty wallet. Earnings are credited once when a shift ends: tips, 5% of revenue per remaining allowance out of six mistakes, $500 for a flawless shift, and a daily bonus ($500/$300/$300/$400/$300 for Days 1–5, $300 for Day 7). Amounts retain cents. Bills are not deducted yet.
 
 Purchases are stored by **Сохранить**, START, or the next end-of-day autosave. Buying does not trigger an SD write. Keep `day1.sav` and `day1.bak` when updating. Old saves retain story progress; previous days' earnings cannot be reconstructed because those saves did not store them. A loaded completed shift can be paid once into the new wallet. Otherwise income begins with the next completed shift.
 
-This shop currently covers room decorations. Download codes, wallpaper/table choices, interactive computer content, distraction penalties and bills remain in [BACKLOG.md](BACKLOG.md), along with playlists and character animation. Day 5 includes all 61 story blocks, Taylor, Virgilio, 11 orders, Game Over and December 17 news. Day 6 includes all 18 reachable dialogue blocks, beer branches and December 18 news. ARM checks passed; real-console testing is still needed.
+This shop currently covers room decorations. Download codes, wallpaper/table choices, interactive computer content, distraction penalties and bills remain in [BACKLOG.md](BACKLOG.md), along with playlists and character animation. Days 5–7 have passed ARM story and order checks; real-console testing is still needed.
 
 ## Credits and License
 

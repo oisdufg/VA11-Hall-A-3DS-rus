@@ -4,6 +4,7 @@
 #include "music.h"
 #include "shop_assets.h"
 const Sprite *menu_phone_page(const View *v,const Menu *u){
+    if(v->state.cur_day==7 && u->app==0){const Sprite *pages[]={&home_news19,&home_news20,&home_news21};return pages[u->article];}
     if(v->state.cur_day==6 && u->app==0){const Sprite *pages[]={&home_news16,&home_news17,&home_news18};return pages[u->article];}
     if(v->state.cur_day==5 && u->app==0){const Sprite *pages[]={&home_news13,&home_news14,&home_news15};return pages[u->article];}
     if(v->state.cur_day==2 && u->app==0)return day2News[v->state.dondrunk1?1:0][u->article];
@@ -64,7 +65,7 @@ static int article_input(Menu *u,const View *v,unsigned keys,int tx){
 }
 static int selection_count(int screen){
     switch(screen){
-    case UI_TEST_DAYS:return 6;
+    case UI_TEST_DAYS:return 7;
     case UI_TITLE:case UI_HOME:return 4;
     default:return 3;
     }
@@ -134,7 +135,7 @@ int menu_input(Menu *u,View *v,unsigned keys,int tx,int ty){
     int count=selection_count(u->screen);
     if(keys&NAV_UP)u->selection=(u->selection+count-1)%count;
     if(keys&NAV_DOWN)u->selection=(u->selection+1)%count;
-    int rowHeight=u->screen==UI_TEST_DAYS?26:38;
+    int rowHeight=u->screen==UI_TEST_DAYS?24:38;
     if((keys&NAV_TOUCH) && tx>=16 && tx<304 && ty>=48 && ty<48+count*rowHeight){u->selection=(ty-48)/rowHeight;keys|=NAV_A;}
     if(keys&NAV_B){
         switch(u->screen){

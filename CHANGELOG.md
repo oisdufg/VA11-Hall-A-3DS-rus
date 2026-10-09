@@ -1,5 +1,11 @@
 # Changes
 
+## 0.10.0 beta
+
+- Added Day 7: Brian, Cass, Stella, Art and Virgilio; 61 reachable dialogue blocks, 11 scripted orders and both routes after the break.
+- The Day 6 twelve-beer outcome now carries into Day 7. Added December 19 news and a seven-day TEST selector.
+- Save version 10 preserves version 9 story, wallet, shop purchases and Day 6 beer count while adding Day 7 state and actor slots. ARM checks cover Day 7 routes and version 9 migration; real-console testing remains pending.
+
 ## 0.9.0 beta
 
 - Added Day 6, a day off with Dana: all 18 reachable dialogue blocks, Stella-dependent lines and beer-count branches. Y drinks one beer, up to 12; A advances the conversation.

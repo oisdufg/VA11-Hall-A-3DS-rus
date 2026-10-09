@@ -9,6 +9,8 @@
 
 ## Console verification
 
+- [ ] Test Day 7, both Stella/Art paths, Brian and Cass portraits, older save migration and frame rate on original 3DS hardware.
+
 - [ ] Test Day 6 beer input, dialogue branches, save/reload and frame rate on original 3DS hardware.
 
 - [ ] Test Day 5, special drinks, sound cues and version 8 save migration on original 3DS hardware.
@@ -21,7 +23,7 @@
 
 ## Later content
 
-- [ ] Day 7 onward. Day 6 is playable in 0.9.0.
+- [ ] Day 8 onward. Day 7 is playable in 0.10.0.
 - [ ] Test Day 4, music changes, DSP playback and 0.6.0 save migration on original 3DS hardware.
 - [ ] Original animated TV broadcasts and streaming-chat presentation. The current port uses static/text indicators.
 - [ ] Test Day 3 on original 3DS hardware, including old saves, paired orders and both failure scenes.

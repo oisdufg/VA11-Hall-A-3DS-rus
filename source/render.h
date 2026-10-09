@@ -7,7 +7,7 @@ typedef struct {
     uint64_t now;
     Mixer mixer;
     State state;
-    int visible[17],position[17],face[17];
+    int visible[19],position[19],face[19];
     int saveError;
     int cheapErrors,failed;
     uint64_t annaUntil;

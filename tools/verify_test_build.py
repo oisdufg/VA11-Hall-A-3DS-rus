@@ -18,12 +18,12 @@ def shot(name):
     (P/'previews').mkdir(exist_ok=True);canvas.save(P/'previews'/f'test-{name}.png')
 
 put(View());call('engine_start',address,1)
-for day in range(1,7):
+for day in range(1,8):
     call('menu_init',ui,0);action(2);assert menu().selection==2
     shot('title');action(16);assert menu().screen==12
     shot('days')
-    # Touch selection uses the same six rows as the visible menu.
-    assert action(256,80,50+(day-1)*26)==0
+    # Touch selection uses the same seven rows as the visible menu.
+    assert action(256,80,50+(day-1)*24)==0
     v=get();assert menu().screen==2 and v.mode==5 and v.state.cur_day==day
     assert v.walletCents==2000000 and v.purchases==0 and v.paidDay==day-1
     assert call('engine_can_save',address)==1
@@ -56,5 +56,5 @@ binary=(P/'build-test/va11-3ds.elf').read_bytes()
 for suffix in ('sav','bak','tmp'):
     assert f'sdmc:/3ds/va11-3ds/test-day1.{suffix}\0'.encode() in binary
     assert f'sdmc:/3ds/va11-3ds/day1.{suffix}\0'.encode() not in binary
-report={'passed':True,'days':[1,2,3,4,5,6],'starting_dollars':20000,'checks':['Touch day selection and cancelled selection','Phone apps on every day','Shop purchase and manual save action','Starting day retains purchases and balance','Playable opening of each day','All compiled save paths isolated from ordinary saves'],'hardware_tested':False}
+report={'passed':True,'days':[1,2,3,4,5,6,7],'starting_dollars':20000,'checks':['Touch day selection and cancelled selection','Phone apps on every day','Shop purchase and manual save action','Starting day retains purchases and balance','Playable opening of each day','All compiled save paths isolated from ordinary saves'],'hardware_tested':False}
 (P/'test-launcher-report.json').write_text(json.dumps(report,indent=2));print(json.dumps(report,indent=2))

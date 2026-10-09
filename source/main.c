@@ -88,7 +88,7 @@ static void write_save(View *v) {
     if(copy.mixer.running)mixer_reset(&copy.mixer);
     const char *tmp=SAVE_BASE ".tmp";
     FILE *f=fopen(tmp,"wb");if(!f){v->saveError=1;return;}
-    uint32_t header[3]={0x56413139,sizeof(copy),checksum_bytes(&copy,sizeof(copy))};
+    uint32_t header[3]={0x5641313a,sizeof(copy),checksum_bytes(&copy,sizeof(copy))};
     int ok=fwrite(header,sizeof(header),1,f)==1 && fwrite(&copy,sizeof(copy),1,f)==1;
     if(fclose(f))ok=0;
     if(ok){remove(SAVE_BASE ".bak");rename(SAVE_BASE ".sav",SAVE_BASE ".bak");ok=rename(tmp,SAVE_BASE ".sav")==0;}
@@ -128,10 +128,10 @@ static void save_shutdown(void) {
 static int load_file(View *v,const char *path) {
     FILE *f=fopen(path,"rb");if(!f)return 0;
     View copy;uint32_t h[3];unsigned char data[sizeof(View)];
-    int ok=fread(h,sizeof(h),1,f)==1 && ((h[0]==0x56413132 && h[1]==296) || (h[0]==0x56413134 && h[1]==432) || (h[0]==0x56413135 && h[1]==448) || (h[0]==0x56413136 && h[1]==520) || (h[0]==0x56413137 && h[1]==640) || (h[0]==0x56413138 && h[1]==656) || (h[0]==0x56413139 && h[1]==sizeof(copy))) && fread(data,h[1],1,f)==1;
+    int ok=fread(h,sizeof(h),1,f)==1 && ((h[0]==0x56413132 && h[1]==296) || (h[0]==0x56413134 && h[1]==432) || (h[0]==0x56413135 && h[1]==448) || (h[0]==0x56413136 && h[1]==520) || (h[0]==0x56413137 && h[1]==640) || (h[0]==0x56413138 && h[1]==656) || (h[0]==0x56413139 && h[1]==760) || (h[0]==0x5641313a && h[1]==sizeof(copy))) && fread(data,h[1],1,f)==1;
     fclose(f);
     if(!ok || h[2]!=checksum_bytes(data,h[1]))return 0;
-    if(h[0]!=0x56413139){if(!engine_migrate(&copy,data,h[1]))return 0;}
+    if(h[0]!=0x5641313a){if(!engine_migrate(&copy,data,h[1]))return 0;}
     else {memcpy(&copy,data,sizeof(copy));if(!engine_valid(&copy) || copy.failed)return 0;}
     if(copy.failed)return 0;
     engine_settle(&copy);
@@ -217,7 +217,7 @@ static void game_input(View *v,Menu *menu,u32 keys){
         else v->overlay=1;
         return;
     }
-    if(v->mode==2 && v->state.cur_day<6){
+    if(v->mode==2 && v->state.cur_day<7){
         if(keys&KEY_A){engine_next_day(v);menu->screen=UI_HOME;menu->selection=0;}
         return;
     }

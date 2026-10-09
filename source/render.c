@@ -301,11 +301,11 @@ void draw_menu(uint8_t *top,uint8_t *bottom,const View *v,const Menu *u) {
         text(b,12,146,uiStrings[UI_SMESHAT_MENEE_5_SEKUND_NVZBOLTAT_OT_5_SEKUND_NAVTOSE],CYAN);
         text(b,12,218,uiStrings[UI_A_B_NAZAD],PINK);return;
     }
-    const char *title=uiStrings[UI_EMPTY],*items[6]={0};int count=3;
+    const char *title=uiStrings[UI_EMPTY],*items[7]={0};int count=3;
     if(u->screen==UI_TITLE){title=uiStrings[UI_VA_11_HALL_A_3DS_0_8_0];items[0]=u->hasSave?uiStrings[UI_PRODOLZHIT]:uiStrings[UI_PRODOLZHIT_NET_SOHRANENIYA];items[1]=uiStrings[UI_NOVAYA_IGRA];items[2]=uiStrings[UI_UPRAVLENIE_2];items[3]=uiStrings[UI_VYHOD];count=4;}
 #ifdef VA11_TEST_MODE
     if(u->screen==UI_TITLE){title=uiStrings[UI_VA_11_HALL_A_0_8_0_TEST];items[2]=uiStrings[UI_TEST_VYBRAT_DEN];}
-    if(u->screen==UI_TEST_DAYS){title=uiStrings[UI_TEST_KVARTIRA_PERED_SMENOY];items[0]=uiStrings[UI_DEN_1];items[1]=uiStrings[UI_DEN_2];items[2]=uiStrings[UI_DEN_3];items[3]=uiStrings[UI_DEN_4];items[4]=uiStrings[UI_DEN_5];items[5]=uiStrings[UI_DAY6_TEST_LABEL];count=6;}
+    if(u->screen==UI_TEST_DAYS){title=uiStrings[UI_TEST_KVARTIRA_PERED_SMENOY];items[0]=uiStrings[UI_DEN_1];items[1]=uiStrings[UI_DEN_2];items[2]=uiStrings[UI_DEN_3];items[3]=uiStrings[UI_DEN_4];items[4]=uiStrings[UI_DEN_5];items[5]=uiStrings[UI_DAY6_TEST_LABEL];items[6]=uiStrings[UI_DAY7_TEST_LABEL];count=7;}
 #endif
     if(u->screen==UI_NEW){title=uiStrings[UI_NOVAYA_IGRA_2];items[0]=uiStrings[UI_S_OBUCHENIEM];items[1]=uiStrings[UI_SRAZU_PERVYY_DEN];items[2]=uiStrings[UI_OTMENA];}
     if(u->screen==UI_HOME){title=ui_apartment_date(v->state.cur_day);items[0]=uiStrings[UI_TELEFON];items[1]=uiStrings[UI_NA_RABOTU];items[2]=uiStrings[UI_SOHRANIT];items[3]=uiStrings[UI_MAGAZIN];count=4;}
@@ -320,8 +320,9 @@ void draw_menu(uint8_t *top,uint8_t *bottom,const View *v,const Menu *u) {
     }
     if(u->screen==UI_LIST && v->state.cur_day==5 && u->app==0){items[0]=uiStrings[UI_NOVOSTI_17_DEKABRYA];items[1]=uiStrings[UI_VTORAYA_STATYA];items[2]=uiStrings[UI_TRETYA_STATYA];}
     if(u->screen==UI_LIST && v->state.cur_day==6 && u->app==0){items[0]=uiStrings[UI_DAY6_NEWS_TITLE];items[1]=uiStrings[UI_VTORAYA_STATYA];items[2]=uiStrings[UI_TRETYA_STATYA];}
+    if(u->screen==UI_LIST && v->state.cur_day==7 && u->app==0){items[0]=uiStrings[UI_DAY7_NEWS_TITLE];items[1]=uiStrings[UI_VTORAYA_STATYA];items[2]=uiStrings[UI_TRETYA_STATYA];}
     text(b,12,10,title,PINK);
-    for(int i=0;i<count;++i)button(b,16,48+i*(u->screen==UI_TEST_DAYS?26:38),288,items[i],u->selection==i);
+    for(int i=0;i<count;++i)button(b,16,48+i*(u->screen==UI_TEST_DAYS?24:38),288,items[i],u->selection==i);
     if(u->screen==UI_NEW && u->hasSave)text(b,12,174,uiStrings[UI_TEKUSCHIY_PROGRESS_BUDET_ZAMENN],MUTED);
     if(u->screen==UI_HOME && u->notice)text(b,12,198,uiStrings[UI_SOHRANENIE_OTPRAVLENO_NA_SD],CYAN);
     text(b,12,218,uiStrings[UI_A_VYBRAT_B_NAZAD],PINK);

@@ -29,6 +29,7 @@ for beers in (0,2,4,6,9,12):
     completed+=1
     assert v.block in (716,717,718)
     assert v.walletCents==123450 and v.paidDay==5 and v.day6Beers==beers
+    assert v.state.jilldrunk1==int(beers==12)
     old=bytes(v);call('engine_settle',address);assert bytes(get())==old
     assert call('engine_advance_checkpoint',address)==0
     break

@@ -2,7 +2,7 @@
 from verify_day1 import *
 import struct
 tokens=json.loads((P/'generated/day1-metadata.json').read_text(encoding='utf8'))['tokens']
-assert C.sizeof(Mixer)==40 and C.sizeof(View)==760 and View.walletCents.offset==728
+assert C.sizeof(Mixer)==40 and C.sizeof(View)==824 and View.walletCents.offset==792
 seen5=set();faces5=set();done=0;effects=set();orders=set();jukeboxes=0
 want={47:'rum',48:'bfairy',49:'beer',50:'cvelvet',51:'fweaver',52:'abs',53:'beer',54:'btini',55:'srush',56:'srush',57:'fed'}
 def pour(v,r,seventeen=False):
@@ -60,5 +60,5 @@ assert len(legacy)==656
 machine.mem_write(0x5120000,legacy);assert call('engine_migrate',address,0x5120000,656)==1
 v=get();assert v.walletCents==456789 and v.purchases==4096 and v.paidDay==3 and v.lastPayCents==78000 and v.face[1]==3 and v.musicTrack==12
 assert v.state.alma4==0 and v.mixer.special==0 and v.visible[16]==0
-report={'passed':True,'shift_simulations':1200,'completed_shifts':done,'day5_blocks':sorted(seen5),'orders':sorted(orders),'effects':sorted(effects),'jukebox_prompts':jukeboxes,'save_bytes':760,'checks':['Golden routes with and without Stella rum gift','All story blocks and order hints','17 actual ingredients and bottled drinks','Day 5 Game Over and safe saves','Once-only payout','Version 8 shop wallet/ownership migration'],'hardware_tested':False}
+report={'passed':True,'shift_simulations':1200,'completed_shifts':done,'day5_blocks':sorted(seen5),'orders':sorted(orders),'effects':sorted(effects),'jukebox_prompts':jukeboxes,'save_bytes':C.sizeof(View),'checks':['Golden routes with and without Stella rum gift','All story blocks and order hints','17 actual ingredients and bottled drinks','Day 5 Game Over and safe saves','Once-only payout','Version 8 shop wallet/ownership migration'],'hardware_tested':False}
 (P/'day5-test-report.json').write_text(json.dumps(report,indent=2));print(json.dumps(report,indent=2))

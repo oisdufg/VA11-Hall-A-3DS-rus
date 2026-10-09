@@ -1,7 +1,7 @@
 """Shop, payroll and save-layout checks against the actual ARM build."""
 from verify_menu import *
 
-assert C.sizeof(View)==760 and View.walletCents.offset==728
+assert C.sizeof(View)==824 and View.walletCents.offset==792
 catalog=json.loads((P/'generated/shop.json').read_text())
 assert len(catalog)==16
 # Salary matches original commission, tips, flawless bonus and daily bonus.
@@ -17,7 +17,10 @@ for day,bonus in enumerate((500,300,300,400),1):
    call('engine_next_day',address);assert get().walletCents==expected and get().state.cash==0
 # Legacy v7 save preserves story/music and starts with no invented historical income.
 put(View());call('engine_start',address,1);v=get();v.musicTrack=12;v.state.cur_day=3
-legacy=bytes(v)[:80]+bytes(v.state)[:336]+bytes(v.visible)[:60]+bytes(v.position)[:60]+bytes(v.face)[:60]+bytes(v)[680:692]+bytes(v)[696:724]+b'\0'*4;machine.mem_write(0x5120000,legacy)
+legacy=bytes(v)[:80]+bytes(v.state)[:336]+bytes(v.visible)[:60]+bytes(v.position)[:60]+bytes(v.face)[:60]
+legacy+=bytes(v)[View.saveError.offset:View.saveError.offset+12]
+legacy+=bytes(v)[View.annaUntil.offset:View.annaUntil.offset+28]+b'\0'*4
+machine.mem_write(0x5120000,legacy)
 assert call('engine_migrate',address,0x5120000,640)==1
 assert get().musicTrack==12 and get().state.cur_day==3 and get().walletCents==0 and get().purchases==0
 # Every decoration: insufficient funds, exact funds, duplicate, wrong mode and index.

@@ -9,7 +9,7 @@ def package_public(project):
     project = Path(project).resolve()
     relative = [Path(name) for name in (
         '.gitignore', 'README.md', 'THIRD_PARTY.md', 'CHANGELOG.md',
-        'BACKLOG.md', 'Makefile', 'DAY4_PROGRESS.md', 'DAY5_PROGRESS.md', 'DAY6_PROGRESS.md',
+        'BACKLOG.md', 'Makefile', 'DAY4_PROGRESS.md', 'DAY5_PROGRESS.md', 'DAY6_PROGRESS.md', 'DAY7_PROGRESS.md',
         'source/engine.c', 'source/game.c', 'source/game.h', 'source/main.c',
         'source/menu.c', 'source/menu.h', 'source/render.c', 'source/render.h',
         'source/ui_text.c', 'source/ui_text.h',
@@ -20,7 +20,7 @@ def package_public(project):
         'tools/prepare_day4.py', 'tools/prepare_day4_assets.py', 'tools/verify_day4_rules.py',
         'tools/prepare_music.py', 'tools/verify_day4.py', 'tools/verify_music.py',
         'tools/prepare_shop.py', 'tools/verify_shop.py', 'tools/prepare_day5.py', 'tools/verify_day5_rules.py', 'tools/verify_day5.py',
-        'tools/prepare_day5_assets.py', 'tools/prepare_day6_assets.py', 'tools/verify_day6.py',
+        'tools/prepare_day5_assets.py', 'tools/prepare_day6_assets.py', 'tools/verify_day6.py', 'tools/verify_day7.py',
         'TEST-BUILD.md', 'tools/verify_test_build.py', 'tools/package_test.py',
         'tools/font/LICENSE.txt', 'tools/font/NotoSansMono-Regular.ttf',
     )]

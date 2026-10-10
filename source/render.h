@@ -7,7 +7,7 @@ typedef struct {
     uint64_t now;
     Mixer mixer;
     State state;
-    int visible[19],position[19],face[19];
+    int visible[23],position[23],face[23];
     int saveError;
     int cheapErrors,failed;
     uint64_t annaUntil;
@@ -18,6 +18,7 @@ typedef struct {
     int paidDay,lastPayCents;
     uint64_t shakeUntil;
     int bang,crash;
+    int day4Download; /* 0 pending, 1 paid, 2 insufficient funds. */
 } View;
 // mode: 0 dialogue, 1 mixing, 2 finished, 3 break, 4 error, 5 apartment, 6 Game Over, 7 jukebox.
 // overlay: 1 recipes, 2 pause. Legacy saves are converted by engine_migrate.
@@ -35,6 +36,10 @@ void engine_tick(View *v);
 int engine_can_save(const View *v);
 void engine_settle(View *v);
 int engine_buy(View *v,int item);
+int engine_shop_music_unlocked(const View *v,int track);
+void engine_grandfather_shop(View *v);
+int engine_focused(const View *v);
+void engine_day4_download(View *v);
 int engine_extra_available(const View *v,int token);
 void engine_pour_special(View *v,int token);
 void engine_day6_drink(View *v);

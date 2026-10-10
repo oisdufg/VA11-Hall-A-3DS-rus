@@ -29,10 +29,10 @@ for run in range(400):
     v=get();v.mode=2;v.state.cur_day=6;v.paidDay=5
     v.state.jilldrunk1=run%2
     v.state.stel1=v.state.stel2=tokens['right' if run%3 else 'wrong']
-    v.walletCents=123450;v.purchases=4096
+    v.walletCents=123450;v.purchases=4096|(1<<5)
     put(v);call('engine_next_day',address)
     v=get();assert (v.state.cur_day,v.block,v.mode)==(7,801,5)
-    assert (v.walletCents,v.purchases,v.state.jilldrunk1)==(123450,4096,run%2)
+    assert (v.walletCents,v.purchases,v.state.jilldrunk1)==(123450,4096|(1<<5),run%2)
     v.mode=0;put(v)
     for step in range(1900):
         v=get();seen.add(v.block)
@@ -75,13 +75,14 @@ v=get();v.state.cur_day=6;v.mode=2;v.block=718;v.day6Beers=9
 v.walletCents=765432;v.purchases=1024;v.paidDay=5
 old=bytes(v)[:80]+bytes(v.state)[:396]
 old+=bytes(v.visible)[:68]+bytes(v.position)[:68]+bytes(v.face)[:68]
-old+=bytes(v)[View.saveError.offset:]
+old+=bytes(v)[View.saveError.offset:View.saveError.offset+12]+b'\0'*4
+old+=bytes(v)[View.annaUntil.offset:View.annaUntil.offset+64]
 assert len(old)==760
-machine.mem_write(0x5120000,old);assert call('engine_migrate',address,0x5120000,760)==1
+machine.mem_write(0x5120000,old);assert call('engine_migrate',address,0x5120000,760)==1,(len(old),get().state.cur_day,get().block,get().mode,get().walletCents,get().day6Beers)
 v=get();assert (v.walletCents,v.purchases,v.day6Beers,v.state.cur_day)==(765432,1024,9,6)
 assert v.state.jilldrunk1==0 and v.visible[17]==v.visible[18]==0
 old12=bytearray(old)
-struct.pack_into('<i',old12,View.day6Beers.offset-64,12)
+struct.pack_into('<i',old12,724,12)
 machine.mem_write(0x5120000,bytes(old12));assert call('engine_migrate',address,0x5120000,760)==1
 assert get().state.jilldrunk1==1
 

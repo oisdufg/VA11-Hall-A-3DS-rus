@@ -2,7 +2,7 @@
 from verify_day1 import *
 import struct
 tokens=json.loads((P/'generated/day1-metadata.json').read_text(encoding='utf8'))['tokens']
-assert C.sizeof(Mixer)==40 and C.sizeof(View)==824 and View.walletCents.offset==792
+assert C.sizeof(Mixer)==40 and C.sizeof(View)==944 and View.walletCents.offset==904
 seen5=set();faces5=set();done=0;effects=set();orders=set();jukeboxes=0
 want={47:'rum',48:'bfairy',49:'beer',50:'cvelvet',51:'fweaver',52:'abs',53:'beer',54:'btini',55:'srush',56:'srush',57:'fed'}
 def pour(v,r,seventeen=False):
@@ -16,9 +16,9 @@ def pour(v,r,seventeen=False):
 for run in range(1200):
  put(View());call('engine_start',address,1);v=get();v.mode=2;v.state.cur_day=4
  v.state.stel1=tokens['right' if run&1 else 'wrong'];v.state.stel2=tokens['right' if run&1 else 'wrong']
- v.state.streamdrunk1=(run>>1)&1;v.state.almadrunk1=(run>>2)&1;v.walletCents=123450;v.purchases=4096;v.paidDay=4
+ v.state.streamdrunk1=(run>>1)&1;v.state.almadrunk1=(run>>2)&1;v.walletCents=123450;v.purchases=4096|(1<<11);v.paidDay=4
  put(v);call('engine_next_day',address);v=get()
- assert v.mode==5 and v.block==601 and v.walletCents==123450 and v.purchases==4096
+ assert v.mode==5 and v.block==601 and v.walletCents==123450 and v.purchases==4096|(1<<11)
  v.mode=0;put(v)
  for step in range(2000):
   v=get();seen5.add(v.block);assert call('engine_valid',address)==1,(run,v.block,v.mode)

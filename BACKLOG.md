@@ -2,14 +2,21 @@
 
 ## Deferred by request
 
-- [ ] Remaining shop products, wallpaper/table choices, interactive PC content and the original distraction mechanic. The 16 room decorations, purchases and ownership are implemented in 0.7.1. Order hints remain readable and Mulan Tea is available without purchase.
+- [x] All 30 apartment-shop products can be purchased and saved: 16 decorations, 12 bonus tracks, Mulan Tea and a shoulder massager. New games must buy bonus tracks and Mulan Tea; older saves retain access.
+- [x] Original daily distraction checks for Days 2, 3, 4, 5 and 7. A missing focus purchase replaces order hints with Jill's thoughts; the original dialogue and drink request continue.
+- [x] Day 8 shoulder-massager distraction check.
+- [x] Day 9 beer-discount distraction check.
+- [ ] Day 10 onward: later focus purchases and story.
+- [ ] Wallpaper/table choices and interactive PC content. These are apartment features rather than missing products in the 30-item shop catalog.
 - [ ] Original 12-slot playlists and automatic music transitions. Manual selection of 59 looping tracks and scripted jukebox prompts are implemented in 0.7.0.
 - [ ] Expenses, bills and financial Game Over. Daily commission, tips and bonuses for Days 1–5 are credited to the wallet in 0.7.1.
-- [ ] Mouth movement, blinking and other character animation. Portraits and Anna's TV cameo use static frames.
+- [ ] Optional finishing work: mouth movement, blinking and other character animation. Portraits and Anna's TV cameo use static frames; the game does not require these animations to be playable.
 
 ## Console verification
 
 - [ ] Test Day 7, both Stella/Art paths, Brian and Cass portraits, older save migration and frame rate on original 3DS hardware.
+- [ ] Test Day 8, Rad and wounded Sei portraits, both music prompts, shoulder-massager hints and version 12 migration on original 3DS hardware.
+- [ ] Test Day 9, Norma, Mario and Gaby portraits, both music prompts, beer-discount hints and version 13 migration on original 3DS hardware.
 
 - [ ] Test Day 6 beer input, dialogue branches, save/reload and frame rate on original 3DS hardware.
 
@@ -23,7 +30,7 @@
 
 ## Later content
 
-- [ ] Day 8 onward. Day 7 is playable in 0.10.0.
+- [ ] Day 10 onward. Day 9 is playable in 0.14.0.
 - [ ] Test Day 4, music changes, DSP playback and 0.6.0 save migration on original 3DS hardware.
 - [ ] Original animated TV broadcasts and streaming-chat presentation. The current port uses static/text indicators.
 - [ ] Test Day 3 on original 3DS hardware, including old saves, paired orders and both failure scenes.

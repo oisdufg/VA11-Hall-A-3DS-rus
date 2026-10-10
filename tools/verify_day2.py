@@ -4,6 +4,7 @@ seen2=set();screens2=set();pairs=0
 for run in range(700):
  put(View());call('engine_start',address,1);v=get();v.mode=2
  v.state.dondrunk1=run%2;v.state.kimdrunk1=(run//2)%2;v.state.ingdrunk1=(run//4)%2
+ v.purchases=1<<12 # Keep the golden routes focused; distraction has separate coverage.
  put(v);call('engine_next_day',address);v=get()
  assert v.mode==5 and v.state.cur_day==2 and v.block==201
  assert v.state.dondrunk1==run%2

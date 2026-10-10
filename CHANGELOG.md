@@ -1,5 +1,29 @@
 # Changes
 
+## 0.14.0 beta — Day 9
+
+- Added Day 9's 47 nonempty Russian dialogue blocks, eight numbered requests, Norma, Mario and Gaby portraits, a break, closing scene, two music prompts and December 21 phone news. Day 8 now advances to the Day 9 apartment.
+- The beer-discount purchase restores Jill's normal order hints on Day 9; without it she is distracted. The test launcher can select all nine days.
+- Save version 14 adds Day 9 story state and three actor slots. Version 13 and earlier saves migrate. ARM checks covered 180 Day 9 routes, every nonempty block, all requests, Game Over and version 13 migration; console testing remains pending.
+
+## 0.13.0 beta — Day 8
+
+- Added Day 8's 51 nonempty Russian dialogue blocks, nine orders, Rad Shiba and wounded Sei portraits, break, final scene, two music prompts and December 20 phone news. Day 7 now advances to the Day 8 apartment.
+- The shoulder massager restores Jill's normal order hints on Day 8; without it she is distracted. The test launcher can select all eight days.
+- Save version 13 adds Day 8 story state and one actor slot. Version 12 and earlier saves migrate. ARM checks covered 160 Day 8 routes, every nonempty block, all nine orders, Game Over and version 12 migration; console testing remains pending.
+
+## 0.12.0 beta — purchase-dependent story hints
+
+- Restored the original distraction checks for playable Days 2, 3, 4, 5 and 7. Without the day's focus item, the order hint shows Jill's wandering thoughts while the dialogue and actual drink request continue unchanged. Days 1 and 6 have no such check.
+- Day 4 now buys the $800 subscription automatically on entering the apartment if the wallet can cover it. Its success or failure is saved and shown in the apartment.
+- Save version 12 adds the Day 4 subscription outcome. Older saves migrate without a retroactive charge. ARM checks cover both focused and distracted hints, Day 4 funds, all finished shifts and 824-byte save migration; console testing remains pending.
+
+## 0.11.0 beta — complete shop catalog
+
+- Added the 14 missing shop products: 12 bonus music tracks, Mulan Tea and the shoulder massager. The first 16 decoration purchase bits retain their save positions.
+- New games unlock bonus tracks and Mulan Tea when bought. Older saves keep access to content that earlier builds offered freely. Save header version 11 uses the existing 824-byte payload.
+- The ARM build and shop, music, Mulan Tea and Day 7 checks pass. The original distraction effects remain for later work; real-console testing is pending.
+
 ## 0.10.0 beta
 
 - Added Day 7: Brian, Cass, Stella, Art and Virgilio; 61 reachable dialogue blocks, 11 scripted orders and both routes after the break.

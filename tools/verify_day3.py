@@ -5,6 +5,7 @@ seen3=set();new_faces=set();endings=0
 for run in range(800):
  put(View());call('engine_start',address,1);v=get();v.mode=2;v.state.cur_day=2
  for i,field in enumerate(('dondrunk1','dondrunk2','kimdrunk1','drunkmiki1','dorodrunk1')):setattr(v.state,field,(run>>i)&1)
+ v.purchases=1<<16 # Miki's song prevents the Day 3 distraction.
  put(v);call('engine_next_day',address);v=get()
  assert v.mode==5 and v.state.cur_day==3 and v.block==401
  assert v.state.dondrunk2==((run>>1)&1)

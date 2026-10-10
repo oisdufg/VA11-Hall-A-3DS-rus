@@ -4,6 +4,8 @@
 #include "music.h"
 #include "shop_assets.h"
 const Sprite *menu_phone_page(const View *v,const Menu *u){
+    if(v->state.cur_day==9 && u->app==0){const Sprite *pages[]={&home_news25,&home_news26,&home_news27};return pages[u->article];}
+    if(v->state.cur_day==8 && u->app==0){const Sprite *pages[]={&home_news22,&home_news23,&home_news24};return pages[u->article];}
     if(v->state.cur_day==7 && u->app==0){const Sprite *pages[]={&home_news19,&home_news20,&home_news21};return pages[u->article];}
     if(v->state.cur_day==6 && u->app==0){const Sprite *pages[]={&home_news16,&home_news17,&home_news18};return pages[u->article];}
     if(v->state.cur_day==5 && u->app==0){const Sprite *pages[]={&home_news13,&home_news14,&home_news15};return pages[u->article];}
@@ -47,6 +49,7 @@ static int music_input(Menu *u,View *v,unsigned keys,int tx,int ty){
             if(chosen<MUSIC_COUNT){u->selection=chosen;keys|=NAV_A;}
         }
         if(keys&(NAV_A|NAV_B)){
+            if((keys&NAV_A) && !engine_shop_music_unlocked(v,u->selection))return ACT_NONE;
             if(keys&NAV_A)v->musicTrack=u->selection;
             if(v->mode==7)engine_finish_jukebox(v);
             u->screen=u->app;u->selection=0;u->notice=0;
@@ -65,7 +68,7 @@ static int article_input(Menu *u,const View *v,unsigned keys,int tx){
 }
 static int selection_count(int screen){
     switch(screen){
-    case UI_TEST_DAYS:return 7;
+    case UI_TEST_DAYS:return 9;
     case UI_TITLE:case UI_HOME:return 4;
     default:return 3;
     }
@@ -107,6 +110,7 @@ static int activate(Menu *u,View *v){
         engine_start(v,1);
         for(int i=1;i<day;++i){v->mode=2;engine_next_day(v);}
         v->mode=5;v->round=0;v->walletCents=2000000;v->purchases=0;
+        if(day>=4){v->walletCents+=80000;v->day4Download=0;v->state.cur_day=4;engine_day4_download(v);v->state.cur_day=day;}
         v->paidDay=day-1;v->lastPayCents=0;
         u->screen=UI_HOME;u->selection=0;u->notice=0;u->hasSave=1;
         return ACT_NONE;
@@ -135,7 +139,7 @@ int menu_input(Menu *u,View *v,unsigned keys,int tx,int ty){
     int count=selection_count(u->screen);
     if(keys&NAV_UP)u->selection=(u->selection+count-1)%count;
     if(keys&NAV_DOWN)u->selection=(u->selection+1)%count;
-    int rowHeight=u->screen==UI_TEST_DAYS?24:38;
+    int rowHeight=u->screen==UI_TEST_DAYS?18:38;
     if((keys&NAV_TOUCH) && tx>=16 && tx<304 && ty>=48 && ty<48+count*rowHeight){u->selection=(ty-48)/rowHeight;keys|=NAV_A;}
     if(keys&NAV_B){
         switch(u->screen){

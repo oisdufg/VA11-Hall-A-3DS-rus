@@ -117,6 +117,7 @@ typedef enum {
     UI_B_VERNUTSYA_K_IGRE,
     UI_X_VYBRAT_MUZYKU,
     UI_MAGAZIN_UKRASHENIYA_DLYA_DOMA,
+    UI_TREK_NUZHNO_KUPIT,
     UI_KOSHELK,
     UI_TSENA,
     UI_KUPIT_A_DA_B_OTMENA,
@@ -247,11 +248,37 @@ typedef enum {
     UI_DAY7_DATE,
     UI_DAY7_TEST_LABEL,
     UI_DAY7_NEWS_TITLE,
+    UI_FOCUS_READY,
+    UI_DAY2_FOCUS_NEED,
+    UI_DAY3_FOCUS_NEED,
+    UI_DAY4_FOCUS_PAID,
+    UI_DAY4_FOCUS_MISSED,
+    UI_DAY5_FOCUS_NEED,
+    UI_DAY7_FOCUS_NEED,
+    UI_DAY8_BADGE,
+    UI_DAY8_COMPLETED,
+    UI_DAY8_NEXT,
+    UI_DAY8_SCENE,
+    UI_DAY8_APARTMENT,
+    UI_DAY8_DATE,
+    UI_DAY8_TEST_LABEL,
+    UI_DAY8_NEWS_TITLE,
+    UI_DAY8_FOCUS_NEED,
+    UI_DAY9_BADGE,
+    UI_DAY9_COMPLETED,
+    UI_DAY9_NEXT,
+    UI_DAY9_SCENE,
+    UI_DAY9_APARTMENT,
+    UI_DAY9_DATE,
+    UI_DAY9_TEST_LABEL,
+    UI_DAY9_NEWS_TITLE,
+    UI_DAY9_FOCUS_NEED,
     UI_STRING_COUNT
 } UiStringId;
 
 extern const char *const uiStrings[UI_STRING_COUNT];
 const char *ui_order_hint(int n);
+const char *ui_focus_status(int day,int focused,int day4Download);
 const char *ui_day_badge(int day);
 const char *ui_day_completed(int day);
 const char *ui_next_day_hint(int day);

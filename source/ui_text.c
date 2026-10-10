@@ -3,11 +3,11 @@
 /* Compiled into the 3DS binary, so drawing never reads text from the SD card. */
 const char *const uiStrings[UI_STRING_COUNT] = {
     [UI_VA_11_HALL_A] = "VA-11 HALL-A",
-    [UI_DEN_5_0_8_0] = "ДЕНЬ 5 / 0.10.0",
-    [UI_DEN_4_0_8_0] = "ДЕНЬ 4 / 0.10.0",
-    [UI_DEN_3_0_8_0] = "ДЕНЬ 3 / 0.10.0",
-    [UI_DEN_2_0_8_0] = "ДЕНЬ 2 / 0.10.0",
-    [UI_DEN_1_0_8_0] = "ДЕНЬ 1 / 0.10.0",
+    [UI_DEN_5_0_8_0] = "ДЕНЬ 5 / 0.14.0",
+    [UI_DEN_4_0_8_0] = "ДЕНЬ 4 / 0.14.0",
+    [UI_DEN_3_0_8_0] = "ДЕНЬ 3 / 0.14.0",
+    [UI_DEN_2_0_8_0] = "ДЕНЬ 2 / 0.14.0",
+    [UI_DEN_1_0_8_0] = "ДЕНЬ 1 / 0.14.0",
     [UI_NOVOSTI] = "НОВОСТИ",
     [UI_DZHILL] = "ДЖИЛЛ",
     [UI_EMPTY] = "",
@@ -115,7 +115,8 @@ const char *const uiStrings[UI_STRING_COUNT] = {
     [UI_A_SOHRANIT_I_OTKRYT_MENYU] = "A: сохранить и открыть меню",
     [UI_B_VERNUTSYA_K_IGRE] = "B: вернуться к игре",
     [UI_X_VYBRAT_MUZYKU] = "X: выбрать музыку",
-    [UI_MAGAZIN_UKRASHENIYA_DLYA_DOMA] = "МАГАЗИН / УКРАШЕНИЯ ДЛЯ ДОМА",
+    [UI_MAGAZIN_UKRASHENIYA_DLYA_DOMA] = "МАГАЗИН / ТОВАРЫ И МУЗЫКА",
+    [UI_TREK_NUZHNO_KUPIT] = "Трек продаётся в магазине",
     [UI_KOSHELK] = "Кошелёк:",
     [UI_TSENA] = "Цена:",
     [UI_KUPIT_A_DA_B_OTMENA] = "Купить? A: да / B: отмена",
@@ -153,7 +154,7 @@ const char *const uiStrings[UI_STRING_COUNT] = {
     [UI_LOKALIZATSIEY_SUKEBAN_GAMES] = "локализацией Sukeban Games.",
     [UI_A_KASANIE_GLAVNOE_MENYU] = "A / касание: главное меню",
     [UI_VA_11_HALL_A_NINTENDO_3DS] = "VA-11 HALL-A / NINTENDO 3DS",
-    [UI_TEST_DNI_1_5_KOSHELK_20000] = "ТЕСТ: дни 1-7 / кошелёк $20000",
+    [UI_TEST_DNI_1_5_KOSHELK_20000] = "ТЕСТ: дни 1-9 / кошелёк $20000",
     [UI_OTDELNOE_TESTOVOE_SOHRANENIE] = "Отдельное тестовое сохранение",
     [UI_KVARTIRA_DZHILL_DEN_5] = "КВАРТИРА ДЖИЛЛ / ДЕНЬ 5",
     [UI_KVARTIRA_DZHILL_DEN_4] = "КВАРТИРА ДЖИЛЛ / ДЕНЬ 4",
@@ -170,13 +171,13 @@ const char *const uiStrings[UI_STRING_COUNT] = {
     [UI_A_DIALOG_SHEYKER_NX_PODAT_B_SBROS_NY_RETSEPTY_L_R_LD] = "A: диалог / шейкер\nX: подать   B: сброс\nY: рецепты   L/R: лёд/выдержка\nКрестовина: ингредиенты\nSELECT: пауза и главное меню\nSTART: сохранить и выйти",
     [UI_SMESHAT_MENEE_5_SEKUND_NVZBOLTAT_OT_5_SEKUND_NAVTOSE] = "Смешать: менее 5 секунд.\nВзболтать: от 5 секунд.\nАвтосейв: в конце дня.",
     [UI_A_B_NAZAD] = "A / B: назад",
-    [UI_VA_11_HALL_A_3DS_0_8_0] = "VA-11 HALL-A / 3DS 0.10.0",
+    [UI_VA_11_HALL_A_3DS_0_8_0] = "VA-11 HALL-A / 3DS 0.14.0",
     [UI_PRODOLZHIT] = "Продолжить",
     [UI_PRODOLZHIT_NET_SOHRANENIYA] = "Продолжить (нет сохранения)",
     [UI_NOVAYA_IGRA] = "Новая игра",
     [UI_UPRAVLENIE_2] = "Управление",
     [UI_VYHOD] = "Выход",
-    [UI_VA_11_HALL_A_0_8_0_TEST] = "VA-11 HALL-A / 0.10.0 TEST",
+    [UI_VA_11_HALL_A_0_8_0_TEST] = "VA-11 HALL-A / 0.14.0 TEST",
     [UI_TEST_VYBRAT_DEN] = "Тест: выбрать день",
     [UI_TEST_KVARTIRA_PERED_SMENOY] = "ТЕСТ: ВЫБРАТЬ ДЕНЬ",
     [UI_DEN_1] = "День 1",
@@ -224,7 +225,7 @@ const char *const uiStrings[UI_STRING_COUNT] = {
     [UI_TEKUSCHIY_PROGRESS_BUDET_ZAMENN] = "Текущий прогресс будет заменён.",
     [UI_SOHRANENIE_OTPRAVLENO_NA_SD] = "Сохранение отправлено на SD.",
     [UI_A_VYBRAT_B_NAZAD] = "A: выбрать   B: назад",
-    [UI_DAY6_BADGE] = "ДЕНЬ 6 / 0.10.0",
+    [UI_DAY6_BADGE] = "ДЕНЬ 6 / 0.14.0",
     [UI_DAY6_COMPLETED] = "ВЫХОДНОЙ ЗАВЕРШЁН",
     [UI_DAY6_NEXT] = "A: домой, день 6   START: выход",
     [UI_DAY6_SCENE] = "ДОМ / ВЫХОДНОЙ",
@@ -237,7 +238,7 @@ const char *const uiStrings[UI_STRING_COUNT] = {
     [UI_DAY6_FINISH_HINT] = "SELECT: меню   START: выход",
     [UI_DAY6_TEST_LABEL] = "День 6",
     [UI_DAY6_NEWS_TITLE] = "Новости / 18 декабря",
-    [UI_DAY7_BADGE] = "ДЕНЬ 7 / 0.10.0",
+    [UI_DAY7_BADGE] = "ДЕНЬ 7 / 0.14.0",
     [UI_DAY7_COMPLETED] = "СЕДЬМОЙ ДЕНЬ ЗАВЕРШЁН",
     [UI_DAY7_NEXT] = "A: домой, день 7   START: выход",
     [UI_DAY7_FINISH_HINT] = "SELECT: меню   START: выход",
@@ -246,27 +247,87 @@ const char *const uiStrings[UI_STRING_COUNT] = {
     [UI_DAY7_DATE] = "ДОМ / 19 ДЕКАБРЯ",
     [UI_DAY7_TEST_LABEL] = "День 7",
     [UI_DAY7_NEWS_TITLE] = "Новости / 19 декабря",
+    [UI_FOCUS_READY] = "Джилл спокойна перед сменой",
+    [UI_DAY2_FOCUS_NEED] = "Джилл отвлекается: нужно голорастение",
+    [UI_DAY3_FOCUS_NEED] = "Джилл отвлекается: нужна песня Мики",
+    [UI_DAY4_FOCUS_PAID] = "Подписка оплачена: $800",
+    [UI_DAY4_FOCUS_MISSED] = "Не хватило $800 на подписку",
+    [UI_DAY5_FOCUS_NEED] = "Джилл отвлекается: нужен вентилятор",
+    [UI_DAY7_FOCUS_NEED] = "Джилл отвлекается: нужна дарума",
+    [UI_DAY8_BADGE] = "ДЕНЬ 8 / 0.14.0",
+    [UI_DAY8_COMPLETED] = "ВОСЬМОЙ ДЕНЬ ЗАВЕРШЁН",
+    [UI_DAY8_NEXT] = "SELECT: меню   START: выход",
+    [UI_DAY8_SCENE] = "БАР / ДЕНЬ 8",
+    [UI_DAY8_APARTMENT] = "КВАРТИРА ДЖИЛЛ / ДЕНЬ 8",
+    [UI_DAY8_DATE] = "ДОМ / 20 ДЕКАБРЯ",
+    [UI_DAY8_TEST_LABEL] = "День 8",
+    [UI_DAY8_NEWS_TITLE] = "Новости / 20 декабря",
+    [UI_DAY8_FOCUS_NEED] = "Джилл отвлекается: нужен массажёр",
+    [UI_DAY9_BADGE] = "ДЕНЬ 9 / 0.14.0",
+    [UI_DAY9_COMPLETED] = "ДЕВЯТЫЙ ДЕНЬ ЗАВЕРШЁН",
+    [UI_DAY9_NEXT] = "SELECT: меню   START: выход",
+    [UI_DAY9_SCENE] = "БАР / ДЕНЬ 9",
+    [UI_DAY9_APARTMENT] = "КВАРТИРА ДЖИЛЛ / ДЕНЬ 9",
+    [UI_DAY9_DATE] = "ДОМ / 21 ДЕКАБРЯ",
+    [UI_DAY9_TEST_LABEL] = "День 9",
+    [UI_DAY9_NEWS_TITLE] = "Новости / 21 декабря",
+    [UI_DAY9_FOCUS_NEED] = "Джилл отвлекается: нужна скидка на пиво",
 };
 
-static const UiStringId dayBadges[]={UI_DEN_1_0_8_0,UI_DEN_2_0_8_0,UI_DEN_3_0_8_0,UI_DEN_4_0_8_0,UI_DEN_5_0_8_0,UI_DAY6_BADGE,UI_DAY7_BADGE};
-static const UiStringId dayCompleted[]={UI_PERVYY_DEN_ZAVERSHN,UI_VTOROY_DEN_ZAVERSHN,UI_TRETIY_DEN_ZAVERSHN,UI_CHETVRTYY_DEN_ZAVERSHN,UI_PYATYY_DEN_ZAVERSHN,UI_DAY6_COMPLETED,UI_DAY7_COMPLETED};
-static const UiStringId nextDayHints[]={UI_A_DOMOY_DEN_2_START_VYHOD,UI_A_DOMOY_DEN_3_START_VYHOD,UI_A_DOMOY_DEN_4_START_VYHOD,UI_A_DOMOY_DEN_5_START_VYHOD,UI_DAY6_NEXT,UI_DAY7_NEXT,UI_DAY7_FINISH_HINT};
-static const UiStringId barHeadings[]={UI_BAR_DEN_1,UI_BAR_DEN_2,UI_BAR_DEN_3,UI_BAR_DEN_4,UI_BAR_DEN_5,UI_DAY6_SCENE,UI_DAY7_SCENE};
-static const UiStringId apartmentHeadings[]={UI_KVARTIRA_DZHILL_DEN_1,UI_KVARTIRA_DZHILL_DEN_2,UI_KVARTIRA_DZHILL_DEN_3,UI_KVARTIRA_DZHILL_DEN_4,UI_KVARTIRA_DZHILL_DEN_5,UI_DAY6_APARTMENT,UI_DAY7_APARTMENT};
-static const UiStringId apartmentDates[]={UI_DOM_13_DEKABRYA,UI_DOM_14_DEKABRYA,UI_DOM_15_DEKABRYA,UI_DOM_16_DEKABRYA,UI_DOM_17_DEKABRYA,UI_DAY6_DATE,UI_DAY7_DATE};
+static const UiStringId dayBadges[]={UI_DEN_1_0_8_0,UI_DEN_2_0_8_0,UI_DEN_3_0_8_0,UI_DEN_4_0_8_0,UI_DEN_5_0_8_0,UI_DAY6_BADGE,UI_DAY7_BADGE,UI_DAY8_BADGE,UI_DAY9_BADGE};
+static const UiStringId dayCompleted[]={UI_PERVYY_DEN_ZAVERSHN,UI_VTOROY_DEN_ZAVERSHN,UI_TRETIY_DEN_ZAVERSHN,UI_CHETVRTYY_DEN_ZAVERSHN,UI_PYATYY_DEN_ZAVERSHN,UI_DAY6_COMPLETED,UI_DAY7_COMPLETED,UI_DAY8_COMPLETED,UI_DAY9_COMPLETED};
+static const UiStringId nextDayHints[]={UI_A_DOMOY_DEN_2_START_VYHOD,UI_A_DOMOY_DEN_3_START_VYHOD,UI_A_DOMOY_DEN_4_START_VYHOD,UI_A_DOMOY_DEN_5_START_VYHOD,UI_DAY6_NEXT,UI_DAY7_NEXT,UI_DAY8_NEXT,UI_DAY9_NEXT,UI_DAY9_NEXT};
+static const UiStringId barHeadings[]={UI_BAR_DEN_1,UI_BAR_DEN_2,UI_BAR_DEN_3,UI_BAR_DEN_4,UI_BAR_DEN_5,UI_DAY6_SCENE,UI_DAY7_SCENE,UI_DAY8_SCENE,UI_DAY9_SCENE};
+static const UiStringId apartmentHeadings[]={UI_KVARTIRA_DZHILL_DEN_1,UI_KVARTIRA_DZHILL_DEN_2,UI_KVARTIRA_DZHILL_DEN_3,UI_KVARTIRA_DZHILL_DEN_4,UI_KVARTIRA_DZHILL_DEN_5,UI_DAY6_APARTMENT,UI_DAY7_APARTMENT,UI_DAY8_APARTMENT,UI_DAY9_APARTMENT};
+static const UiStringId apartmentDates[]={UI_DOM_13_DEKABRYA,UI_DOM_14_DEKABRYA,UI_DOM_15_DEKABRYA,UI_DOM_16_DEKABRYA,UI_DOM_17_DEKABRYA,UI_DAY6_DATE,UI_DAY7_DATE,UI_DAY8_DATE,UI_DAY9_DATE};
 static const UiStringId ingredients[]={UI_ADELGID,UI_BRONSON_EKSTRAKT,UI_POROSHKOVAYA_DELTA,UI_FLANERGID,UI_KARMOTRIN};
 static const UiStringId chatReactions[]={UI_EMPTY,UI_APLODISM,UI_DA_A_A,UI_BU_U,UI_NET,UI_HA_HA,UI_O_O};
-static int day_index(int day){return day>=1 && day<=7?day-1:0;}
+static int day_index(int day){return day>=1 && day<=9?day-1:0;}
 const char *ui_day_badge(int day){return uiStrings[dayBadges[day_index(day)]];}
 const char *ui_day_completed(int day){return uiStrings[dayCompleted[day_index(day)]];}
-const char *ui_next_day_hint(int day){return uiStrings[nextDayHints[day>=1 && day<=7?day-1:6]];}
+const char *ui_next_day_hint(int day){return uiStrings[nextDayHints[day>=1 && day<=9?day-1:8]];}
 const char *ui_bar_heading(int day,int tutorial){return tutorial?uiStrings[UI_BAR_OBUCHENIE]:uiStrings[barHeadings[day_index(day)]];}
 const char *ui_apartment_heading(int day){return uiStrings[apartmentHeadings[day_index(day)]];}
 const char *ui_apartment_date(int day){return uiStrings[apartmentDates[day_index(day)]];}
 const char *ui_ingredient_name(int ingredient){return uiStrings[ingredients[ingredient>=0 && ingredient<5?ingredient:0]];}
 const char *ui_chat_reaction(int reaction){return uiStrings[chatReactions[reaction>=0 && reaction<7?reaction:0]];}
+const char *ui_focus_status(int day,int focused,int day4Download){
+    if(day==4)return uiStrings[day4Download==1?UI_DAY4_FOCUS_PAID:UI_DAY4_FOCUS_MISSED];
+    if(focused)return uiStrings[UI_FOCUS_READY];
+    switch(day){
+    case 2:return uiStrings[UI_DAY2_FOCUS_NEED];
+    case 3:return uiStrings[UI_DAY3_FOCUS_NEED];
+    case 5:return uiStrings[UI_DAY5_FOCUS_NEED];
+    case 7:return uiStrings[UI_DAY7_FOCUS_NEED];
+    case 8:return uiStrings[UI_DAY8_FOCUS_NEED];
+    case 9:return uiStrings[UI_DAY9_FOCUS_NEED];
+    default:return "";
+    }
+}
 
 const char *ui_order_hint(int n) {
+    if(n>=1040 && n<1160){
+        static const char *const wandering[]={
+            "Что же сейчас заказали?..",
+            "Мысли опять куда-то уплыли",
+            "Надо вспомнить слова посетителя",
+            "Похоже, я прослушала заказ",
+            "Дома всё в порядке?..",
+            "Сосредоточься, Джилл",
+            "Как же неловко переспросить",
+            "В голове крутится музыка",
+            "Опять думаю не о работе",
+            "Заказ был совсем недавно...",
+            "Сначала вспомни, потом смешивай"};
+        static const char *const subscription[]={
+            "Подписка кончилась не вовремя",
+            "Голова занята этой подпиской",
+            "Не могу забыть про счёт дома",
+            "Сосредоточься на заказе, Джилл"};
+        int day=(n-1000)/20,variation=(n-1000)%20;
+        if(day==4)return subscription[variation%4];
+        return wandering[variation%11];
+    }
     switch(n) {
     case 1:return "Сахарный прилив";case 2:return "Взрыв на Луне";
     case 3:case 4:return "Большое пиво";case 5:case 7:return "Пиво";
@@ -318,6 +379,22 @@ const char *ui_order_hint(int n) {
     case 66:return "Piano Man";case 67:return "Напиток для Вирджилио";
     case 68:return "На усмотрение бармена";
     case 69:return "Что-нибудь сладкое";
+    case 70:return "Fluffy Dream";
+    case 71:return "Сладкий без алкоголя";
+    case 72:return "Bleeding Jane (или сладкий)";
+    case 73:return "Удар по печени";
+    case 74:return "Горький или мужественный";
+    case 75:return "Пиво";
+    case 76:return "Bleeding Jane";
+    case 77:return "Zen Star";
+    case 78:return "Fluffy Dream без алкоголя";
+    case 79:return "Marsblast или Piano Woman";
+    case 80:return "Gut Punch или Moonblast";
+    case 81:return "Fringe Weaver";
+    case 82:return "Bleeding Jane";
+    case 83:return "Большая Blue Fairy";
+    case 84:return "Cobalt Velvet";
+    case 178:return "Пиво для Гила";
     case 174:return "Пиво или другой алкоголь";
     default:return "Заказ посетителя";
     }

@@ -10,21 +10,42 @@
 #include "music.h"
 #include "shop_assets.h"
 
+int engine_focused(const View *v){
+    switch(v->state.cur_day){
+    case 2:return (v->purchases&(1u<<12))!=0; /* Holo-Plant */
+    case 3:return (v->purchases&(1u<<16))!=0; /* Miki's song */
+    case 4:return v->day4Download==1;
+    case 5:return (v->purchases&(1u<<11))!=0; /* Fan */
+    case 7:return (v->purchases&(1u<<5))!=0;  /* Daruma */
+    case 8:return (v->purchases&(1u<<18))!=0; /* Shoulder massager */
+    case 9:return (v->purchases&(1u<<13))!=0; /* Beer discount */
+    default:return 1;
+    }
+}
+void engine_day4_download(View *v){
+    if(v->state.cur_day!=4 || v->day4Download)return;
+    if(v->walletCents>=80000){v->walletCents-=80000;v->day4Download=1;}
+    else v->day4Download=2;
+}
+
 static void block(View *v,int n) {
     if(n==-2){v->cheapErrors=0;v->mode=3;return;}
     if(n==-3){v->mode=2;engine_settle(v);return;}
-    if(n<=0 || n>=863 || !blockCount[n]){v->mode=4;return;}
+    if(n<=0 || n>=1049 || !blockCount[n]){v->mode=4;return;}
     v->block=n;v->line=0;v->mode=0;page_enter(v);
 }
 static int day_rule_for(View *v) {
     State *s=&v->state;
+    if(s->cur_day==8 && s->cur_client==-2){s->cur_client=4;s->cur_stage=1;return 0;}
     switch(s->cur_day) {
-    case 2:return day2_rule(s);
-    case 3:return day3_rule(s);
-    case 4:return day4_rule(s);
-    case 5:return day5_rule(s);
+    case 2:return day2_rule(s,engine_focused(v));
+    case 3:return day3_rule(s,engine_focused(v));
+    case 4:return day4_rule(s,engine_focused(v));
+    case 5:return day5_rule(s,engine_focused(v));
     case 6:return day6_rule(s,v->day6Beers);
-    case 7:return day7_rule(s);
+    case 7:return day7_rule(s,engine_focused(v));
+    case 8:return s->cur_stage==-1?-3:day8_rule(s,engine_focused(v));
+    case 9:return day9_rule(s,engine_focused(v));
     default:return day_rule(s);
     }
 }
@@ -35,6 +56,8 @@ static int mix_rule_for(State *s) {
     case 4:return mix4_rule(s);
     case 5:return mix5_rule(s);
     case 7:return mix7_rule(s);
+    case 8:return mix8_rule(s);
+    case 9:return mix9_rule(s);
     default:return mix_rule(s);
     }
 }
@@ -42,6 +65,13 @@ static int resume_after_music(View *v) {
     State *s=&v->state;
     s->juke=0;
     switch(s->cur_day) {
+    case 9:
+        if(s->cur_stage==-1)return s->cur_client==5?-3:1002;
+        return 1002;
+    case 8:
+        if(s->cur_stage==-1)return -3;
+        if(s->cur_client==-2){s->cur_client=1;s->cur_stage=2;return 0;}
+        return 902;
     case 7:
         if(s->cur_client==-2){
             s->cur_client=s->stel4==TOK_right && s->stel5==TOK_right?3:4;
@@ -93,15 +123,15 @@ void engine_start(View *v,int dayOnly) {
     dispatch(v);
 }
 void engine_next_day(View *v) {
-    if(v->mode!=2 || (v->state.cur_day<1 || v->state.cur_day>=7))return;
+    if(v->mode!=2 || (v->state.cur_day<1 || v->state.cur_day>=9))return;
     engine_settle(v);
     State *s=&v->state;++s->cur_day;s->cur_client=1;s->cur_stage=1;
     s->cash=0;s->tips=0;s->mistakes=0;s->mix=0;s->juke=0;s->heldRecipe=0;s->slotamount=1;
     memset(v->visible,0,sizeof(v->visible));memset(v->face,0,sizeof(v->face));
-    v->cheapErrors=0;v->annaUntil=0;v->round=0;v->overlay=0;v->day6Beers=0;mixer_reset(&v->mixer);dispatch(v);v->mode=5;
+    v->cheapErrors=0;v->annaUntil=0;v->round=0;v->overlay=0;v->day6Beers=0;mixer_reset(&v->mixer);engine_day4_download(v);dispatch(v);v->mode=5;
 }
 void engine_advance(View *v) {
-    if(v->mode==3){v->state.cur_client=-2;v->state.cur_stage=1;dispatch(v);return;}
+    if(v->mode==3){v->state.cur_client=(v->state.cur_day==8 || v->state.cur_day==9)?3:-2;v->state.cur_stage=1;dispatch(v);return;}
     if(v->mode!=0)return;
     page_leave(v);
     if(v->line+1<blockCount[v->block]){++v->line;page_enter(v);return;}
@@ -172,20 +202,34 @@ int engine_valid(const View *v) {
     if(v->musicTrack<0 || v->musicTrack>=MUSIC_COUNT || v->chat<0 || v->chat>6 || v->news<0 || v->news>2 || v->boom<0)return 0;
     if(v->cheapErrors<0 || v->cheapErrors>3 || (v->failed!=0 && v->failed!=1))return 0;
     if(v->bang<0 || v->crash<0 || v->mixer.special<0 || (v->mixer.special && (v->mixer.special<60 || v->mixer.special>RECIPE_COUNT)))return 0;
-    if(v->day6Beers<0 || v->day6Beers>12)return 0;
-    if(v->block<1 || v->block>=863 || !blockCount[v->block])return 0;
+    if(v->day6Beers<0 || v->day6Beers>12 || v->day4Download<0 || v->day4Download>2)return 0;
+    if(v->block<1 || v->block>=1049 || !blockCount[v->block])return 0;
     if(v->line<0 || v->line>=blockCount[v->block] || v->mode<0 || v->mode>7 || v->mode==4)return 0;
     if(v->recipe<0 || v->recipe>=BOOK_COUNT || v->selected<0 || v->selected>4)return 0;
-    if(v->state.cur_day<1 || v->state.cur_day>7 || v->state.heldRecipe<0 || v->state.heldRecipe>RECIPE_COUNT)return 0;
+    if(v->state.cur_day<1 || v->state.cur_day>9 || v->state.heldRecipe<0 || v->state.heldRecipe>RECIPE_COUNT)return 0;
     for(int i=0;i<ACTOR_COUNT;++i)if(v->face[i]<0 || v->face[i]>=actorFaceCount[i] || v->position[i]<-200 || v->position[i]>600)return 0;
     return 1;
 }
 int engine_migrate(View *v,const void *legacy,unsigned size){
+    if(size==880){
+        const unsigned char *p=legacy;memset(v,0,sizeof(*v));
+        memcpy(v,p,80);memcpy(&v->state,p+80,476);
+        memcpy(v->visible,p+556,80);memcpy(v->position,p+636,80);memcpy(v->face,p+716,80);
+        memcpy(&v->saveError,p+796,12);memcpy(&v->annaUntil,p+808,72);
+        return engine_valid(v);
+    }
+    if(size==832 || size==824){
+        const unsigned char *p=legacy;memset(v,0,sizeof(*v));
+        memcpy(v,p,80);memcpy(&v->state,p+80,436);
+        memcpy(v->visible,p+516,76);memcpy(v->position,p+592,76);memcpy(v->face,p+668,76);
+        memcpy(&v->saveError,p+744,12);memcpy(&v->annaUntil,p+760,size-760);
+        return engine_valid(v);
+    }
     if(size==760){
         const unsigned char *p=legacy;memset(v,0,sizeof(*v));
         memcpy(v,p,80);memcpy(&v->state,p+80,396);
         memcpy(v->visible,p+476,68);memcpy(v->position,p+544,68);memcpy(v->face,p+612,68);
-        memcpy(&v->saveError,p+680,80);
+        memcpy(&v->saveError,p+680,12);memcpy(&v->annaUntil,p+696,64);
         if(v->state.cur_day==6 && v->mode==2 && v->day6Beers==12)v->state.jilldrunk1=1;
         return engine_valid(v);
     }
@@ -231,10 +275,10 @@ int engine_can_save(const View *v){return !v->failed && engine_valid(v);}
 
 void engine_settle(View *v){
     int day=v->state.cur_day;
-    if(v->mode!=2 || v->failed || day<1 || day>7 || day==6 || v->paidDay>=day)return;
+    if(v->mode!=2 || v->failed || day<1 || day>9 || day==6 || v->paidDay>=day)return;
     int errors=v->state.mistakes;
     if(errors<0 || v->state.cash<0 || v->state.cash>1000000 || v->state.tips<0 || v->state.tips>1000000)return;
-    static const int bonus[]={0,500,300,300,400,300,0,300};
+    static const int bonus[]={0,500,300,300,400,300,0,300,300,300};
     int commission=errors<6?(6-errors)*5:0;
     int pay=v->state.cash*commission+v->state.tips*100+(bonus[day]+(errors==0?500:0))*100;
     if(pay>100000000-v->walletCents)return;
@@ -246,8 +290,21 @@ int engine_buy(View *v,int item){
     if((v->purchases&bit) || v->walletCents<price)return 0;
     v->walletCents-=price;v->purchases|=bit;return 1;
 }
+int engine_shop_music_unlocked(const View *v,int track){
+    for(int i=0;i<SHOP_COUNT;++i)
+        if(shopItems[i].musicTrack==track)return (v->purchases&(1u<<i))!=0;
+    return 1;
+}
+void engine_grandfather_shop(View *v){
+    /* Earlier builds allowed every bonus track and Mulan Tea without a purchase. */
+    v->purchases|=1u<<SHOP_TEA_INDEX;
+    for(int i=0;i<SHOP_COUNT;++i)
+        if(shopItems[i].musicTrack>=0)v->purchases|=1u<<i;
+    if(v->state.cur_day>=4 && !v->day4Download)v->day4Download=1;
+}
 int engine_extra_available(const View *v,int token){
-    if(token==TOK_tea || token==TOK_fed)return 1;
+    if(token==TOK_tea)return (v->purchases&(1u<<SHOP_TEA_INDEX))!=0;
+    if(token==TOK_fed)return 1;
     int gift=v->state.stel1==TOK_right && v->state.stel2==TOK_right;
     return v->state.cur_day>=5 && ((token==TOK_rum && gift) || (token==TOK_abs && !gift));
 }

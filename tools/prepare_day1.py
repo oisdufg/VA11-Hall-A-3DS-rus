@@ -11,30 +11,44 @@ from PIL import Image
 game=args.game
 day=(D/'gml_Script_day1control.gml').read_text();mix=(D/'gml_Script_mix1control.gml').read_text();drinks=(D/'gml_Script_drink_a.gml').read_text()
 day2=(D/'gml_Script_day2control.gml').read_text();mix2=(D/'gml_Script_mix2control.gml').read_text()
-day2=re.sub(r'choose\([^)]*\)', '0', day2).replace('distractioncheck()', '1')
+day2=re.sub(r'choose\([^)]*\)', '1000+20*global.cur_day+((global.cur_client+global.cur_stage)%11)', day2).replace('distractioncheck()', 'focused')
 day3=(D/'gml_Script_day3control.gml').read_text();mix3=(D/'gml_Script_mix3control.gml').read_text()
-day3=re.sub(r'choose\([^)]*\)', '0', day3).replace('distractioncheck()', '1')
+day3=re.sub(r'choose\([^)]*\)', '1000+20*global.cur_day+((global.cur_client+global.cur_stage)%11)', day3).replace('distractioncheck()', 'focused')
 day4=(D/'gml_Script_day4control.gml').read_text();mix4=(D/'gml_Script_mix4control.gml').read_text()
-day4=re.sub(r'choose\([^)]*\)', '0', day4).replace('distractioncheck()', '1')
+day4=re.sub(r'choose\([^)]*\)', '1000+20*global.cur_day+((global.cur_client+global.cur_stage)%4)', day4).replace('distractioncheck()', 'focused')
 day5=(D/'gml_Script_day5control.gml').read_text();mix5=(D/'gml_Script_mix5control.gml').read_text()
-day5=re.sub(r'choose\([^)]*\)', '0', day5).replace('distractioncheck()', '1')
+day5=re.sub(r'choose\([^)]*\)', '1000+20*global.cur_day+((global.cur_client+global.cur_stage)%11)', day5).replace('distractioncheck()', 'focused')
 day7=(D/'gml_Script_day7control.gml').read_text();mix7=(D/'gml_Script_mix7control.gml').read_text()
-day7=re.sub(r'choose\([^)]*\)', '0', day7).replace('distractioncheck()', '1')
-tokens=sorted(set(re.findall(r'"([^"\n]*)"',day+mix+day2+mix2+day3+mix3+day4+mix4+day5+mix5+day7+mix7+drinks)))
+day7=re.sub(r'choose\([^)]*\)', '1000+20*global.cur_day+((global.cur_client+global.cur_stage)%11)', day7).replace('distractioncheck()', 'focused')
+day8=(D/'gml_Script_day8control.gml').read_text();mix8=(D/'gml_Script_mix8control.gml').read_text()
+day8=re.sub(r'choose\([^)]*\)', '1000+20*global.cur_day+((global.cur_client+global.cur_stage)%11)', day8).replace('distractioncheck()', 'focused')
+# Room 29 is the original break room. The 3DS scene stays in the bar;
+# the Day 8 break is represented by its dialogue block and mode 3.
+before,after=day8.split('\n    case 3:',1)
+middle,tail=after.split('\n    case 4:',1)
+day8=before+'\n    case 3:'+middle.replace('room == 29','1')+'\n    case 4:'+tail
+day8=day8.replace('room == 29','0').replace('!instance_exists(296)','0').replace('!instance_exists(300)','0').replace('instance_create(x, y, 296);','return 0;').replace('instance_create(x, y, 300);','return 0;')
+day8=day8.replace('instance_create(x, y, 308);','textbox_create(global.ch8, 51, 1);')
+day9=(D/'gml_Script_day9control.gml').read_text();mix9=(D/'gml_Script_mix9control.gml').read_text()
+day9=re.sub(r'choose\([^)]*\)', '1000+20*global.cur_day+((global.cur_client+global.cur_stage)%11)', day9).replace('distractioncheck()', 'focused')
+day9=day9.replace('room == 29','1').replace('!instance_exists(300)','0').replace('instance_create(x, y, 300);','return 0;')
+day9=day9.replace('instance_create(x, y, 308);','textbox_create(global.ch9, 47, 1);')
+tokens=sorted(set(re.findall(r'"([^"\n]*)"',day+mix+day2+mix2+day3+mix3+day4+mix4+day5+mix5+day7+mix7+day8+mix8+day9+mix9+drinks)))
 tok=json.loads((G/'v8-metadata.json').read_text(encoding='utf8'))['tokens']
 for v in tokens:
  if v not in tok:tok[v]=max(tok.values())+1
 (G/'tokens.h').write_text('#pragma once\n'+''.join(f'#define TOK_{k} {v}\n' for k,v in tok.items() if re.fullmatch('[a-z]+',k)))
 def token(v):return str(tok[v])
-fields=sorted(set(re.findall(r'global\.(\w+)',day+mix+day2+mix2+day3+mix3+day4+mix4+day5+mix5+day7+mix7))-{'ch1','ch2','ch3','ch4','ch5','ch7','tuto'}-{f'odstr{i}' for i in range(200)}-{f'distract{i}' for i in range(200)})
+fields=sorted(set(re.findall(r'global\.(\w+)',day+mix+day2+mix2+day3+mix3+day4+mix4+day5+mix5+day7+mix7+day8+mix8+day9+mix9))-{'ch1','ch2','ch3','ch4','ch5','ch7','ch8','ch9','tuto'}-{f'odstr{i}' for i in range(200)}-{f'distract{i}' for i in range(200)})
 fields+=['shouldpay','rightdrink','big_able','tipping','cash','tips','mistakes','juke','mix','drinkscore_a']
 fields+=['cur_day','heldRecipe','heldK','heldIce','rightdrink1','rightdrink2','big_able1','big_able2']
 legacy=json.loads((G/'v9-state-fields.json').read_text())
-fields=legacy+sorted(set(fields)-set(legacy))
+v13_extra=['art3','art4','art5','brian1','brian2','ing4','ing5','ingdrunk2','jamie4','jamie5','jamie6','jilldrunk1','mod_e','rad1','rad2','sei5','sei6','stel4','stel5','virgilio3']
+fields=legacy+v13_extra+sorted(set(fields)-set(legacy)-set(v13_extra))
 (G/'state.h').write_text('#pragma once\ntypedef struct {\n'+''.join('int '+f+';\n' for f in fields)+'} State;\n')
 (G/'state-fields.json').write_text(json.dumps(fields))
 def translate(s):
- s=re.sub(r'textbox_create\(global\.(ch1|ch2|ch3|ch4|ch5|ch7|tuto), (\d+), 1\);',lambda m:'return '+str(int(m[2])+({'tuto':0,'ch1':100,'ch2':200,'ch3':400,'ch4':500,'ch5':600,'ch7':800}[m[1]]))+';',s)
+ s=re.sub(r'textbox_create\(global\.(ch1|ch2|ch3|ch4|ch5|ch7|ch8|ch9|tuto), (\d+), 1\);',lambda m:'return '+str(int(m[2])+({'tuto':0,'ch1':100,'ch2':200,'ch3':400,'ch4':500,'ch5':600,'ch7':800,'ch8':900,'ch9':1000}[m[1]]))+';',s)
  s=re.sub(r'instance_create\(x, y, (305|308)\);',lambda m:'return '+('-2' if m[1]=='305' else '-3')+';',s)
  s=re.sub(r'mixertips_double\((\d+), (\d+), (\d+), (\d+), (\d+), (\d+)\);',lambda m:f's->shouldpay={m[1]};s->rightdrink1={m[2]};s->rightdrink2={m[3]};s->big_able1={m[4]};s->big_able2={m[5]};s->tipping={m[6]};',s)
  s=re.sub(r'mixertips\((\d+), (\d+), (\d+), (\d+)\);',lambda m:f's->shouldpay={m[1]};s->rightdrink={m[2]};s->big_able={m[3]};s->tipping={m[4]};',s)
@@ -68,7 +82,7 @@ case 13:return -3;
 default:return 0;
 }}
 '''
-(G/'rules.h').write_text('static int day_rule(State *s){\n'+translate(day)+'\n}\nstatic int mix_rule(State *s){\n'+translate(mix)+'\n}\nstatic int day2_rule(State *s){\n'+translate(day2)+'\n}\nstatic int mix2_rule(State *s){\n'+translate(mix2)+'\n}\nstatic int day3_rule(State *s){\n'+translate(day3)+'\n}\nstatic int mix3_rule(State *s){\n'+translate(mix3)+'\n}\nstatic int day4_rule(State *s){\n'+translate(day4)+'\n}\nstatic int mix4_rule(State *s){\n'+translate(mix4)+'\n}\nstatic int day5_rule(State *s){\n'+translate(day5)+'\n}\nstatic int mix5_rule(State *s){\n'+translate(mix5)+'\n}\n'+day6_rule+'static int day7_rule(State *s){\n'+translate(day7)+'\n}\nstatic int mix7_rule(State *s){\n'+translate(mix7)+'\n}\n')
+(G/'rules.h').write_text('static int day_rule(State *s){\n'+translate(day)+'\n}\nstatic int mix_rule(State *s){\n'+translate(mix)+'\n}\nstatic int day2_rule(State *s,int focused){\n'+translate(day2)+'\n}\nstatic int mix2_rule(State *s){\n'+translate(mix2)+'\n}\nstatic int day3_rule(State *s,int focused){\n'+translate(day3)+'\n}\nstatic int mix3_rule(State *s){\n'+translate(mix3)+'\n}\nstatic int day4_rule(State *s,int focused){\n'+translate(day4)+'\n}\nstatic int mix4_rule(State *s){\n'+translate(mix4)+'\n}\nstatic int day5_rule(State *s,int focused){\n'+translate(day5)+'\n}\nstatic int mix5_rule(State *s){\n'+translate(mix5)+'\n}\n'+day6_rule+'static int day7_rule(State *s,int focused){\n'+translate(day7)+'\n}\nstatic int mix7_rule(State *s){\n'+translate(mix7)+'\n}\nstatic int day8_rule(State *s,int focused){\n'+translate(day8)+'\n}\nstatic int mix8_rule(State *s){\n'+translate(mix8)+'\n}\nstatic int day9_rule(State *s,int focused){\n'+translate(day9)+'\n}\nstatic int mix9_rule(State *s){\n'+translate(mix9)+'\n}\n')
 # Original ingredient conditions and classification, including size and optional alcohol.
 recipes=[]
 for m in re.finditer(r'else if \((global.mod_aa[^\n]+)\)\s*\{([\s\S]*?global.drinkscore_a = (\d+);)',drinks):
@@ -79,7 +93,7 @@ for m in re.finditer(r'else if \((global.mod_aa[^\n]+)\)\s*\{([\s\S]*?global.dri
   amounts.append(int(a[2]));optional|=a[1]=='>='
  recipes.append(dict(name=props['bev_a'],id=props['bevid_a'],flavor=props['flavor_a'],kind=props['kind_a'],size=props['drinksize_a'],alcohol=props['alcohol_a'],price=int(price),amount=amounts,optional=optional,ice='!global.otr_a' not in cond,aged='!global.age_a' not in cond,blended='!global.mixed_a' in cond))
 assert len(recipes)>50,len(recipes)
-# Bottled extra: available directly until the shop is implemented.
+# Bottled extra: the shop controls Mulan Tea availability at runtime.
 recipes.append(dict(name='Муланский чай',id='tea',flavor='sweet',kind='classic',size='normal',alcohol='yes',price=500,amount=[0]*5,optional=False,ice=False,aged=False,blended=False))
 for name,title,flavor in [('rum','Ром','bitter'),('abs','Абсент','sour'),('fed','Plumfume','bubbly')]:
  recipes.append(dict(name=title,id=name,flavor=flavor,kind='classic',size='normal',alcohol='yes',price=500,amount=[0]*5,optional=False,ice=False,aged=False,blended=False))
@@ -94,17 +108,19 @@ for i,r in enumerate(recipes):
 (G/'recipes.h').write_text('#pragma once\ntypedef struct {const char *name;int amount[5],optional,ice,aged,blended,id,flavor,kind,size,alcohol,price;} Recipe;\nstatic const Recipe recipes[]={\n'+',\n'.join(rows)+'};\nstatic const int recipeBook[]={'+','.join(map(str,book))+'};\n#define RECIPE_COUNT '+str(len(recipes))+'\n#define BOOK_COUNT '+str(len(book))+'\n',encoding='utf8')
 (G/'recipes.json').write_text(json.dumps(recipes,indent=2))
 # Commands are compiled to explicit entry/exit functions for each page.
-actors=['gil','dana','kim','donovan','ingram','sei','doro','jamie','miki','alma','stella','art','stream','betty','deal','taylor','virgilio','brian','cass'];short={'gil':'gil','dan':'dana','dana':'dana','kim':'kim','don':'donovan','in':'ingram','sei':'sei','doro':'doro','jamie':'jamie','miki':'miki','alma':'alma','stel':'stella','art':'art','stream':'stream','betty':'betty','deal':'deal','taylor':'taylor','virgilio':'virgilio','brian':'brian','cass':'cass'}
+actors=['gil','dana','kim','donovan','ingram','sei','doro','jamie','miki','alma','stella','art','stream','betty','deal','taylor','virgilio','brian','cass','rad','norma','mario','gaby'];short={'gil':'gil','dan':'dana','dana':'dana','kim':'kim','don':'donovan','in':'ingram','sei':'sei','doro':'doro','jamie':'jamie','miki':'miki','alma':'alma','stel':'stella','art':'art','stream':'stream','betty':'betty','deal':'deal','taylor':'taylor','virgilio':'virgilio','brian':'brian','cass':'cass','rad':'rad','norma':'norma','mario':'mario','gaby':'gaby'}
 previous=json.loads((G/'v8-metadata.json').read_text(encoding='utf8'))['faces']
 variants={a:list(previous.get(a,[''])) for a in actors}
-for filename in ['tutorial.txt','script1.txt','script2.txt','script3.txt','script4.txt','script5.txt','script6.txt','script7.txt']:
+variants['sei'].append('wound_base')
+for filename in ['tutorial.txt','script1.txt','script2.txt','script3.txt','script4.txt','script5.txt','script6.txt','script7.txt','script8.txt','script9.txt']:
  for key,val in re.findall(r'\[XS:(\w+)face,([^\]]*)\]',(game/'scripts/eng'/filename).read_text(encoding='utf-8-sig')):
   actor=short[key]
+  if filename=='script8.txt' and actor=='sei':val='wound_'+(val or 'base')
   if val not in variants[actor]:variants[actor].append(val)
 assert variants['dana'][3]=='mask'
 def command(tag):
- if tag.startswith(('SHOW:','SHOWF:')) and 'doro_shake' in tag:
-  return command(tag.replace('doro_shake','doro'))+'v->shakeUntil=v->now+500;'
+ if tag.startswith(('SHOW:','SHOWF:')) and ('doro_shake' in tag or 'dana_shake' in tag):
+  return command(tag.replace('_shake',''))+'v->shakeUntil=v->now+500;'
  if tag.startswith(('SHOW:','SHOWF:')) and 'codec_' in tag:
   return '' # Day 6 room props are represented by the static apartment scene.
  if tag.startswith('HIDEALL:'):return 'memset(v->visible,0,sizeof(v->visible));'
@@ -118,19 +134,21 @@ def command(tag):
  if tag.startswith('RUM:'):return 'v->rum=1;'
  if tag.startswith('ANNA:'):return 'v->annaUntil=v->now+3334;'
  if tag.startswith('SHOW:') or tag.startswith('SHOWF:'):
-  x,a=tag.split(':')[1].split(',');a=a.replace('sprite_','');masked=a in ('seimask','danamask');a={'seimask':'sei','danamask':'dana','brien':'brian'}.get(a,a);i=actors.index(a)
-  return f'v->visible[{i}]=1;v->position[{i}]={x};v->face[{i}]={variants[a].index('mask') if masked else 0};'
+  x,a=tag.split(':')[1].split(',');a=a.replace('sprite_','');masked=a in ('seimask','danamask');wounded=a=='seiwound';a={'seimask':'sei','seiwound':'sei','danamask':'dana','brien':'brian'}.get(a,a);i=actors.index(a)
+  return f'v->visible[{i}]=1;v->position[{i}]={x};v->face[{i}]={variants[a].index('mask') if masked else variants[a].index('wound_base') if wounded else 0};'
  if tag.startswith('XS:'):
   key,val=tag[3:].split(',')
   if key in ['ph','client','mix','juke']:return f's->{dict(ph="cur_stage",client="cur_client").get(key,key)}={val};'
   if key.endswith('face') and key[:-4] in short:
-   a=short[key[:-4]];return f'v->face[{actors.index(a)}]={variants[a].index(val)};'
+   a=short[key[:-4]];face='wound_'+(val or 'base') if current_script=='script8.txt' and a=='sei' else val
+   return f'v->face[{actors.index(a)}]={variants[a].index(face)};'
   if key.endswith('hide') and key[:-4] in short:return f'v->visible[{actors.index(short[key[:-4]])}]=0;'
  if tag.startswith('DON1'):return 's->orders=174;'
  if tag.startswith('DON2'):return 's->orders=4;'
  return ''
 allblocks={};entries=[];enter={};leave={}
-for filename,offset in [('tutorial.txt',0),('script1.txt',100),('script2.txt',200),('gameover.txt',300),('script3.txt',400),('script4.txt',500),('script5.txt',600),('script6.txt',700),('script7.txt',800)]:
+for filename,offset in [('tutorial.txt',0),('script1.txt',100),('script2.txt',200),('gameover.txt',300),('script3.txt',400),('script4.txt',500),('script5.txt',600),('script6.txt',700),('script7.txt',800),('script8.txt',900),('script9.txt',1000)]:
+ current_script=filename
  block=offset;pending=''
  for raw in (game/'scripts/eng'/filename).read_text(encoding='utf-8-sig').splitlines():
   clean=' '.join(re.sub(r'\[[^\]]*\]','',raw).replace('#',' ').split())
@@ -139,7 +157,7 @@ for filename,offset in [('tutorial.txt',0),('script1.txt',100),('script2.txt',20
   # SHOW and emotion take effect at entry. Hides take effect after the spoken line.
   maskedraw=re.sub(r'\[[^\]]*\]',lambda m:' '*len(m[0]),raw)
   firsttext=next((i for i,c in enumerate(maskedraw) if not c.isspace()),len(raw))
-  def isbefore(pos,t):return t.startswith(('HIDEALL','ANNA','SHOW','XS:gilface','XS:danaface','XS:kimface','XS:donface','XS:seiface','XS:doroface','XS:jamieface','XS:mikiface','XS:almaface','XS:stelface','XS:artface','XS:streamface','XS:bettyface','XS:virgilioface','BANG','CRASH','SHAKE','BOOM','CHAT','CHANNEL','RUM')) or ('hide,' in t and pos<firsttext)
+  def isbefore(pos,t):return t.startswith(('HIDEALL','ANNA','SHOW','XS:gilface','XS:danaface','XS:kimface','XS:donface','XS:seiface','XS:doroface','XS:jamieface','XS:mikiface','XS:almaface','XS:stelface','XS:artface','XS:streamface','XS:bettyface','XS:virgilioface','XS:marioface','XS:gabyface','BANG','CRASH','SHAKE','BOOM','CHAT','CHANNEL','RUM')) or ('hide,' in t and pos<firsttext)
   before=''.join(c for pos,c,t in cmds if isbefore(pos,t))
   after=''.join(c for pos,c,t in cmds if c and not isbefore(pos,t))
   if clean:
@@ -153,7 +171,7 @@ for filename,offset in [('tutorial.txt',0),('script1.txt',100),('script2.txt',20
   else:pending+=before+after
   for n in re.findall(r'\[E:(\d+)\]',raw):block=offset+int(n)
 assert 0 not in allblocks and 100 not in allblocks
-starts=[0]*863;counts=[0]*863
+starts=[0]*1049;counts=[0]*1049
 for b,ids in allblocks.items():starts[b]=ids[0];counts[b]=len(ids)
 (G/'story.h').write_text('#pragma once\ntypedef struct {const char *name,*text;int face;} Line;\nstatic const Line story[]={'+',\n'.join('{'+cstr(e['name'])+','+cstr(e['text'])+',0}' for e in entries)+'};\nstatic const int blockStart[]={'+','.join(map(str,starts))+'};\nstatic const int blockCount[]={'+','.join(map(str,counts))+'};\n',encoding='utf8')
 (G/'story.json').write_text(json.dumps({b:[entries[i] for i in ids] for b,ids in allblocks.items()},ensure_ascii=False,indent=2),encoding='utf8')
@@ -201,6 +219,23 @@ layers['virgilio']={f:sprite_names(ids) for f,ids in {'':[389,391,390],'smug':[3
 layers['brian']={'':sprite_names([467,468,469])}
 layers['cass']={'':sprite_names([470,471,472])}
 layers['doro']['wah']=sprite_names([249,250,251])
+layers['rad']={'':['rad_spr','rad_lips']}
+layers['dana']['intensify']=layers['dana']['']
+layers['sei'].update({
+ 'wound_base':sprite_names([189,190,192]),
+ 'wound_happy':sprite_names([189,195,192]),
+ 'wound_smile':sprite_names([189,190,192]),
+ 'wound_pain':sprite_names([193,194]),
+ 'wound_sad':sprite_names([196,197,198]),
+ 'wound_sorry':sprite_names([199,200,201])})
+layers['norma']={'':sprite_names([412,413,414])}
+layers['mario']={f:sprite_names(ids) for f,ids in {
+ '':[415,416,417], 'surprise':[418,419,420],
+ 'smile':[421,422], 'nothet':[423,425,424]}.items()}
+layers['gaby']={f:sprite_names(ids) for f,ids in {
+ '':[426,427,428], 'angry':[429,430,431],
+ 'sad':[432,433,434], 'pain':[432,433,434],
+ 'shy':[440,441,443], 'surprise':[437,438,439]}.items()}
 defs=[];tables=[]
 for a in actors:
  names=[]
@@ -208,12 +243,12 @@ for a in actors:
   ls=layers[a][f];im=composite([(x,0,0) if isinstance(x,str) else x for x in ls]);name=f'actor_{a}_{i}';names.append('&'+name)
   im.save(G/(name+'.png'));defs.append('static const uint8_t px_'+name+'[]={'+','.join(map(str,im.tobytes()))+'};\nstatic const Sprite '+name+'={'+f'{im.width},{im.height},px_{name}'+'};')
  tables.append('{'+','.join(names+['NULL']*(16-len(names)))+'}')
-(G/'actors.h').write_text('#pragma once\n#define ACTOR_COUNT 19\nextern const Sprite *const actors[19][16];\n')
+(G/'actors.h').write_text('#pragma once\n#define ACTOR_COUNT 23\nextern const Sprite *const actors[23][16];\n')
 im=gd.sprite('anna_channel').resize((round(gd.sprite('anna_channel').width*264/338),round(gd.sprite('anna_channel').height*264/338)),Image.Resampling.NEAREST)
 im.save(G/'anna_tv.png')
 defs.append('static const uint8_t px_anna_tv[]={'+','.join(map(str,im.tobytes()))+'};\nconst Sprite anna_tv={'+f'{im.width},{im.height},px_anna_tv'+'};')
-(G/'actors.h').write_text((G/'actors.h').read_text()+'extern const Sprite anna_tv;\nstatic const int actorFaceCount[19]={'+','.join(str(len(variants[a])) for a in actors)+'};\n')
+(G/'actors.h').write_text((G/'actors.h').read_text()+'extern const Sprite anna_tv;\nstatic const int actorFaceCount[23]={'+','.join(str(len(variants[a])) for a in actors)+'};\n')
 old=(G/'assets.c').read_text().split('\n#include <stddef.h>')[0]
-(G/'assets.c').write_text(old+'\n#include <stddef.h>\n'+'\n'.join(defs)+'\nconst Sprite *const actors[19][16]={'+','.join(tables)+'};\n')
+(G/'assets.c').write_text(old+'\n#include <stddef.h>\n'+'\n'.join(defs)+'\nconst Sprite *const actors[23][16]={'+','.join(tables)+'};\n')
 (G/'day1-metadata.json').write_text(json.dumps({'pages':len(entries),'blocks':len(allblocks),'recipes':len(book),'recipe_variants':len(recipes),'faces':variants,'tokens':tok},ensure_ascii=False,indent=2),encoding='utf8')
 print('Generated',len(entries),'pages,',len(book),'recipes,',variants)

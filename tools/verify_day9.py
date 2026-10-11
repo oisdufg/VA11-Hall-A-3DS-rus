@@ -7,7 +7,7 @@ import random
 base=Path(__file__).with_name('verify_day1.py')
 exec(base.read_text(encoding='utf8').split('checks=[]')[0])
 
-assert C.sizeof(View)==944,C.sizeof(View)
+assert C.sizeof(View)==1344,C.sizeof(View)
 seen,orders,actors=set(),set(),set()
 completed=failed=breaks=music=0
 rng=random.Random(9009)

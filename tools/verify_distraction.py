@@ -6,7 +6,7 @@ import json
 base=Path(__file__).with_name('verify_day1.py')
 exec(base.read_text(encoding='utf8').split('checks=[]')[0])
 
-assert C.sizeof(View)==944
+assert C.sizeof(View)==1344
 def first_order():
     v=get();v.mode=0;put(v)
     for _ in range(500):

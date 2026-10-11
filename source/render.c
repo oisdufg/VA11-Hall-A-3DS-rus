@@ -12,6 +12,7 @@
 #include "home_assets.h"
 #include "shop_assets.h"
 #include "day6_assets.h"
+#include "ending_assets.h"
 
 typedef struct {uint8_t *p;int w;} Screen;
 static const uint32_t BG=0x110e1d, PANEL=0x21172e, INK=0xf0e6ec, MUTED=0xaa96b5, PINK=0xf56ea9, CYAN=0x6edbda;
@@ -76,9 +77,33 @@ static void button(Screen s,int x,int y,int w,const char *label,bool active) {
     rect(s,x,y,w,25,active?0x44304f:0x211c2b);
     rect(s,x,y,w,1,active?PINK:0x51405a);text(s,x+6,y+5,label,active?INK:MUTED);
 }
+static void draw_ending(Screen t,Screen b,const View *v){
+    if(v->mode==9){
+        for(int y=0;y<240;++y)for(int x=0;x<400;++x){
+            const uint8_t *p=endingCredits.rgba+4*((y+v->selected)*400+x);
+            if(p[3]>127)pixel(t,x,y,((uint32_t)p[0]<<16)|((uint32_t)p[1]<<8)|p[2]);
+        }
+        text(b,10,24,uiStrings[UI_CREDITS_SCROLL_HINT],PINK);
+        text(b,10,78,uiStrings[UI_CREDITS_CONTINUE],INK);
+        text(b,10,215,uiStrings[UI_START_VYHOD],MUTED);
+        return;
+    }
+    int scene=v->block>=2101 && v->block<=2106?v->block-2101:0;
+    sprite(t,0,0,&endingScenes[scene]);
+    rect(t,8,148,384,91,0x171121);rect(t,8,148,384,1,PINK);
+    if(v->mode==0){
+        const Line *line=&story[blockStart[v->block]+v->line];
+        text(t,16,151,line->name,CYAN);text(t,16,168,line->text,INK);
+        text(t,335,151,uiStrings[UI_A],PINK);
+    }else text(t,16,177,ui_day_completed(v->state.cur_day),CYAN);
+    text(b,12,18,uiStrings[UI_EPILOGUE_SCENE],PINK);
+    text(b,12,67,uiStrings[UI_EPILOGUE_TEXT_HINT],INK);
+    if(v->mode==2)text(b,12,115,ui_next_day_hint(v->state.cur_day),CYAN);
+}
 void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
     Screen t={top,400},b={bottom,320};
     rect(t,0,0,400,240,BG);rect(b,0,0,320,240,BG);
+    if(v->state.cur_day==20){draw_ending(t,b,v);return;}
     text(t,12,3,uiStrings[UI_VA_11_HALL_A],PINK);text(t,224,3,ui_day_badge(v->state.cur_day),MUTED);
     int shake=v->shakeUntil?((v->now/50)%2?2:-2):0;
     bool day6Home=v->state.cur_day==6 && v->block>=702;
@@ -107,6 +132,9 @@ void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
         text(t,16,174,ui_order_hint(v->state.orders),INK);
         text(t,16,196,v->state.slotamount==2?(v->state.heldRecipe?uiStrings[UI_NAPITOK_2_2_X_PODAT_OBA]:uiStrings[UI_NAPITOK_1_2_X_OTLOZHIT_V_SLOT]):uiStrings[UI_Y_RETSEPT_A_SHEYKER_X_PODAT],MUTED);
         text(t,16,215,uiStrings[UI_B_SBROS_L_LD_R_VYDERZHKA],MUTED);
+    } else if(v->mode==8) {
+        text(t,16,158,uiStrings[UI_PARTY_CHOOSE],CYAN);
+        text(t,16,188,uiStrings[UI_PARTY_QUESTION],INK);
     } else if(v->mode==6) {
         text(t,16,153,uiStrings[UI_GAME_OVER],PINK);
         text(t,16,177,uiStrings[UI_DANA_OTPRAVILA_DZHILL_DOMOY],INK);
@@ -153,6 +181,17 @@ void draw_screens(uint8_t *top,uint8_t *bottom,const View *v) {
             text(b,18,143,uiStrings[UI_B_VERNUTSYA_K_IGRE],MUTED);
             text(b,18,165,uiStrings[UI_X_VYBRAT_MUZYKU],CYAN);
         }
+        return;
+    }
+    if(v->mode==8){
+        static const UiStringId people[]={UI_PARTY_DANA,UI_PARTY_DOROTHY,UI_PARTY_RAD,UI_PARTY_ALMA,UI_PARTY_GIL};
+        text(b,12,12,uiStrings[UI_PARTY_GUEST],PINK);
+        for(int i=0;i<5;++i){
+            int y=54+i*28;
+            rect(b,12,y,296,25,i==v->selected?0x44304f:PANEL);
+            text(b,24,y+4,uiStrings[people[i]],i==2 && v->state.dogpick?MUTED:i==v->selected?INK:CYAN);
+        }
+        text(b,12,208,uiStrings[UI_PARTY_CONTROLS],MUTED);
         return;
     }
     text(b,8,4,ui_bar_heading(v->state.cur_day,v->state.cur_client==0),PINK);
@@ -226,19 +265,34 @@ void draw_menu(uint8_t *top,uint8_t *bottom,const View *v,const Menu *u) {
         text(b,12,196,notice,CYAN);text(b,12,220,uiStrings[UI_B_DOMOY_STRANITSA],PINK);return;
     }
     if(u->screen==UI_MUSIC){
-        text(t,24,30,uiStrings[UI_MUZYKALNYY_AVTOMAT],PINK);
-        text(t,24,68,u->notice?uiStrings[UI_VYBERI_MUZYKU_PERED_SMENOY]:uiStrings[UI_MUZYKA_DLYA_ETOY_SMENY],INK);
-        text(t,24,108,uiStrings[UI_SEYCHAS_VYBRANO],MUTED);
-        text(t,24,134,musicTitles[v->musicTrack],CYAN);
-        text(t,24,180,uiStrings[UI_VYBRANNYY_TREK_IGRAET_PO_KRUGU],MUTED);
-        text(b,12,14,uiStrings[UI_VVERH_VNIZ_TREK_STRANITSA],PINK);
+        if(u->scroll){
+            text(t,16,9,uiStrings[UI_PLAYLIST_SLOT],PINK);number(t,192,9,u->article+1,PINK);
+            text(t,16,31,musicTitles[v->playlist[u->article]],CYAN);
+            for(int i=0;i<12;++i){
+                int x=16+(i/6)*190,y=62+(i%6)*28;
+                rect(t,x,y,176,25,u->article==i?0x44304f:PANEL);
+                number(t,x+8,y+5,i+1,u->article==i?INK:MUTED);
+                text(t,x+30,y+5,":",MUTED);
+                number(t,x+46,y+5,v->playlist[i]+1,u->article==i?CYAN:INK);
+            }
+            text(b,12,14,uiStrings[UI_PLAYLIST_PICK],PINK);
+        }else{
+            text(t,24,30,uiStrings[UI_MUZYKALNYY_AVTOMAT],PINK);
+            text(t,24,68,u->notice?uiStrings[UI_VYBERI_MUZYKU_PERED_SMENOY]:uiStrings[UI_MUZYKA_DLYA_ETOY_SMENY],INK);
+            text(t,24,108,uiStrings[UI_SEYCHAS_VYBRANO],MUTED);
+            text(t,24,134,musicTitles[v->musicTrack],CYAN);
+            text(t,24,180,uiStrings[UI_VYBRANNYY_TREK_IGRAET_PO_KRUGU],MUTED);
+            text(b,12,14,uiStrings[UI_VVERH_VNIZ_TREK_STRANITSA],PINK);
+        }
         int first=(u->selection/5)*5;
         for(int i=0;i<5 && first+i<MUSIC_COUNT;++i){
             rect(b,8,48+i*28,304,25,first+i==u->selection?0x35253f:PANEL);
             text(b,16,53+i*28,musicTitles[first+i],!engine_shop_music_unlocked(v,first+i)?MUTED:first+i==u->selection?CYAN:INK);
         }
-        text(b,12,198,engine_shop_music_unlocked(v,u->selection)?uiStrings[UI_A_KASANIE_IGRAT]:uiStrings[UI_TREK_NUZHNO_KUPIT],PINK);
-        text(b,12,220,uiStrings[UI_B_OSTAVIT_TEKUSCHIY_TREK],MUTED);return;
+        const char *action=uiStrings[UI_TREK_NUZHNO_KUPIT];
+        if(engine_shop_music_unlocked(v,u->selection))action=uiStrings[u->scroll?UI_PLAYLIST_SAVE:UI_A_KASANIE_IGRAT];
+        text(b,12,198,action,PINK);
+        text(b,12,220,u->scroll?uiStrings[UI_PLAYLIST_TOGGLE]:uiStrings[UI_B_OSTAVIT_TEKUSCHIY_TREK],MUTED);return;
     }
     if(u->screen==UI_CREDITS){
         rect(t,24,35,352,2,PINK);
@@ -282,15 +336,19 @@ void draw_menu(uint8_t *top,uint8_t *bottom,const View *v,const Menu *u) {
         text(t,12,6,ui_apartment_heading(v->state.cur_day),PINK);
         sprite(t,62,27,&home_room);
         for(int i=0;i<SHOP_COUNT;++i)if((v->purchases&(1u<<i)) && shopItems[i].decoration)sprite(t,62,48,shopItems[i].decoration);
-        if(v->state.cur_day==2 || v->state.cur_day==3 || v->state.cur_day==4 || v->state.cur_day==5 || v->state.cur_day==7 || v->state.cur_day==8 || v->state.cur_day==9)
+        if(v->state.cur_day==2 || v->state.cur_day==3 || v->state.cur_day==4 || v->state.cur_day==5 || v->state.cur_day==7 || v->state.cur_day==8 || v->state.cur_day==9 || v->state.cur_day==10 || v->state.cur_day==11 || v->state.cur_day==12 || v->state.cur_day==14 || v->state.cur_day==15 || v->state.cur_day==16 || v->state.cur_day==17 || v->state.cur_day==18)
             text(t,16,199,ui_focus_status(v->state.cur_day,engine_focused(v),v->day4Download),engine_focused(v)?CYAN:PINK);
         text(t,24,219,uiStrings[UI_KOSHELK],CYAN);money(t,104,219,v->walletCents,CYAN);
     }
     if(u->screen==UI_ARTICLE){
         const Sprite *im=menu_phone_page(v,u);
         for(int yy=0;yy<188;++yy)for(int xx=0;xx<im->w;++xx){
-            const uint8_t *p=im->rgba+((yy+u->scroll)*im->w+xx)*4;
-            if(p[3]>127)pixel(b,60+xx,24+yy,((uint32_t)p[0]<<16)|((uint32_t)p[1]<<8)|p[2]);
+            const uint8_t *p=im->rgba+((yy+u->scroll)*im->w+xx)*2;
+            uint16_t value=(uint16_t)p[0]|((uint16_t)p[1]<<8);
+            if(value&0x8000){
+                uint32_t r=((value>>10)&31)*255/31,g=((value>>5)&31)*255/31,blue=(value&31)*255/31;
+                pixel(b,60+xx,24+yy,(r<<16)|(g<<8)|blue);
+            }
         }
         text(b,8,3,u->app==0?uiStrings[UI_DOPOLNENNAYA_PRAVDA]:u->app==1?uiStrings[UI_DANGER_U]:uiStrings[UI_BLOG_KIRY_MIKI],PINK);
         text(b,12,96,uiStrings[UI_VVERH],MUTED);text(b,270,96,uiStrings[UI_VNIZ],MUTED);
@@ -303,31 +361,37 @@ void draw_menu(uint8_t *top,uint8_t *bottom,const View *v,const Menu *u) {
         text(b,12,146,uiStrings[UI_SMESHAT_MENEE_5_SEKUND_NVZBOLTAT_OT_5_SEKUND_NAVTOSE],CYAN);
         text(b,12,218,uiStrings[UI_A_B_NAZAD],PINK);return;
     }
-    const char *title=uiStrings[UI_EMPTY],*items[9]={0};int count=3;
+    const char *title=uiStrings[UI_EMPTY],*items[10]={0};int count=3,first=0;
     if(u->screen==UI_TITLE){title=uiStrings[UI_VA_11_HALL_A_3DS_0_8_0];items[0]=u->hasSave?uiStrings[UI_PRODOLZHIT]:uiStrings[UI_PRODOLZHIT_NET_SOHRANENIYA];items[1]=uiStrings[UI_NOVAYA_IGRA];items[2]=uiStrings[UI_UPRAVLENIE_2];items[3]=uiStrings[UI_VYHOD];count=4;}
 #ifdef VA11_TEST_MODE
     if(u->screen==UI_TITLE){title=uiStrings[UI_VA_11_HALL_A_0_8_0_TEST];items[2]=uiStrings[UI_TEST_VYBRAT_DEN];}
-    if(u->screen==UI_TEST_DAYS){title=uiStrings[UI_TEST_KVARTIRA_PERED_SMENOY];items[0]=uiStrings[UI_DEN_1];items[1]=uiStrings[UI_DEN_2];items[2]=uiStrings[UI_DEN_3];items[3]=uiStrings[UI_DEN_4];items[4]=uiStrings[UI_DEN_5];items[5]=uiStrings[UI_DAY6_TEST_LABEL];items[6]=uiStrings[UI_DAY7_TEST_LABEL];items[7]=uiStrings[UI_DAY8_TEST_LABEL];items[8]=uiStrings[UI_DAY9_TEST_LABEL];count=9;}
+    if(u->screen==UI_TEST_DAYS){
+        static const UiStringId labels[]={UI_DEN_1,UI_DEN_2,UI_DEN_3,UI_DEN_4,UI_DEN_5,UI_DAY6_TEST_LABEL,UI_DAY7_TEST_LABEL,UI_DAY8_TEST_LABEL,UI_DAY9_TEST_LABEL,UI_DAY10_TEST_LABEL,UI_DAY11_TEST_LABEL,UI_DAY12_TEST_LABEL,UI_DAY13_TEST_LABEL,UI_DAY14_TEST_LABEL,UI_DAY15_TEST_LABEL,UI_DAY16_TEST_LABEL,UI_DAY17_TEST_LABEL,UI_DAY18_TEST_LABEL,UI_DAY19_TEST_LABEL};
+        title=uiStrings[UI_TEST_KVARTIRA_PERED_SMENOY];first=(u->selection/10)*10;count=19-first;
+        if(count>10)count=10;
+        for(int i=0;i<count;++i)items[i]=uiStrings[labels[first+i]];
+    }
 #endif
     if(u->screen==UI_NEW){title=uiStrings[UI_NOVAYA_IGRA_2];items[0]=uiStrings[UI_S_OBUCHENIEM];items[1]=uiStrings[UI_SRAZU_PERVYY_DEN];items[2]=uiStrings[UI_OTMENA];}
     if(u->screen==UI_HOME){title=ui_apartment_date(v->state.cur_day);items[0]=uiStrings[UI_TELEFON];items[1]=uiStrings[UI_NA_RABOTU];items[2]=uiStrings[UI_SOHRANIT];items[3]=uiStrings[UI_MAGAZIN];count=4;}
     if(u->screen==UI_PHONE){title=uiStrings[UI_TELEFON_2];items[0]=uiStrings[UI_DOPOLNENNAYA_PRAVDA_2];items[1]=uiStrings[UI_DANGER_U_2];items[2]=uiStrings[UI_BLOG_KIRY_MIKI_2];}
     if(u->screen==UI_LIST){
-        const char *names[3][3]={{uiStrings[UI_MASSOVAYA_EMIGRATSIYA],uiStrings[UI_NOVAYA_UGROZA_VANDERLENDERY],uiStrings[UI_KIBORG_NA_KABLUKAH]},{uiStrings[UI_KONTSERT_MIKI],uiStrings[UI_POGOVORIM_OB_ALICE_RABBIT],uiStrings[UI_KONTSERT_MIKI_2]},{uiStrings[UI_KAK_YA_OTDYHAYU],uiStrings[UI_KONTSERT_POD_KUPOLOM],uiStrings[UI_SPASIBO_GLITCH_SITI]}};
         title=u->app==0?uiStrings[UI_NOVOSTI]:u->app==1?uiStrings[UI_DANGER_U]:uiStrings[UI_KIRA_MIKI];
-        for(int i=0;i<3;++i)items[i]=names[u->app][i];
-        if(v->state.cur_day==4 && u->app==0){items[0]=uiStrings[UI_NOVOSTI_16_DEKABRYA];items[1]=uiStrings[UI_VTORAYA_STATYA];items[2]=uiStrings[UI_TRETYA_STATYA];}
-        if(v->state.cur_day==3 && u->app==0){items[0]=uiStrings[UI_NOVOSTI_15_DEKABRYA];items[1]=uiStrings[UI_VTORAYA_STATYA];items[2]=uiStrings[UI_TRETYA_STATYA];}
-        if(v->state.cur_day==2 && u->app==0){items[0]=uiStrings[UI_MESTNAYA_GEROINYA];items[1]=v->state.dondrunk1?uiStrings[UI_70_NASHIH_CHITATELEY]:uiStrings[UI_BESPORYADKI_USILIVAYUTSYA];items[2]=v->state.dondrunk1?uiStrings[UI_KEM_MOZHET_BYT_ALICE_RABBIT]:uiStrings[UI_LECHENIE_TOKIYSKOGO_GRIPPA];}
+        if(u->app==1){
+            for(int i=0;i<3;++i)items[i]=ui_phone_forum_title(menu_phone_index(v,1,i));
+        }else if(u->app==2){
+            for(int i=0;i<3;++i)items[i]=ui_phone_miki_title(menu_phone_index(v,2,i));
+        }else if(v->state.cur_day==1){
+            items[0]=uiStrings[UI_MASSOVAYA_EMIGRATSIYA];items[1]=uiStrings[UI_NOVAYA_UGROZA_VANDERLENDERY];items[2]=uiStrings[UI_KIBORG_NA_KABLUKAH];
+        }else if(v->state.cur_day==2){
+            items[0]=uiStrings[UI_MESTNAYA_GEROINYA];items[1]=v->state.dondrunk1?uiStrings[UI_70_NASHIH_CHITATELEY]:uiStrings[UI_BESPORYADKI_USILIVAYUTSYA];items[2]=v->state.dondrunk1?uiStrings[UI_KEM_MOZHET_BYT_ALICE_RABBIT]:uiStrings[UI_LECHENIE_TOKIYSKOGO_GRIPPA];
+        }else{
+            items[0]=ui_phone_news_title(v->state.cur_day);items[1]=uiStrings[UI_VTORAYA_STATYA];items[2]=uiStrings[UI_TRETYA_STATYA];
+        }
     }
-    if(u->screen==UI_LIST && v->state.cur_day==5 && u->app==0){items[0]=uiStrings[UI_NOVOSTI_17_DEKABRYA];items[1]=uiStrings[UI_VTORAYA_STATYA];items[2]=uiStrings[UI_TRETYA_STATYA];}
-    if(u->screen==UI_LIST && v->state.cur_day==6 && u->app==0){items[0]=uiStrings[UI_DAY6_NEWS_TITLE];items[1]=uiStrings[UI_VTORAYA_STATYA];items[2]=uiStrings[UI_TRETYA_STATYA];}
-    if(u->screen==UI_LIST && v->state.cur_day==7 && u->app==0){items[0]=uiStrings[UI_DAY7_NEWS_TITLE];items[1]=uiStrings[UI_VTORAYA_STATYA];items[2]=uiStrings[UI_TRETYA_STATYA];}
-    if(u->screen==UI_LIST && v->state.cur_day==8 && u->app==0){items[0]=uiStrings[UI_DAY8_NEWS_TITLE];items[1]=uiStrings[UI_VTORAYA_STATYA];items[2]=uiStrings[UI_TRETYA_STATYA];}
-    if(u->screen==UI_LIST && v->state.cur_day==9 && u->app==0){items[0]=uiStrings[UI_DAY9_NEWS_TITLE];items[1]=uiStrings[UI_VTORAYA_STATYA];items[2]=uiStrings[UI_TRETYA_STATYA];}
     text(b,12,10,title,PINK);
     for(int i=0;i<count;++i){
-        if(u->screen==UI_TEST_DAYS){int y=48+i*18;rect(b,16,y,288,17,u->selection==i?0x44304f:PANEL);text(b,22,y+1,items[i],u->selection==i?INK:MUTED);}
+        if(u->screen==UI_TEST_DAYS){int y=48+i*18;rect(b,16,y,288,17,u->selection==first+i?0x44304f:PANEL);text(b,22,y+1,items[i],u->selection==first+i?INK:MUTED);}
         else button(b,16,48+i*38,288,items[i],u->selection==i);
     }
     if(u->screen==UI_NEW && u->hasSave)text(b,12,174,uiStrings[UI_TEKUSCHIY_PROGRESS_BUDET_ZAMENN],MUTED);

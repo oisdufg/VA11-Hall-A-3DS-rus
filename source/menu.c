@@ -3,19 +3,28 @@
 #include "home_assets.h"
 #include "music.h"
 #include "shop_assets.h"
+#include "playlist.h"
+int menu_phone_index(const View *v,int app,int article){
+    static const unsigned char forumMove[20]={0,0,0,3,4,7,7,10,11,12,13,14,15,15,16,17,18,19,19,20};
+    static const unsigned char mikiMove[20]={0,0,0,0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,3,3};
+    int day=v->state.cur_day;
+    if(day<1 || day>19 || article<0 || article>2)return 1;
+    if(app==1){int index=forumMove[day]+article+1;return index==9 && v->state.streamdrunk1==1?24:index;}
+    if(app==2)return mikiMove[day]+article+1;
+    return 3*((day==19?18:day)-1)+article+1;
+}
 const Sprite *menu_phone_page(const View *v,const Menu *u){
-    if(v->state.cur_day==9 && u->app==0){const Sprite *pages[]={&home_news25,&home_news26,&home_news27};return pages[u->article];}
-    if(v->state.cur_day==8 && u->app==0){const Sprite *pages[]={&home_news22,&home_news23,&home_news24};return pages[u->article];}
-    if(v->state.cur_day==7 && u->app==0){const Sprite *pages[]={&home_news19,&home_news20,&home_news21};return pages[u->article];}
-    if(v->state.cur_day==6 && u->app==0){const Sprite *pages[]={&home_news16,&home_news17,&home_news18};return pages[u->article];}
-    if(v->state.cur_day==5 && u->app==0){const Sprite *pages[]={&home_news13,&home_news14,&home_news15};return pages[u->article];}
-    if(v->state.cur_day==2 && u->app==0)return day2News[v->state.dondrunk1?1:0][u->article];
-    if(v->state.cur_day==3 && u->app==0)return day3News[v->state.dondrunk2?1:0][u->article];
-    if(v->state.cur_day==4 && u->app==0)return day4News[(v->state.dondrunk1==1 && v->state.dondrunk3==1)?1:0][u->article];
-    return phonePages[u->app][u->article];
+    if(u->app<0 || u->app>2 || u->article<0 || u->article>2)return phonePages[0][0];
+    int day=v->state.cur_day,article=u->article;
+    if(u->app==1)return forumPages[menu_phone_index(v,1,article)];
+    if(u->app==2)return mikiPages[menu_phone_index(v,2,article)];
+    if(day==2)return day2News[v->state.dondrunk1?1:0][article];
+    if(day==3)return day3News[v->state.dondrunk2?1:0][article];
+    if(day==4)return day4News[(v->state.dondrunk1==1 && v->state.dondrunk3==1)?1:0][article];
+    return newsPages[menu_phone_index(v,0,article)];
 }
 void menu_init(Menu *u,int hasSave){memset(u,0,sizeof(*u));u->screen=UI_TITLE;u->hasSave=hasSave;u->selection=hasSave?0:1;}
-void menu_music(Menu *u,const View *v){u->app=u->screen;u->screen=UI_MUSIC;u->selection=v->musicTrack;u->notice=v->mode==7;}
+void menu_music(Menu *u,const View *v){u->app=u->screen;u->screen=UI_MUSIC;u->selection=v->musicTrack;u->article=0;u->scroll=0;u->notice=v->mode==7;}
 static int shop_input(Menu *u,View *v,unsigned keys,int tx,int ty){
         if(keys&NAV_B){
             if(u->notice==1){u->notice=0;return ACT_NONE;}
@@ -40,6 +49,24 @@ static int shop_input(Menu *u,View *v,unsigned keys,int tx,int ty){
         return ACT_NONE;
 }
 static int music_input(Menu *u,View *v,unsigned keys,int tx,int ty){
+    if(keys&NAV_Y){u->scroll=!u->scroll;u->article=0;return ACT_NONE;}
+    if(u->scroll){
+        if(keys&NAV_LEFT)u->article=(u->article+PLAYLIST_SLOTS-1)%PLAYLIST_SLOTS;
+        if(keys&NAV_RIGHT)u->article=(u->article+1)%PLAYLIST_SLOTS;
+        if(keys&NAV_UP)u->selection=(u->selection+MUSIC_COUNT-1)%MUSIC_COUNT;
+        if(keys&NAV_DOWN)u->selection=(u->selection+1)%MUSIC_COUNT;
+        if((keys&NAV_TOUCH) && tx>=8 && tx<312 && ty>=48 && ty<188){
+            int chosen=(u->selection/5)*5+(ty-48)/28;
+            if(chosen<MUSIC_COUNT){u->selection=chosen;keys|=NAV_A;}
+        }
+        if((keys&NAV_A) && engine_shop_music_unlocked(v,u->selection)){
+            playlist_assign(v,u->article,u->selection);
+            u->article=(u->article+1)%PLAYLIST_SLOTS;
+        }
+        if(keys&NAV_B){u->scroll=0;return ACT_NONE;}
+        if(!(keys&NAV_X))return ACT_NONE;
+        v->playlistPos=0;v->musicTrack=v->playlist[0];
+    }else{
         if(keys&NAV_UP)u->selection=(u->selection+MUSIC_COUNT-1)%MUSIC_COUNT;
         if(keys&NAV_DOWN)u->selection=(u->selection+1)%MUSIC_COUNT;
         if(keys&NAV_LEFT)u->selection=(u->selection+MUSIC_COUNT-5)%MUSIC_COUNT;
@@ -48,13 +75,13 @@ static int music_input(Menu *u,View *v,unsigned keys,int tx,int ty){
             int chosen=(u->selection/5)*5+(ty-48)/28;
             if(chosen<MUSIC_COUNT){u->selection=chosen;keys|=NAV_A;}
         }
-        if(keys&(NAV_A|NAV_B)){
-            if((keys&NAV_A) && !engine_shop_music_unlocked(v,u->selection))return ACT_NONE;
-            if(keys&NAV_A)v->musicTrack=u->selection;
-            if(v->mode==7)engine_finish_jukebox(v);
-            u->screen=u->app;u->selection=0;u->notice=0;
-        }
-        return ACT_NONE;
+        if(!(keys&(NAV_A|NAV_B)))return ACT_NONE;
+        if((keys&NAV_A) && !engine_shop_music_unlocked(v,u->selection))return ACT_NONE;
+        if(keys&NAV_A)playlist_fill(v,u->selection);
+    }
+    if(v->mode==7)engine_finish_jukebox(v);
+    u->screen=u->app;u->selection=0;u->notice=0;u->scroll=0;
+    return ACT_NONE;
 }
 static int article_input(Menu *u,const View *v,unsigned keys,int tx){
         int limit=menu_phone_page(v,u)->h-188;
@@ -68,7 +95,7 @@ static int article_input(Menu *u,const View *v,unsigned keys,int tx){
 }
 static int selection_count(int screen){
     switch(screen){
-    case UI_TEST_DAYS:return 9;
+    case UI_TEST_DAYS:return 19;
     case UI_TITLE:case UI_HOME:return 4;
     default:return 3;
     }
@@ -111,6 +138,8 @@ static int activate(Menu *u,View *v){
         for(int i=1;i<day;++i){v->mode=2;engine_next_day(v);}
         v->mode=5;v->round=0;v->walletCents=2000000;v->purchases=0;
         if(day>=4){v->walletCents+=80000;v->day4Download=0;v->state.cur_day=4;engine_day4_download(v);v->state.cur_day=day;}
+        if(day==12){v->state.lightdl=0;engine_day12_download(v);}
+        if(day==18){v->state.housedl=0;engine_day18_rent(v);}
         v->paidDay=day-1;v->lastPayCents=0;
         u->screen=UI_HOME;u->selection=0;u->notice=0;u->hasSave=1;
         return ACT_NONE;
@@ -140,7 +169,9 @@ int menu_input(Menu *u,View *v,unsigned keys,int tx,int ty){
     if(keys&NAV_UP)u->selection=(u->selection+count-1)%count;
     if(keys&NAV_DOWN)u->selection=(u->selection+1)%count;
     int rowHeight=u->screen==UI_TEST_DAYS?18:38;
-    if((keys&NAV_TOUCH) && tx>=16 && tx<304 && ty>=48 && ty<48+count*rowHeight){u->selection=(ty-48)/rowHeight;keys|=NAV_A;}
+    int first=u->screen==UI_TEST_DAYS?(u->selection/10)*10:0;
+    int shown=u->screen==UI_TEST_DAYS && count-first>10?10:count-first;
+    if((keys&NAV_TOUCH) && tx>=16 && tx<304 && ty>=48 && ty<48+shown*rowHeight){u->selection=first+(ty-48)/rowHeight;keys|=NAV_A;}
     if(keys&NAV_B){
         switch(u->screen){
         case UI_LIST:u->screen=UI_PHONE;break;

@@ -6,6 +6,7 @@
 #include "recipes.h"
 #include "tokens.h"
 #include "menu.h"
+#include "playlist.h"
 
 #ifdef VA11_TEST_MODE
 #define SAVE_BASE "sdmc:/3ds/va11-3ds/test-day1"
@@ -42,14 +43,18 @@ static int audio_init(void) {
     }
     return 1;
 }
+static FILE *audio_open_track(int track){
+    char path[80];snprintf(path,sizeof(path),"sdmc:/3ds/va11-3ds/music/%03d.pcm",track);
+    FILE *file=fopen(path,"rb");
+    if(!file && track==0)file=fopen("sdmc:/3ds/va11-3ds/music.pcm","rb");
+    return file;
+}
 static int audio_select(int track){
     if(!dspReady)return 0;
     ndspChnWaveBufClear(0);
     if(music){fclose(music);music=NULL;}
     for(int i=0;i<3;++i){memset(&waves[i],0,sizeof(waves[i]));waves[i].data_vaddr=audioBuffer+i*AUDIO_FRAMES;waves[i].status=NDSP_WBUF_FREE;}
-    char path[80];snprintf(path,sizeof(path),"sdmc:/3ds/va11-3ds/music/%03d.pcm",track);
-    music=fopen(path,"rb");
-    if(!music && track==0)music=fopen("sdmc:/3ds/va11-3ds/music.pcm","rb");
+    music=audio_open_track(track);
     return music?1:2;
 }
 static void audio_effect(int which){
@@ -59,13 +64,21 @@ static void audio_effect(int which){
     memset(&boomWave,0,sizeof(boomWave));boomWave.data_vaddr=effectBuffer[which];boomWave.nsamples=effectFrames[which];
     DSP_FlushDataCache(effectBuffer[which],effectFrames[which]*2);ndspChnWaveBufAdd(1,&boomWave);
 }
-static void audio_tick(void) {
+static void audio_tick(View *v,int *playingTrack) {
     if(!music || !dspReady)return;
     for(int i=0;i<3;++i) {
         if(waves[i].status!=NDSP_WBUF_DONE && waves[i].status!=NDSP_WBUF_FREE)continue;
         int16_t *dst=audioBuffer+i*AUDIO_FRAMES;
         size_t n=fread(dst,sizeof(int16_t),AUDIO_FRAMES,music);
-        if(n<AUDIO_FRAMES){rewind(music);n+=fread(dst+n,sizeof(int16_t),AUDIO_FRAMES-n,music);}
+        if(n<AUDIO_FRAMES){
+            int next=v->playlist[(v->playlistPos+1)%PLAYLIST_SLOTS];
+            FILE *following=audio_open_track(next);
+            if(following){
+                fclose(music);music=following;
+                *playingTrack=playlist_advance(v);
+            }else rewind(music);
+            n+=fread(dst+n,sizeof(int16_t),AUDIO_FRAMES-n,music);
+        }
         if(!n)continue;
         waves[i].nsamples=n;waves[i].looping=false;
         DSP_FlushDataCache(dst,n*sizeof(int16_t));ndspChnWaveBufAdd(0,&waves[i]);
@@ -88,7 +101,7 @@ static void write_save(View *v) {
     if(copy.mixer.running)mixer_reset(&copy.mixer);
     const char *tmp=SAVE_BASE ".tmp";
     FILE *f=fopen(tmp,"wb");if(!f){v->saveError=1;return;}
-    uint32_t header[3]={0x5641313e,sizeof(copy),checksum_bytes(&copy,sizeof(copy))};
+    uint32_t header[3]={0x56413149,sizeof(copy),checksum_bytes(&copy,sizeof(copy))};
     int ok=fwrite(header,sizeof(header),1,f)==1 && fwrite(&copy,sizeof(copy),1,f)==1;
     if(fclose(f))ok=0;
     if(ok){remove(SAVE_BASE ".bak");rename(SAVE_BASE ".sav",SAVE_BASE ".bak");ok=rename(tmp,SAVE_BASE ".sav")==0;}
@@ -125,13 +138,26 @@ static void save_shutdown(void) {
     LightLock_Lock(&saveLock);saveStopping=1;LightLock_Unlock(&saveLock);
     LightEvent_Signal(&saveEvent);threadJoin(saveThread,U64_MAX);threadFree(saveThread);
 }
+static bool supported_save(uint32_t magic,uint32_t bytes){
+    static const struct {uint32_t magic,bytes;} formats[]={
+        {0x56413132,296},{0x56413134,432},{0x56413135,448},{0x56413136,520},
+        {0x56413137,640},{0x56413138,656},{0x56413139,760},{0x5641313a,824},
+        {0x5641313b,824},{0x5641313c,832},{0x5641313d,880},{0x5641313e,944},
+        {0x5641313f,984},{0x56413140,1032},{0x56413141,1080},{0x56413142,1088},
+        {0x56413143,1144},{0x56413144,1176},{0x56413145,1216},{0x56413146,1240},
+        {0x56413147,1288},{0x56413148,1296},{0x56413149,sizeof(View)}
+    };
+    for(unsigned i=0;i<sizeof(formats)/sizeof(formats[0]);++i)
+        if(formats[i].magic==magic)return formats[i].bytes==bytes;
+    return false;
+}
 static int load_file(View *v,const char *path) {
     FILE *f=fopen(path,"rb");if(!f)return 0;
     View copy;uint32_t h[3];unsigned char data[sizeof(View)];
-    int ok=fread(h,sizeof(h),1,f)==1 && ((h[0]==0x56413132 && h[1]==296) || (h[0]==0x56413134 && h[1]==432) || (h[0]==0x56413135 && h[1]==448) || (h[0]==0x56413136 && h[1]==520) || (h[0]==0x56413137 && h[1]==640) || (h[0]==0x56413138 && h[1]==656) || (h[0]==0x56413139 && h[1]==760) || (h[0]==0x5641313a && h[1]==824) || (h[0]==0x5641313b && h[1]==824) || (h[0]==0x5641313c && h[1]==832) || (h[0]==0x5641313d && h[1]==880) || (h[0]==0x5641313e && h[1]==sizeof(copy))) && fread(data,h[1],1,f)==1;
+    int ok=fread(h,sizeof(h),1,f)==1 && supported_save(h[0],h[1]) && fread(data,h[1],1,f)==1;
     fclose(f);
     if(!ok || h[2]!=checksum_bytes(data,h[1]))return 0;
-    if(h[0]!=0x5641313e){if(!engine_migrate(&copy,data,h[1]))return 0;}
+    if(h[0]!=0x56413149){if(!engine_migrate(&copy,data,h[1]))return 0;playlist_fill(&copy,copy.musicTrack);}
     else {memcpy(&copy,data,sizeof(copy));if(!engine_valid(&copy) || copy.failed)return 0;}
     if(h[0]<=0x5641313a)engine_grandfather_shop(&copy);
     else if(h[0]==0x5641313b && copy.state.cur_day>=4)copy.day4Download=1;
@@ -157,6 +183,8 @@ static unsigned navigation_from_keys(u32 keys,int *tx,int *ty){
     if(keys&KEY_DRIGHT)nav|=NAV_RIGHT;
     if(keys&KEY_A)nav|=NAV_A;
     if(keys&KEY_B)nav|=NAV_B;
+    if(keys&KEY_X)nav|=NAV_X;
+    if(keys&KEY_Y)nav|=NAV_Y;
     *tx=*ty=0;
     if(keys&KEY_TOUCH){touchPosition p;hidTouchRead(&p);*tx=p.px;*ty=p.py;nav|=NAV_TOUCH;}
     return nav;
@@ -214,13 +242,26 @@ static void game_input(View *v,Menu *menu,u32 keys){
         return;
     }
     if(keys&KEY_SELECT){v->overlay=2;return;}
+    if(v->mode==9){
+        if(keys&KEY_A)engine_finish_credits(v);
+        if(keys&(KEY_DDOWN|KEY_DRIGHT))engine_scroll_credits(v,64);
+        if(keys&(KEY_DUP|KEY_DLEFT))engine_scroll_credits(v,-64);
+        return;
+    }
     if(keys&KEY_Y){
         if(v->state.cur_day==6)engine_day6_drink(v);
         else v->overlay=1;
         return;
     }
-    if(v->mode==2 && v->state.cur_day<9){
-        if(keys&KEY_A){engine_next_day(v);menu->screen=UI_HOME;menu->selection=0;}
+    if(v->mode==8){
+        if(keys&KEY_DUP)v->selected=(v->selected+4)%5;
+        if(keys&KEY_DDOWN)v->selected=(v->selected+1)%5;
+        if(keys&KEY_A)engine_choose(v,v->selected);
+        if(keys&KEY_TOUCH){touchPosition p;hidTouchRead(&p);if(p.py>=54 && p.py<194){int choice=(p.py-54)/28;v->selected=choice;engine_choose(v,choice);}}
+        return;
+    }
+    if(v->mode==2 && v->state.cur_day<20){
+        if(keys&KEY_A){engine_next_day(v);menu->screen=v->state.cur_day==20?UI_GAME:UI_HOME;menu->selection=0;}
         return;
     }
     if(v->mode==0 || v->mode==3){if(keys&KEY_A)advance(v);return;}
@@ -252,7 +293,7 @@ int main(void) {
         if(v.boom!=lastBoom){if(v.boom>lastBoom)audio_effect(0);lastBoom=v.boom;}
         if(v.bang!=lastBang){if(v.bang>lastBang)audio_effect(1);lastBang=v.bang;}
         if(v.crash!=lastCrash){if(v.crash>lastCrash)audio_effect(2);lastCrash=v.crash;}
-        audio_tick();
+        audio_tick(&v,&playingTrack);
         View compare=v;compare.now=0;
         int blended=v.mixer.running && v.now-v.mixer.started>=5000;
         if(v.shakeUntil || memcmp(&lastView,&compare,sizeof(v)) || memcmp(&lastMenu,&menu,sizeof(menu)) || blended!=lastBlended){redraw=2;lastView=compare;lastMenu=menu;lastBlended=blended;}

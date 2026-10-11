@@ -1,5 +1,38 @@
 # Changes
 
+## 0.26.0 beta — twelve-track playlists
+
+- Added a 12-slot playlist editor to the jukebox. Y opens it; Up/Down selects a track, Left/Right selects a slot, A assigns the track, X starts the playlist. A single-track choice still works and fills all slots with that track.
+- The SD audio streamer opens the next playlist track at the end of the current one. Playlist slots and position are saved; version 24 saves migrate with their selected track in every slot.
+- ARM checks cover slot assignment, locked tracks, wraparound, the Day 1 scripted prompt and old-save migration. The actual DSP handoff between files needs console testing.
+
+## 0.25.0 beta — finale art and phone content
+
+- Added all six ending illustrations and the scrolling original credits before the epilogue dialogue. A skips credits; Up/Down scrolls them manually.
+- Restored forum and Kira Miki phone pages as the days progress, including the alternate Streaming-chan thread. Phone article pixels now use 16-bit storage, reducing the ARM image from roughly 60 MB to 37 MB.
+- Replaced repeated day-specific phone-menu checks with table lookups and fixed the Day 19 entry in the test selector. Added compiled-ARM checks for all phone pages and credits.
+- Corrected the original daily bonus amounts for Days 7 ($500), 10 ($500) and 18 ($600), and fixed an out-of-bounds Day 19 bonus lookup. Added payroll regression checks for Days 1–19.
+- Character animation remains deferred; original 3DS performance, audio and SD behavior still need hardware testing.
+
+## 0.24.0 beta — Days 16–19 and epilogues
+
+- Added Russian story dialogue, drink requests, breaks and new portraits through Day 19. The New Year's finale now leads to the six original epilogue dialogue blocks, selected from earlier story choices and rent status.
+- Added Day 16–18 phone news, focus checks and the Day 18 $10,000 rent. The test launcher can open Days 1–19.
+- Save version 24 preserves previous versions through version 23. ARM checks cover each playable day, all Day 19 drink outcomes, epilogue branches and the test launcher. Original 3DS testing remains pending; ending illustrations and scrolling credits are not yet reproduced.
+
+## 0.20.0 beta — Days 11–15
+
+- Added the story, drink requests, break scenes, music prompts and phone news for Days 11, 12, 14 and 15. Day 13 is a selectable-guest Christmas party without a cocktail shift.
+- Added the Day 11 Christmas tree, Day 14 Y2K and Day 15 Snatcher focus checks, plus the Day 12 electricity bill. Day 14's Lexi encounter depends on the Flaming Moai story flag.
+- Added Days 11–15 portraits and December 23–27 phone news. The test launcher can select all 15 days.
+- Save version 20 migrates older saves. ARM simulations cover every reachable dialogue block through Day 15; original 3DS hardware testing is still pending.
+
+## 0.15.0 beta — Day 10
+
+- Added Day 10's 47 nonempty Russian dialogue blocks, ten drink requests (including paired drinks), Virgilio, wounded Sei, Stella and Kim branches, a break, closing scene, two music prompts and December 22 phone news. Day 9 now advances to the Day 10 apartment.
+- The poster purchase restores normal order hints on Day 10; without it Jill is distracted. The test launcher can select all ten days.
+- Save version 15 adds Day 10 story state and migrates version 14 saves. The ARM build passed 200 Day 10 routes, every nonempty block, Game Over and migration checks; console testing remains pending.
+
 ## 0.14.0 beta — Day 9
 
 - Added Day 9's 47 nonempty Russian dialogue blocks, eight numbered requests, Norma, Mario and Gaby portraits, a break, closing scene, two music prompts and December 21 phone news. Day 8 now advances to the Day 9 apartment.

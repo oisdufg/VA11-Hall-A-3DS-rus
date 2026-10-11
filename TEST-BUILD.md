@@ -1,8 +1,8 @@
-# Test launcher 0.14.0
+# Test launcher 0.26.0
 
-Install the regular 0.14.0 package first, then extract the test archive onto the SD card. The test executable lives in `3ds/va11-3ds-test/`, alongside the regular installation. It uses music from `3ds/va11-3ds/music/`.
+Install the regular 0.26.0 package first, then extract the test archive onto the SD card. The test executable lives in `3ds/va11-3ds-test/`, alongside the regular installation. It uses music from `3ds/va11-3ds/music/`.
 
-Launch **VA-11 HALL-A TEST** in Homebrew Launcher. After the startup notices, choose **Тест: выбрать день** and select Day 1–9. Each selection starts a fresh test apartment with $20,000, no purchased decorations and default previous-day story flags. Day 5 starts without the earlier Stella rum gift, so its extra bottle is absinthe. A normal playthrough retains your actual previous choices. Day 6 is a day off: after leaving the apartment, press A for dialogue and Y to drink a beer. Days 7–9 start with the default earlier story choices.
+Launch **VA-11 HALL-A TEST** in Homebrew Launcher. After the startup notices, choose **Тест: выбрать день** and select Day 1–19. Each selection starts a fresh test apartment with $20,000, no purchased decorations and default previous-day story flags. Day 5 starts without the earlier Stella rum gift, so its extra bottle is absinthe. A normal playthrough retains your actual previous choices. Day 6 is a day off: after leaving the apartment, press A for dialogue and Y to drink a beer. Days 7–19 start with the default earlier story choices.
 
 - **Телефон** opens the phone apps.
 - **Магазин** opens the shop. A or touch selects a product; confirm again to buy. B cancels or returns home.
@@ -15,10 +15,16 @@ The test build reads and writes only `test-day1.sav`, `test-day1.bak` and `test-
 
 Useful console check: select Day 2, buy a decoration, return home and verify it appears, save, exit, launch TEST again and choose Continue. The decoration and wallet balance should survive. Buy Mulan Tea and confirm it can be poured from the recipe book. Buy a bonus track and confirm it becomes selectable in the jukebox; an unbought bonus track should remain unavailable. Then visit the phone and start work.
 
+At the scripted jukebox, press Y to edit the 12-slot playlist. Put two different unlocked tracks in slots 1 and 2, press X, and listen for the transition after the first recording ends. Save and reload to check that both slots remain. This audio transition has passed ARM state checks but still needs a real-console test.
+
 For the new story hint check, start Day 2 without the Holo-Plant and reach the first drink order: Jill's thoughts should replace the order hint. Start Day 2 again, buy the Holo-Plant, and verify that the normal drink hint returns. Day 4 automatically pays $800 for its subscription; the apartment shows the result.
 
 On Day 8, buy the shoulder massager before work to keep the normal order hints. Starting the same day without it shows Jill's distracted thoughts while the drink request remains the same.
 
 On Day 9, buy the beer discount before work to keep the normal order hints. Without it, Jill's thoughts replace them while the requested drinks stay the same.
+On Day 10, buy the poster before work for normal order hints. Stella orders paired drinks, so prepare and serve both glasses.
+On Day 13, use Up/Down and A or touch to choose each guest. Day 13 has no cocktail shift or pay.
+On Days 11, 14 and 15, buy the Christmas tree, Y2K item and Snatcher item respectively to keep normal order hints. Day 12 charges the $8,000 electricity bill on apartment entry.
+Day 18 charges $10,000 rent on apartment entry. The test launcher starts that day with $20,000 and leaves $10,000 after rent. Finish Day 19, press A to see the credits, then press A again for the epilogue. Choosing Day 19 directly uses default earlier choices, so use a normal playthrough to check optional endings.
 
 This local playable binary contains original game resources. It is not the asset-free public source archive. It has been compiled and checked in ARM emulation; real-console rendering and SD persistence still need testing.

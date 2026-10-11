@@ -1,7 +1,7 @@
 """Shop, payroll and save-layout checks against the actual ARM build."""
 from verify_menu import *
 
-assert C.sizeof(View)==944 and View.walletCents.offset==904
+assert C.sizeof(View)==1344 and View.walletCents.offset==1256
 catalog=json.loads((P/'generated/shop.json').read_text())
 assert len(catalog)==30
 # Salary matches original commission, tips, flawless bonus and daily bonus.

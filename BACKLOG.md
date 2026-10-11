@@ -6,10 +6,12 @@
 - [x] Original daily distraction checks for Days 2, 3, 4, 5 and 7. A missing focus purchase replaces order hints with Jill's thoughts; the original dialogue and drink request continue.
 - [x] Day 8 shoulder-massager distraction check.
 - [x] Day 9 beer-discount distraction check.
-- [ ] Day 10 onward: later focus purchases and story.
-- [ ] Wallpaper/table choices and interactive PC content. These are apartment features rather than missing products in the 30-item shop catalog.
-- [ ] Original 12-slot playlists and automatic music transitions. Manual selection of 59 looping tracks and scripted jukebox prompts are implemented in 0.7.0.
-- [ ] Expenses, bills and financial Game Over. Daily commission, tips and bonuses for Days 1–5 are credited to the wallet in 0.7.1.
+- [x] Day 10 poster distraction check and story.
+- [x] Days 11–15 story and implemented focus purchases. Day 13 has guest selection instead of a cocktail shift.
+- [x] Days 16–19 and the epilogue dialogue, including late focus checks, Tomcat and Jess portraits, rent and story-dependent endings. ARM story checks pass.
+- [ ] Wallpaper and table choices, their purchases, and the interactive apartment PC. These are separate from the 30-item shop catalog and account for the remaining wallet deductions found in the original scripts.
+- [x] Twelve-slot playlists can be edited and saved; SD playback moves to the next slot when a track ends. Original 3DS audio handoff still needs hardware testing.
+- [x] The Day 4 subscription, Day 12 electricity bill and Day 18 rent affect the wallet. Unpaid rent selects the bad epilogue.
 - [ ] Optional finishing work: mouth movement, blinking and other character animation. Portraits and Anna's TV cameo use static frames; the game does not require these animations to be playable.
 
 ## Console verification
@@ -17,6 +19,9 @@
 - [ ] Test Day 7, both Stella/Art paths, Brian and Cass portraits, older save migration and frame rate on original 3DS hardware.
 - [ ] Test Day 8, Rad and wounded Sei portraits, both music prompts, shoulder-massager hints and version 12 migration on original 3DS hardware.
 - [ ] Test Day 9, Norma, Mario and Gaby portraits, both music prompts, beer-discount hints and version 13 migration on original 3DS hardware.
+- [ ] Test Day 10, wounded Sei expressions, paired orders, poster hints and version 14 migration on original 3DS hardware.
+- [ ] Test Days 11–15 on original 3DS hardware, especially Day 13 guest selection, Day 12 bill, Day 14 Lexi branch, paired orders and save migration.
+- [ ] Test Days 16–19 and all epilogue branches on original 3DS hardware, including rent, old-save migration and frame rate.
 
 - [ ] Test Day 6 beer input, dialogue branches, save/reload and frame rate on original 3DS hardware.
 
@@ -30,11 +35,11 @@
 
 ## Later content
 
-- [ ] Day 10 onward. Day 9 is playable in 0.14.0.
+- [x] All six ending illustrations and scrolling credits from the owner's copy are shown locally before epilogue dialogue.
 - [ ] Test Day 4, music changes, DSP playback and 0.6.0 save migration on original 3DS hardware.
 - [ ] Original animated TV broadcasts and streaming-chat presentation. The current port uses static/text indicators.
 - [ ] Test Day 3 on original 3DS hardware, including old saves, paired orders and both failure scenes.
-- [ ] Update forum and Miki phone content as the days progress.
+- [x] Forum threads and Miki blog posts advance with the days, including the alternate Streaming-chan thread.
 - [ ] Full comparison against the original, including presentation and audio.
 
 ## Implemented in 0.5.0

@@ -11,3 +11,4 @@ int menu_input(Menu *u,View *v,unsigned keys,int tx,int ty);
 void draw_menu(uint8_t *top,uint8_t *bottom,const View *v,const Menu *u);
 
 const Sprite *menu_phone_page(const View *v,const Menu *u);
+int menu_phone_index(const View *v,int app,int article);

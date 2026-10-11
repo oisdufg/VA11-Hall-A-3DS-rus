@@ -7,7 +7,7 @@ import random
 base = Path(__file__).with_name('verify_day1.py')
 exec(base.read_text(encoding='utf8').split('checks=[]')[0])
 
-assert C.sizeof(View) == 944, C.sizeof(View)
+assert C.sizeof(View) == 1344, C.sizeof(View)
 tokens = json.loads((P/'generated/day1-metadata.json').read_text(encoding='utf8'))['tokens']
 want = {69:'gtemple',70:'fdream',71:'bfairy',72:'bjane',73:'gpunch',
         74:'gtemple',75:'beer',76:'bjane',77:'zstar'}

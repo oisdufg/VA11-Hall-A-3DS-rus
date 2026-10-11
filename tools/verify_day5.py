@@ -2,7 +2,7 @@
 from verify_day1 import *
 import struct
 tokens=json.loads((P/'generated/day1-metadata.json').read_text(encoding='utf8'))['tokens']
-assert C.sizeof(Mixer)==40 and C.sizeof(View)==944 and View.walletCents.offset==904
+assert C.sizeof(Mixer)==40 and C.sizeof(View)==1344 and View.walletCents.offset==1256
 seen5=set();faces5=set();done=0;effects=set();orders=set();jukeboxes=0
 want={47:'rum',48:'bfairy',49:'beer',50:'cvelvet',51:'fweaver',52:'abs',53:'beer',54:'btini',55:'srush',56:'srush',57:'fed'}
 def pour(v,r,seventeen=False):
